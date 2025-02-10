@@ -15,6 +15,8 @@ class PermissionSeeder extends Seeder
             'Registrasi',
             'Pasien',
             'Rekam-Medis',
+            'BPJS-Tools',
+            'Management-Client',
             'Apotek',
             'Laboratorium'
         ];
