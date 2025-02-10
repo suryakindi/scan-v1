@@ -157,11 +157,15 @@ class UserService
         if (!$user) {
             return false;
         }
-
+        DB::beginTransaction();
         try {
-            $user->delete();
+            $user->is_active = false;
+            $user->save();
+
+            DB::commit();
             return true;
         } catch (Exception $e) {
+            DB::rollBack();
             throw $e;
         }
     }

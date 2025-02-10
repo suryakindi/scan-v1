@@ -38,7 +38,7 @@ class CheckPermission
 
         // Jika tidak punya izin dari role maupun user-specific, tolak akses
         if (!$rolePermission && !$userPermission) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Tidak Memiliki Hak Akses'], 403);
         }
 
         return $next($request);
