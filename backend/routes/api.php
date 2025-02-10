@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ManagementClientController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,12 +34,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('permission:Registrasi,create')->group(function () {
             Route::post('register-user', [AuthController::class, 'RegisterUser']);
     });
-   
-    // Modul Registrasi
 
-    // Route::middleware('permission:Registrasi,view')->group(function () {
-    //     Route::get('/registrasi', [RegistrasiController::class, 'index']);
-    // });
+
+    Route::prefix('management')->group(function () {
+        Route::middleware('permission:Management-Client,create')->group(function () {
+                Route::post('create-client', [ManagementClientController::class, 'create']);
+        });
+        Route::middleware('permission:Management-Client,delete')->group(function () {
+            Route::delete('delete-client/{client}', [ManagementClientController::class, 'delete']);
+        });
+        Route::middleware('permission:Management-Client,edit')->group(function () {
+            Route::put('update-client/{client}', [ManagementClientController::class, 'update']);
+        });
+        Route::middleware('permission:Management-Client,view')->group(function () {
+            Route::get('get-client', [ManagementClientController::class, 'getAll']);
+        });
+        Route::middleware('permission:Management-Client,view')->group(function () {
+            Route::get('get-client/id/{client}', [ManagementClientController::class, 'GetById']);
+        });
+    });
+
+    
 
     
 
