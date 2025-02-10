@@ -35,24 +35,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('register-user', [AuthController::class, 'RegisterUser']);
     });
 
-
-    Route::prefix('management')->group(function () {
-        Route::middleware('permission:Management-Client,create')->group(function () {
-                Route::post('create-client', [ManagementClientController::class, 'create']);
-        });
-        Route::middleware('permission:Management-Client,delete')->group(function () {
-            Route::delete('delete-client/{client}', [ManagementClientController::class, 'delete']);
-        });
-        Route::middleware('permission:Management-Client,edit')->group(function () {
-            Route::put('update-client/{client}', [ManagementClientController::class, 'update']);
-        });
-        Route::middleware('permission:Management-Client,view')->group(function () {
-            Route::get('get-client', [ManagementClientController::class, 'getAll']);
-        });
-        Route::middleware('permission:Management-Client,view')->group(function () {
-            Route::get('get-client/id/{client}', [ManagementClientController::class, 'GetById']);
-        });
+    Route::prefix('management')->middleware('permission:Management-Client')->group(function () {
+        Route::post('create-client', [ManagementClientController::class, 'create'])->middleware('permission:Management-Client,create');
+        Route::delete('delete-client/{client}', [ManagementClientController::class, 'delete'])->middleware('permission:Management-Client,delete');
+        Route::put('update-client/{client}', [ManagementClientController::class, 'update'])->middleware('permission:Management-Client,edit');
+        Route::get('get-clients', [ManagementClientController::class, 'getAll'])->middleware('permission:Management-Client,view');
+        Route::get('get-client/{client}', [ManagementClientController::class, 'GetById'])->middleware('permission:Management-Client,view');
     });
+    
 
     
 
