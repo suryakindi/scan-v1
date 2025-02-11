@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\BaseUrl;
 use Illuminate\Support\ServiceProvider;
 
-use App\Services\{UserService, ManagementClientService};
+use App\Services\{BaseUrlService, BPJSToolsService, UserService, ManagementClientService};
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -17,6 +18,12 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(ManagementClientService::class, function ($app) {
             return new ManagementClientService();
+        });
+        $this->app->singleton(BaseUrlService::class, function ($app) {
+            return new BaseUrlService();
+        });
+        $this->app->singleton(BPJSToolsService::class, function ($app) {
+            return new BPJSToolsService();
         });
     }
 

@@ -17,6 +17,10 @@ class CheckPermission
      */
     public function handle(Request $request, Closure $next, $module, $action)
     {
+        if (!$module || !$action) {
+            return response()->json(['message' => 'Middleware permission membutuhkan parameter module dan action'], 400);
+        }
+        
         $user = Auth::user();
 
         // Cek izin dari ROLE

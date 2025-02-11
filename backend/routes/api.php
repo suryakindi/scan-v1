@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BaseUrlController;
+use App\Http\Controllers\BPJSToolsController;
 use App\Http\Controllers\ManagementClientController;
+use App\Models\BPJSTools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,16 +36,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('check-token', [AuthController::class, 'CheckToken']);
     Route::middleware('permission:Registrasi,create')->group(function () {
             Route::post('register-user', [AuthController::class, 'RegisterUser']);
+            Route::put('update-user/{id}', [AuthController::class, 'updateUser']);
+            Route::delete('delete-user/{id}', [AuthController::class, 'deleteUser']);
     });
 
-    Route::prefix('management')->middleware('permission:Management-Client')->group(function () {
+    Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {
         Route::post('create-client', [ManagementClientController::class, 'create'])->middleware('permission:Management-Client,create');
         Route::delete('delete-client/{client}', [ManagementClientController::class, 'delete'])->middleware('permission:Management-Client,delete');
         Route::put('update-client/{client}', [ManagementClientController::class, 'update'])->middleware('permission:Management-Client,edit');
         Route::get('get-clients', [ManagementClientController::class, 'getAll'])->middleware('permission:Management-Client,view');
-        Route::get('get-client/{client}', [ManagementClientController::class, 'GetById'])->middleware('permission:Management-Client,view');
+        Route::get('get-client/id/{client}', [ManagementClientController::class, 'GetById'])->middleware('permission:Management-Client,view');
     });
     
+    Route::prefix('integerasi-sistem')->middleware('permission:Integrasi-Tools,view')->group(function () {
+       Route::post('create-base-url',[BaseUrlController::class, 'create'])->middleware('permission:Integrasi-Tools,create');
+       Route::put('edit-base-url/{id_baseurl}',[BaseUrlController::class, 'update'])->middleware('permission:Integrasi-Tools,edit');
+       Route::post('create-bpjs-tools/{id_client}', [BPJSToolsController::class, 'create'])->middleware('permission:Integrasi-Tools,create');
+       Route::get('get-bpjs-tools/{id_client}', [BPJSToolsController::class, 'getBPJSToolsById'])->middleware('permission:Integrasi-Tools,view');
+       Route::put('update-bpjs-tools/{id_client}', [BPJSToolsController::class, 'update'])->middleware('permission:Integrasi-Tools,edit');
+       Route::get('get-dokter-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getDokterByBPJS'])->middleware('permission:Integrasi-Tools,view');
+       Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Integrasi-Tools,view');
+    });
+
 
     
 

@@ -29,6 +29,25 @@ class AuthController extends Controller
         }
     }
 
+    public function updateUser($id, Request $request){
+        try {
+            $user = $this->userService->updateUser($id, $request->all());
+            return $this->baseResponse('Update User Berhasil', null, $user, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat update', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteUser($id)
+    {
+        try {
+            $user = $this->userService->deleteUser($id);
+            return $this->baseResponse('Delete User Berhasil', null, $user, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat delete', $e->getMessage(), null, 500);
+        }
+    }
+
     public function loginUser(Request $request)
     {
         $request->validate([
