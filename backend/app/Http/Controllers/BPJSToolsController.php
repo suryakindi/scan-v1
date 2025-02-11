@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\BPJSRequest;
+use Illuminate\Http\Request;
+use App\Models\BPJSTools;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use App\Services\BPJSToolsService;
+
+class BPJSToolsController extends Controller
+{
+    protected BPJSToolsService $BPJSToolsService;
+ 
+
+    public function __construct(BPJSToolsService $BPJSToolsService)
+    {
+        $this->BPJSToolsService = $BPJSToolsService;
+    }
+
+
+    public function getDokterByBPJS($id_client, Request $request)
+    {   
+        return $this->BPJSToolsService->getDokterBPJS($id_client, $request->all());
+
+    }
+
+    public function getPesertaByBPJS($id_client, Request $request){
+        return $this->BPJSToolsService->getPesertaByBPJS($id_client, $request->all());
+    }
+
+
+    public function create(BPJSRequest $request, $id_client): JsonResponse
+    {
+        try {
+            $bpjstools = $this->BPJSToolsService->createBPJSTool($id_client, $request->validated());
+            return $this->baseResponse('BPJS Tools berhasil dibuat', null, $bpjstools, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function update(BPJSRequest $request, $id_client): JsonResponse
+    {
+        try {
+            $bpjstools = $this->BPJSToolsService->updateBPJSTool($id_client, $request->validated());
+            return $this->baseResponse('BPJS Tools berhasil diperbarui', null, $bpjstools, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+
+
+    public function getBPJSToolsById($id_client)
+    {
+        
+        try {
+            $bpjstools = $this->BPJSToolsService->getBPJSToolsById($id_client);
+            if($bpjstools == null){
+                return $this->baseResponse('BPJS Tools NotFound', null, $bpjstools, 404);
+            }
+            return $this->baseResponse('BPJS Tools', null, $bpjstools, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+}
