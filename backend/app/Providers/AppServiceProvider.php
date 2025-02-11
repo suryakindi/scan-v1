@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Models\BaseUrl;
 use Illuminate\Support\ServiceProvider;
 
-use App\Services\{BaseUrlService, BPJSToolsService, UserService, ManagementClientService};
+use App\Services\{BaseUrlService, BPJSToolsService, UserService, ManagementClientService, PermissionService};
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -24,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(BPJSToolsService::class, function ($app) {
             return new BPJSToolsService();
+        });
+        $this->app->singleton(PermissionService::class, function ($app) {
+            return new PermissionService();
         });
     }
 
