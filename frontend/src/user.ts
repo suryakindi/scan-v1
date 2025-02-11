@@ -1,0 +1,48 @@
+export const user = {
+  status: "success",
+  message: "Token Valid",
+  detailError: null,
+  data: {
+    user: {
+      id: 1,
+      name: "John Lin",
+      username: "johnliee",
+      role_id: 1,
+      email: "johnlie@example.com",
+      notelp: "081234567890",
+      nik: "399991904014",
+      nip: "987654321",
+      sip: "1234-SIP",
+      kode_bpjs: "BPJS123456",
+      ihs_id: "IHS98765",
+      is_active: true,
+      cdfix: 1,
+      created_at: "2025-02-10T16:53:04.000000Z",
+      updated_at: "2025-02-11T01:18:32.000000Z",
+    },
+    role_permissions: [
+      {
+        module: "Integrasi-Tools",
+        can_view: true,
+        can_edit: true,
+        can_create: true,
+        can_delete: true,
+      },
+      {
+        module: "Management-Client",
+        can_view: true,
+        can_edit: true,
+        can_create: true,
+        can_delete: true,
+      },
+      {
+        module: "Registrasi",
+        can_view: true,
+        can_edit: true,
+        can_create: true,
+        can_delete: true,
+      },
+    ],
+    user_permissions: [],
+  },
+};
