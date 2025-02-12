@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BaseUrlController;
 use App\Http\Controllers\BPJSToolsController;
 use App\Http\Controllers\ManagementClientController;
+use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PermissionController;
 use App\Models\BPJSTools;
 use Illuminate\Http\Request;
@@ -48,6 +49,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('update-client/{client}', [ManagementClientController::class, 'update'])->middleware('permission:Management-Client,edit');
         Route::get('get-clients', [ManagementClientController::class, 'getAll'])->middleware('permission:Management-Client,view');
         Route::get('get-client/id/{client}', [ManagementClientController::class, 'GetById'])->middleware('permission:Management-Client,view');
+    });
+
+    Route::prefix('master-data')->middleware('permission:Master-Data,view')->group(function () {
+        Route::post('create-master-alergi', [MasterDataController::class, 'createMasterAlergi'])->middleware('permission:Master-Data,create');
+        Route::get('get-master-alergi', [MasterDataController::class, 'getMasterAlergi'])->middleware('permission:Management-Client,view');
+        Route::put('edit-master-alergi/{id_alergi}', [MasterDataController::class, 'editMasterAlergi'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-alergi/{id_alergi}', [MasterDataController::class, 'deleteMasterAlergi'])->middleware('permission:Master-Data,delete');
+        Route::post('create-master-jeniskunjungan', [MasterDataController::class, 'createMasterJenisKunjungan'])->middleware('permission:Master-Data,create');
+        Route::put('edit-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'editMasterJenisKunjungan'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'deleteMasterJenisKunjungan'])->middleware('permission:Master-Data,delete');
     });
     
     Route::prefix('integerasi-sistem')->middleware('permission:Integrasi-Tools,view')->group(function () {
