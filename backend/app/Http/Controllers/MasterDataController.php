@@ -94,4 +94,13 @@ class MasterDataController extends Controller
         }
     }
 
+    public function getMasterJenisKunjungan()
+    {
+        try {
+            $jeniskunjungan = $this->MasterDataService->getMasterJenisKunjungan();
+            return $this->baseResponse('Master jeniskunjungan berhasil Didapatkan', null, $jeniskunjungan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
 }
