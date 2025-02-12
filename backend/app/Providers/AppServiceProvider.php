@@ -2,10 +2,11 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\MasterDataController;
 use App\Models\BaseUrl;
 use Illuminate\Support\ServiceProvider;
 
-use App\Services\{BaseUrlService, BPJSToolsService, UserService, ManagementClientService, PermissionService};
+use App\Services\{BaseUrlService, BPJSToolsService, UserService, ManagementClientService, PermissionService, MasterDataService};
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(PermissionService::class, function ($app) {
             return new PermissionService();
+        });
+        $this->app->singleton(MasterDataService::class, function ($app) {
+            return new MasterDataService();
         });
     }
 
