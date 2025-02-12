@@ -37,8 +37,8 @@ class MasterDataService
     public function getMasterAlergi()
     {
         try {
-            $client = MasterAlergi::where('is_active', TRUE)->paginate(100);
-            return $client;
+            $alergi = MasterAlergi::where('is_active', TRUE)->paginate(100);
+            return $alergi;
         } catch (\Exception $e) {
             throw new Exception("Gagal Mendapatkan Alergi: " . $e->getMessage());
         }
@@ -109,6 +109,17 @@ class MasterDataService
         } catch (\Exception $e) {
             DB::rollback(); 
             throw new \Exception("Gagal Update jeniskunjungan: " . $e->getMessage());
+        }
+    }
+
+
+    public function getMasterJenisKunjungan()
+    {
+        try {
+            $jeniskunjungan = MasterJenisKunjungan::where('is_active', TRUE)->paginate(100);
+            return $jeniskunjungan;
+        } catch (\Exception $e) {
+            throw new Exception("Gagal Mendapatkan jeniskunjungan: " . $e->getMessage());
         }
     }
 }

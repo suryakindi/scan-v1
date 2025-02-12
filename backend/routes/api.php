@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BaseUrlController;
 use App\Http\Controllers\BPJSToolsController;
+use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\ManagementClientController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PermissionController;
@@ -21,6 +22,13 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+Route::prefix('lokasi')->group(function () {
+    Route::get('provinces', [LokasiController::class, 'provinces']);
+    Route::get('regencies', [LokasiController::class, 'regencies']);
+    Route::get('districts', [LokasiController::class, 'districts']);
+    Route::get('villages', [LokasiController::class, 'villages']);
+});
 
 Route::prefix('auth')->group(function () {
     Route::get('/', function () {
@@ -59,6 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('create-master-jeniskunjungan', [MasterDataController::class, 'createMasterJenisKunjungan'])->middleware('permission:Master-Data,create');
         Route::put('edit-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'editMasterJenisKunjungan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'deleteMasterJenisKunjungan'])->middleware('permission:Master-Data,delete');
+        Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Management-Client,view');
     });
     
     Route::prefix('integerasi-sistem')->middleware('permission:Integrasi-Tools,view')->group(function () {
