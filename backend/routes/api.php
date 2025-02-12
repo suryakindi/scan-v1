@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('check-token', [AuthController::class, 'CheckToken']);
     Route::middleware('permission:Registrasi,create')->group(function () {
             Route::post('register-user', [AuthController::class, 'RegisterUser']);
+            Route::get('get-user', [AuthController::class, 'getUser'])->middleware('permission:Registrasi,view');
             Route::put('update-user/{id}', [AuthController::class, 'updateUser']);
             Route::delete('delete-user/{id}', [AuthController::class, 'deleteUser']);
     });
@@ -63,7 +64,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
        Route::get('get-role', [PermissionController::class, 'getRole'])->middleware('permission:Integrasi-Tools,view');
        Route::get('get-modul', [PermissionController::class, 'getModul'])->middleware('permission:Integrasi-Tools,view');
        Route::get('get-role-permission/{role_id}', [PermissionController::class, 'getPermission'])->middleware('permission:Integrasi-Tools,view');
+       Route::get('get-user-permission/{user_id}', [PermissionController::class, 'getUserPermission'])->middleware('permission:Integrasi-Tools,view');
+       Route::delete('delete-role-permission/{id_permission}', [PermissionController::class, 'deletePermission'])->middleware('permission:Integrasi-Tools,delete');
+       Route::delete('delete-user-permission/{id_user_permission}', [PermissionController::class, 'deleteUserPermission'])->middleware('permission:Integrasi-Tools,delete');
        Route::post('create-permission/role', [PermissionController::class, 'createPermissionRole'])->middleware('permission:Integrasi-Tools,create');
+       Route::post('create-user-permission/user', [PermissionController::class, 'createPermissionUser'])->middleware('permission:Integrasi-Tools,create');
+       Route::put('update-user-permission/{id_user_permission}', [PermissionController::class, 'UpdateUserPermissionRole'])->middleware('permission:Integrasi-Tools,edit');   
        Route::put('update-permission/permission/{id_permission}', [PermissionController::class, 'UpdatePermissionRole'])->middleware('permission:Integrasi-Tools,edit');   
     });
 
