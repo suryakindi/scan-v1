@@ -171,4 +171,14 @@ class UserService
             throw $e;
         }
     }
+
+    public function getUser()
+    {
+        try {
+            $user = User::paginate(100);
+            return $user;
+        } catch (\Exception $e) {
+            throw new Exception("Gagal Mendapatkan User: " . $e->getMessage());
+        }
+    }
 }

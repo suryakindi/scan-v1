@@ -65,4 +65,16 @@ class AuthController extends Controller
         $response = $this->userService->checkToken();
         return $this->baseResponse($response['message'], null, $response['data'], $response['code']);
     }
+
+    public function getUser()
+    {
+        try {
+            // Kirim id_permission ke service bersama dengan data request
+            $user = $this->userService->getUser();
+    
+            return $this->baseResponse('User berhasil Didapatkan', null, $user, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat get user', $e->getMessage(), null, 500);
+        }
+    }
 }
