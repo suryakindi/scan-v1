@@ -504,9 +504,7 @@ const Components: FC = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-md shadow-gray-200 shadow-md p-4">
           <Field>
-            <Label className="text-sm/6 font-medium">
-              Description
-            </Label>
+            <Label className="text-sm/6 font-medium">Description</Label>
             <Description className="text-sm/6">
               This will be shown under the product title.
             </Description>
