@@ -112,20 +112,60 @@ class PermissionService
         DB::beginTransaction();
         try {
             $role_user = Auth()->user()->role_id;
-            if (UserPermission::where('module_id', $data['module_id'])->exists()) {
-                throw new Exception("Permission sudah ada untuk module ini!");
+            
+            // Check if permission already exists for the module and role in Permission model
+            $permissionExists = Permission::where('module_id', $data['module_id'])
+                                          ->where('role_id', $role_user)
+                                          ->first();
+            
+            if ($permissionExists) {
+                
+                // Initialize an array to hold the new UserPermission data
+                $newData = [
+                    'user_id' => $data['user_id'],
+                    'module_id' => $data['module_id'],
+                    'role_id' => $role_user
+                ];
+                
+                // Set to 'null' if the actions are the same as the existing permission
+                // Otherwise, use the provided value in $data
+                $newData['can_view'] = ($permissionExists->can_view == $data['can_view']) ? false : $data['can_view'];
+                $newData['can_create'] = ($permissionExists->can_create == $data['can_create']) ? false : $data['can_create'];
+                $newData['can_edit'] = ($permissionExists->can_edit == $data['can_edit']) ? false : $data['can_edit'];
+                $newData['can_delete'] = ($permissionExists->can_delete == $data['can_delete']) ? false : $data['can_delete'];
+    
+                // Create the new UserPermission if there are any changes
+                if (!empty($newData['can_view']) || !empty($newData['can_create']) || !empty($newData['can_edit']) || !empty($newData['can_delete'])) {
+                    $userPermission = UserPermission::create($newData);
+                    DB::commit();
+                    return $userPermission; // Return the newly created UserPermission
+                } else {
+                    throw new Exception("Tidak ada perubahan pada permission.");
+                }
+            } else {
+                // If no permission exists in the Permission model, create a new UserPermission with the data
+                $newData = [
+                    'user_id' => $data['user_id'],
+                    'module_id' => $data['module_id'],
+                    'role_id' => $role_user,
+                    'can_view' => $data['can_view'],
+                    'can_create' => $data['can_create'],
+                    'can_edit' => $data['can_edit'],
+                    'can_delete' => $data['can_delete']
+                ];
+    
+                // Create the new UserPermission
+                $userPermission = UserPermission::create($newData);
+                DB::commit();
+                return $userPermission; // Return the newly created UserPermission
             }
-            if (Permission::where('role_id', $role_user)->exists() && Permission::where('module_id', $data['module_id'])->exists()) {
-                throw new Exception("Permission sudah ada untuk module ini!");
-            }
-            $permission = UserPermission::create($data);
-            DB::commit();
-            return $permission; // Mengembalikan objek permission langsung
         } catch (Exception $e) {
             DB::rollBack();
             throw new Exception("Gagal membuat Permission: " . $e->getMessage());
         }
     }
+    
+
 
     public function UpdateUserPermissionRole($id_user_permission, array $data)
     {
