@@ -68,6 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('edit-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'editMasterJenisKunjungan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'deleteMasterJenisKunjungan'])->middleware('permission:Master-Data,delete');
         Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Management-Client,view');
+        Route::get('get-master-diagnosa', [MasterDataController::class, 'getMasterDiagnosa'])->middleware('permission:Management-Client,view');
     });
     
     Route::prefix('integerasi-sistem')->middleware('permission:Integrasi-Tools,view')->group(function () {

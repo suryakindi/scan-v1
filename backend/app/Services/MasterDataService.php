@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\MasterAlergi;
+use App\Models\MasterDiagnosa;
 use App\Models\MasterJenisKunjungan;
 use App\Models\Module;
 use App\Models\Permission;
@@ -120,6 +121,23 @@ class MasterDataService
             return $jeniskunjungan;
         } catch (\Exception $e) {
             throw new Exception("Gagal Mendapatkan jeniskunjungan: " . $e->getMessage());
+        }
+    }
+    public function getMasterDiagnosa($SearchQuery = null)
+    {
+        try {
+            $diagnosa = MasterDiagnosa::where('is_active', true);
+
+            if (!empty($SearchQuery)) {
+                $diagnosa->where(function ($q) use ($SearchQuery) {
+                    $q->where('nama_icd_indo', 'ilike', '%' . $SearchQuery . '%')
+                      ->orWhere('kode_icd', 'ilike', '%' . $SearchQuery . '%');
+                });
+            }
+
+            return $diagnosa->paginate(100); // Perbaikan: Return hasil query
+        } catch (\Throwable $e) { // Menggunakan Throwable untuk menangkap semua error
+            throw new \Exception("Gagal mendapatkan Master Diagnosa: " . $e->getMessage());
         }
     }
 }
