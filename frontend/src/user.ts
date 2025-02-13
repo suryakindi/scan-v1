@@ -5,7 +5,7 @@ export const user = {
   data: {
     user: {
       id: 1,
-      name: "John Lin",
+      name: "Yawin",
       username: "johnliee",
       role_id: 1,
       email: "johnlie@example.com",
@@ -22,13 +22,6 @@ export const user = {
     },
     role_permissions: [
       {
-        module: "Integrasi-Tools",
-        can_view: true,
-        can_edit: true,
-        can_create: true,
-        can_delete: true,
-      },
-      {
         module: "Management-Client",
         can_view: true,
         can_edit: true,
@@ -36,13 +29,28 @@ export const user = {
         can_delete: true,
       },
       {
+        module: "Integrasi-Tools",
+        can_view: true,
+        can_edit: false,
+        can_create: true,
+        can_delete: true,
+      },
+    ],
+    user_permissions: [
+      {
         module: "Registrasi",
         can_view: true,
         can_edit: true,
         can_create: true,
         can_delete: true,
       },
+      {
+        module: "Master-Data",
+        can_view: true,
+        can_edit: true,
+        can_create: true,
+        can_delete: true,
+      },
     ],
-    user_permissions: [],
   },
 };
