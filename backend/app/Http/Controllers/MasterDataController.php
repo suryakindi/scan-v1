@@ -103,4 +103,16 @@ class MasterDataController extends Controller
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
+
+    public function getMasterDiagnosa(Request $request)
+    {
+        $SearchQuery = $request->input('search', null); // Lebih ringkas
+
+        try {
+            $diagnosa = $this->MasterDataService->getMasterDiagnosa($SearchQuery);
+            return $this->baseResponse('Master Diagnosa berhasil didapatkan', null, $diagnosa, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
 }
