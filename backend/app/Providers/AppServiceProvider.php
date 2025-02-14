@@ -6,7 +6,15 @@ use App\Http\Controllers\MasterDataController;
 use App\Models\BaseUrl;
 use Illuminate\Support\ServiceProvider;
 
-use App\Services\{BaseUrlService, BPJSToolsService, UserService, ManagementClientService, PermissionService, MasterDataService};
+use App\Services\{
+    BaseUrlService, 
+    BPJSToolsService, 
+    UserService, 
+    ManagementClientService, 
+    PermissionService, 
+    MasterDataService,
+    PasienService,
+    };
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -31,6 +39,9 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(MasterDataService::class, function ($app) {
             return new MasterDataService();
+        });
+        $this->app->singleton(PasienService::class, function ($app) {
+            return new PasienService();
         });
     }
 
