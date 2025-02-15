@@ -5,6 +5,50 @@ import type { RawWrapRoutePropsT } from "../routes";
 
 const navs: RawWrapRoutePropsT[] = [
   {
+    path: "registrasi",
+    name: "Registrasi",
+    module: "Registrasi",
+    childs: [
+      {
+        path: "child-1",
+        name: "Child 1",
+        module: "Registrasi",
+      },
+      {
+        path: "child-2",
+        name: "Child 2",
+        module: "Registrasi",
+      },
+      {
+        path: "child-3",
+        name: "Child 3",
+        module: "Registrasi",
+      },
+    ],
+  },
+  {
+    path: "integrasi-tools",
+    name: "Integrasi Tools",
+    module: "Integrasi-Tools",
+    childs: [
+      {
+        path: "child-1",
+        name: "Child 1",
+        module: "Integrasi-Tools",
+      },
+      {
+        path: "child-2",
+        name: "Child 2",
+        module: "Integrasi-Tools",
+      },
+      {
+        path: "child-3",
+        name: "Child 3",
+        module: "Integrasi-Tools",
+      },
+    ],
+  },
+  {
     path: "pasien",
     name: "Pasien",
     module: "Pasien",

@@ -252,19 +252,21 @@ export const routeBuilder = (permissions: PermissionT[]) => {
     >
   );
 
+  console.log(parsed_permissions);
+
   const builder = (routes: RawWrapRoutePropsT[]): WrapRoutePropsT[] => {
-    return routes.map(
+    return routes.filter(({ module }) => parsed_permissions[module]).map(
       (x) =>
-        ({
-          ...x,
-          permissions: parsed_permissions[x.module] ?? {
-            can_create: false,
-            can_delete: false,
-            can_edit: false,
-            can_view: false,
-          },
-          ...(x.childs ? { childs: builder(x.childs) } : {}),
-        } as WrapRoutePropsT)
+      ({
+        ...x,
+        permissions: parsed_permissions[x.module] ?? {
+          can_create: false,
+          can_delete: false,
+          can_edit: false,
+          can_view: false,
+        },
+        ...(x.childs ? { childs: builder(x.childs) } : {}),
+      } as WrapRoutePropsT)
     );
   };
 
