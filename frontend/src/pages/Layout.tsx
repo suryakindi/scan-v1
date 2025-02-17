@@ -1,9 +1,17 @@
 import { FC } from "react";
 import { NavLink, Outlet } from "react-router";
 import clsx from "clsx";
-import type { RawWrapRoutePropsT } from "../routes";
+import type { ModuleT, RawWrapRoutePropsT } from "../routes";
+import { user } from "../user";
 
-const navs: RawWrapRoutePropsT[] = [
+const parsed = [user.data.role_permissions, user.data.user_permissions]
+  .flat(1)
+  .filter((p) =>
+    [p.can_create, p.can_delete, p.can_edit, p.can_view].includes(true)
+  )
+  .map(({ module }) => module) as ModuleT[];
+
+const navs = [
   {
     path: "registrasi",
     name: "Registrasi",
@@ -92,12 +100,12 @@ const navs: RawWrapRoutePropsT[] = [
       },
     ],
   },
-  {
-    path: "login",
-    name: "Login",
-    module: "Rekam-Medis",
-  },
-];
+].filter(
+  (x) =>
+    parsed.includes(x.module as ModuleT) ||
+    (x.childs &&
+      x.childs.filter((y) => parsed.includes(y.module as ModuleT)).length)
+) as RawWrapRoutePropsT[];
 
 const Layout: FC = () => {
   return (

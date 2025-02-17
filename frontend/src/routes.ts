@@ -252,8 +252,6 @@ export const routeBuilder = (permissions: PermissionT[]) => {
     >
   );
 
-  console.log(parsed_permissions);
-
   const builder = (routes: RawWrapRoutePropsT[]): WrapRoutePropsT[] => {
     return routes.filter(({ module }) => parsed_permissions[module]).map(
       (x) =>
