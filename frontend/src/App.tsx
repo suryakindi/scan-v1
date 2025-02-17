@@ -7,6 +7,7 @@ import { PermissionT, routeBuilder } from "./routes";
 import { user } from "./user";
 import Layout from "./pages/Layout";
 import Login from "./pages/auth/Login";
+import Loading from "./pages/Loading";
 
 const routes = routeBuilder([
   ...(user.data.role_permissions as PermissionT[]),
@@ -81,6 +82,7 @@ const App: FC = () => {
           <Route path="*" element={<Error404 />} />
         </Routes>
       </BrowserRouter>
+      <Loading />
     </Provider>
   );
 };
