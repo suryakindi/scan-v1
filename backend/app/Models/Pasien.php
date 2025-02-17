@@ -17,6 +17,7 @@ class Pasien extends Model
         'is_active',
         'nama',
         'no_bpjs',
+        'ihs_number',
         'nik',
         'tempatlahir',
         'tanggal_lahir',

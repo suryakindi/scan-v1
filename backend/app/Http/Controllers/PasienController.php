@@ -67,6 +67,14 @@ class PasienController extends Controller
         }
     }
     
-    
+    public function UpdateIHSNumber(Request $request, $id_pasien)
+    {
+        try {
+            $pasien = $this->PasienService->updateIHSNumber($request->all(), $id_pasien);
+            return $this->baseResponse('IHS Number berhasil diupdate', null, $pasien, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Gagal Update IHS Number', $e->getMessage(), null, 500);
+        }
+    }
 
 }
