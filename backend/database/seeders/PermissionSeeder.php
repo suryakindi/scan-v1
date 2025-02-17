@@ -14,11 +14,8 @@ class PermissionSeeder extends Seeder
         $modules = [
             'Registrasi',
             'Pasien',
-            'Rekam-Medis',
             'Integrasi-Tools',
             'Management-Client',
-            'Apotek',
-            'Laboratorium'
         ];
 
         $rolesPermissions = [
