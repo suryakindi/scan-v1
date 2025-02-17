@@ -14,7 +14,8 @@ use App\Services\{
     PermissionService, 
     MasterDataService,
     PasienService,
-    };
+    SatuSehatService,
+};
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -42,6 +43,9 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->singleton(PasienService::class, function ($app) {
             return new PasienService();
+        });
+        $this->app->singleton(SatuSehatService::class, function ($app) {
+            return new SatuSehatService();
         });
     }
 

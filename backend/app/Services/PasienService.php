@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+
 class PasienService
 {   
 
+ 
     public function createPasien(array $pasienData, array $alamatData)
     {
         DB::beginTransaction();
@@ -43,6 +45,20 @@ class PasienService
             return $pasien;
         } catch (\Exception $e) {
             throw new \Exception('Gagal mendapatkan pasien: ' . $e->getMessage());
+        }
+    }
+
+    public function updateIHSNumber($data, $id_pasien)
+    {
+        DB::beginTransaction();
+        try {
+            $pasien = Pasien::find($id_pasien);
+            $pasien->update($data);
+            DB::commit();
+            return $pasien;
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
         }
     }
     

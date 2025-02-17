@@ -16,6 +16,7 @@ class PermissionSeeder extends Seeder
             'Pasien',
             'Integrasi-Tools',
             'Management-Client',
+            'Master-Data',
         ];
 
         $rolesPermissions = [

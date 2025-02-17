@@ -16,6 +16,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->string('nama');
             $table->string('no_bpjs')->nullable();
+            $table->string('ihs_number')->nullable();
             $table->string('nik')->nullable()->unique();
             $table->string('tempatlahir');
             $table->string('tanggal_lahir');
