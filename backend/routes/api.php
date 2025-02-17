@@ -55,7 +55,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::prefix('pasien')->middleware('permission:Registrasi,view')->group(function () {
-        Route::post('register-pasien', [PasienController::class, 'createPasien']);
+        Route::post('register-pasien', [PasienController::class, 'createPasien'])->middleware('permission:Registrasi,create');
+        Route::put('/update-ihs/{id_pasien}', [PasienController::class, 'UpdateIHSNumber'])->middleware('permission:Registrasi,edit');
         Route::get('get-pasien', [PasienController::class, 'getPasien']);
     });
 
@@ -88,8 +89,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
        Route::get('get-dokter-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getDokterByBPJS'])->middleware('permission:Integrasi-Tools,view');
        Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Integrasi-Tools,view');
     
-       Route::get('satu-sehat',[SatuSehatController::class, 'index']);
-
+       Route::post('create-satu-sehat',[SatuSehatController::class, 'createSatuSehat'])->middleware('permission:Integrasi-Tools,create');
+       Route::put('edit-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'editSatuSehat'])->middleware('permission:Integrasi-Tools,edit');
+       Route::delete('delete-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'deleteSatuSehat'])->middleware('permission:Integrasi-Tools,delete');
+       Route::get('/ihs/patients/{nik}', [SatuSehatController::class, 'getIhsPatientByNik'])->middleware('permission:Integrasi-Tools,view');   
+       Route::get('check-satu-sehat',[SatuSehatController::class, 'getTokenAccess'])->middleware('permission:Integrasi-Tools,view');
+    
+       
 
        Route::get('get-role', [PermissionController::class, 'getRole'])->middleware('permission:Integrasi-Tools,view');
        Route::get('get-modul', [PermissionController::class, 'getModul'])->middleware('permission:Integrasi-Tools,view');
