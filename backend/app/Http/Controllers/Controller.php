@@ -36,8 +36,8 @@ class Controller extends BaseController
     // Fungsi Enkripsi AES-256-CBC
     protected function encryptAES($data)
     {
-        $key = substr(hash('sha256', 'scandigital'), 0, 32); // Kunci AES dari "scandigital"
-        $iv = substr(hash('sha256', 'scandigital'), 0, 16);  // IV dari "scandigital"
+        $key = substr(hash('sha256', env('APP_KEY_LARAVEL', 'scandigital')), 0, 32); // Kunci AES dari "scandigital"
+        $iv = substr(hash('sha256', env('APP_KEY_LARAVEL', 'scandigital')), 0, 16);  // IV dari "scandigital"
 
         $encrypted = openssl_encrypt(json_encode($data), 'AES-256-CBC', $key, 0, $iv);
         return base64_encode($encrypted); // Encode ke Base64 agar aman dikirim
