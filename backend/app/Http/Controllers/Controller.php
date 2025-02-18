@@ -16,21 +16,30 @@ class Controller extends BaseController
         $processedError = env('APP_DEBUG', false) ? $detailError : 'Production Level';
         $isDebug = env('APP_DEBUG', false);
         $env_conf = 'dev';
-    
+
         if (!$isDebug && $data !== null) {
-            $data = base64_encode(json_encode($data) . '$c4n'); // Konversi ke JSON sebelum Base64
+            $data = $this->encryptAES($data); // Gunakan AES untuk enkripsi
             $env_conf = 'prod';
         }
-    
+
         $response = [
-            'status' => $statusCode < 400 ? 'success' : 'error',  
+            'status' => $statusCode < 400 ? 'success' : 'error',
             'message' => $message,
             'detailError' => $processedError,
-            'data' => $data, 
+            'data' => $data,
             'config' => $env_conf
         ];
-    
+
         return response()->json($response, $statusCode);
     }
-    
+
+    // Fungsi Enkripsi AES-256-CBC
+    protected function encryptAES($data)
+    {
+        $key = substr(hash('sha256', 'scandigital'), 0, 32); // Kunci AES dari "scandigital"
+        $iv = substr(hash('sha256', 'scandigital'), 0, 16);  // IV dari "scandigital"
+
+        $encrypted = openssl_encrypt(json_encode($data), 'AES-256-CBC', $key, 0, $iv);
+        return base64_encode($encrypted); // Encode ke Base64 agar aman dikirim
+    }
 }
