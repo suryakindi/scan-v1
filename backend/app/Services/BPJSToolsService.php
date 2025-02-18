@@ -41,21 +41,27 @@ class BPJSToolsService
         $output = openssl_decrypt(base64_decode($bahan), $encrypt_method, $key_hash, OPENSSL_RAW_DATA, $iv);
         $decompress = \LZCompressor\LZString::decompressFromEncodedURIComponent($output);
         $result = json_decode($decompress);
-        return response()->json([
-            'data'=>$result,
-            'metaData'=>$value['metaData']
-        ]);
-      
+    
+        // Cek apakah 'metaData' ada di dalam array $value
+        if (isset($value['metaData'])) {
+            return response()->json([
+                'data' => $result,
+                'metaData' => $value['metaData']
+            ]);
+        } else {
+            return response()->json($result);
+        }
     }
+    
 
-    public function SetUpHeader($id_client)
+    public function SetUpHeader($id_client, $service_name)
     {
         $set = $this->getBPJSToolsById($id_client);
 
         $this->cons_id = $set['bpjs_tools']['cons_id'];
         $this->secretKey = $set['bpjs_tools']['secretkey'];
         foreach ($set['service_name'] as $key => $item) {
-            if($item['service_name'] == 'pcare-rest'){
+            if($item['service_name'] == $service_name){
                 $this->userkey = $item['userkey'];
                 $this->pcare_username = $item['username'];
                 $this->pcare_password = $item['password'];
@@ -176,7 +182,7 @@ class BPJSToolsService
         }
     }
 
-    public function getDokterBPJS($id_client, array $data)
+    public function getDokterBPJS($id_client, array $data, $service_name)
     {
         $start = 0;
         $end = 100;
@@ -196,7 +202,7 @@ class BPJSToolsService
         if (!$base_url) {
             return response()->json(['error' => 'Base URL untuk PCare tidak ditemukan'], 400);
         }
-        $headers = $this->SetUpHeader($id_client);
+        $headers = $this->SetUpHeader($id_client, $service_name);
         
         $connect = new \GuzzleHttp\Client();
         try {
@@ -230,11 +236,11 @@ class BPJSToolsService
     
     }
 
-    public function getPesertaByBPJS($id_client, array $data)
+    public function getPesertaByBPJS($id_client, array $data, $service_name)
     {
         $jeniskartu = ($data['jeniskartu'] == 'nik') ? 'nik' : 'noka';
         $nomorkartu = $data['nokartu'];
-        $headers = $this->SetUpHeader($id_client);
+        $headers = $this->SetUpHeader($id_client, $service_name);
         $set = $this->getBPJSToolsById($id_client);
         $kdProvider = null;
         $base_url = null;
@@ -291,6 +297,75 @@ class BPJSToolsService
         }
     }
 
+    public function createServiceBPJS(BPJSTools $id_bpjs_tools, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $service_bpjs = SettingServiceName::create($data);
+            DB::commit();
+            return $service_bpjs;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function updateServiceBPJSById(SettingServiceName $id_service_bpjs, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $id_service_bpjs->update($data);
+            DB::commit();
+            return $id_service_bpjs;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function getPoliAntrean($id_client, $data, $service_name)
+    {
+        $set = $this->getBPJSToolsById($id_client);
+        $tanggal = $data['tanggal'];
+        foreach ($set['service_name'] as $key => $item) {
+            if($item['service_name'] == 'antreanfktp'){
+                $base_url = $item['base_url'] . '/ref/poli/tanggal/'.$tanggal;
+                break;
+            }
+        }
+        if (!$base_url) {
+            return response()->json(['error' => 'Base URL untuk PCare tidak ditemukan'], 400);
+        }
+        $headers = $this->SetUpHeader($id_client, $service_name);
+        // return $base_url;
+        // return $headers;
+        $connect = new \GuzzleHttp\Client();
+        try {
+            $response = $connect->get($base_url, [
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=utf-8',
+                    'X-cons-id' => $this->cons_id,
+                    'X-signature' => $headers['X-signature'],
+                    'X-timestamp' => $headers['X-timestamp'],
+                    'user_key' => $headers['user_key'],
+                ],
+                'timeout' => 10, // Set timeout 10 detik
+            
+            ]);
+    
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody();
+            $responseData = json_decode($body, true);
+         
+            // return $responseData;
+            return $this->DecryptResponse($responseData);
+            
+    
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     
 }

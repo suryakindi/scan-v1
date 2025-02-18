@@ -9,7 +9,6 @@ use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SatuSehatController;
-use App\Models\BPJSTools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -84,11 +83,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
        Route::post('create-base-url',[BaseUrlController::class, 'create'])->middleware('permission:Integrasi-Tools,create');
        Route::put('edit-base-url/{id_baseurl}',[BaseUrlController::class, 'update'])->middleware('permission:Integrasi-Tools,edit');
        Route::post('create-bpjs-tools/{id_client}', [BPJSToolsController::class, 'create'])->middleware('permission:Integrasi-Tools,create');
+       Route::post('create-service-bpjs/{id_bpjs_tools}', [BPJSToolsController::class, 'createServiceBPJS'])->middleware('permission:Integrasi-Tools,create');
        Route::get('get-bpjs-tools/{id_client}', [BPJSToolsController::class, 'getBPJSToolsById'])->middleware('permission:Integrasi-Tools,view');
        Route::put('update-bpjs-tools/{id_client}', [BPJSToolsController::class, 'update'])->middleware('permission:Integrasi-Tools,edit');
+       Route::put('update-service-bpjs/{id_service_bpjs}', [BPJSToolsController::class, 'updateServiceBPJSById'])->middleware('permission:Integrasi-Tools,edit');
        Route::get('get-dokter-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getDokterByBPJS'])->middleware('permission:Integrasi-Tools,view');
        Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Integrasi-Tools,view');
-    
+       Route::get('/antrean/get-poli/{id_client}', [BPJSToolsController::class, 'getPoliAntrean'])->middleware('permission:Integrasi-Tools,view');
+
+
        Route::post('create-satu-sehat',[SatuSehatController::class, 'createSatuSehat'])->middleware('permission:Integrasi-Tools,create');
        Route::put('edit-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'editSatuSehat'])->middleware('permission:Integrasi-Tools,edit');
        Route::delete('delete-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'deleteSatuSehat'])->middleware('permission:Integrasi-Tools,delete');
