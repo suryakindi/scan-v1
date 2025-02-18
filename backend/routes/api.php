@@ -89,6 +89,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
        Route::put('update-service-bpjs/{id_service_bpjs}', [BPJSToolsController::class, 'updateServiceBPJSById'])->middleware('permission:Integrasi-Tools,edit');
        Route::get('get-dokter-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getDokterByBPJS'])->middleware('permission:Integrasi-Tools,view');
        Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Integrasi-Tools,view');
+       Route::get('/kunjungan/riwayat-bpjs/{id_client}', [BPJSToolsController::class, 'getKunjunganBPJS'])->middleware('permission:Integrasi-Tools,view');
        Route::get('/antrean/get-poli/{id_client}', [BPJSToolsController::class, 'getPoliAntrean'])->middleware('permission:Integrasi-Tools,view');
 
 

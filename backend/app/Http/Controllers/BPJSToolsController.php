@@ -96,10 +96,22 @@ class BPJSToolsController extends Controller
     public function getPoliAntrean($id_client, Request $request)
     {
         $service_name = 'antreanfktp';
-        return $getpoliantrean = $this->BPJSToolsService->getPoliAntrean($id_client, $request->all(), $service_name);
+        
         try {
-         
+            $getpoliantrean = $this->BPJSToolsService->getPoliAntrean($id_client, $request->all(), $service_name);
             return $this->baseResponse('Ref Poli Antrean Berhasil Didapatkan', null, $getpoliantrean, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getKunjunganBPJS($id_client, Request $request)
+    {
+        $service_name = 'pcare-rest';
+        return $getriwayatkunjungan = $this->BPJSToolsService->getKunjunganBPJS($id_client, $request->all(), $service_name);
+        try {
+            
+            return $this->baseResponse('Riwayat Kunjungan BPJS Berhasil Didapatkan', null, $getriwayatkunjungan, 200);
         } catch (\Exception $e) {
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
