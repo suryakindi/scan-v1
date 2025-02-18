@@ -14,12 +14,18 @@ class Controller extends BaseController
     protected function baseResponse(string $message, $detailError, $data = null, int $statusCode = 200): JsonResponse
     {
         $processedError = env('APP_DEBUG', false) ? $detailError : 'Production Level';
-
+        $isDebug = env('APP_DEBUG', false);
+        $env_conf = 'dev';
+        if(!$isDebug){
+            $data = base64_encode($data . '$c4n'); 
+            $env_conf = 'prod';
+        }
         $response = [
             'status' => $statusCode < 400 ? 'success' : 'error',  
             'message' => $message,
             'detailError'=>$processedError,
             'data' => $data, 
+            'config'=>$env_conf
         ];
 
         return response()->json($response, $statusCode);
