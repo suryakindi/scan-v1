@@ -108,9 +108,8 @@ class BPJSToolsController extends Controller
     public function getKunjunganBPJS($id_client, Request $request)
     {
         $service_name = 'pcare-rest';
-        return $getriwayatkunjungan = $this->BPJSToolsService->getKunjunganBPJS($id_client, $request->all(), $service_name);
         try {
-            
+            $getriwayatkunjungan = $this->BPJSToolsService->getKunjunganBPJS($id_client, $request->all(), $service_name);
             return $this->baseResponse('Riwayat Kunjungan BPJS Berhasil Didapatkan', null, $getriwayatkunjungan, 200);
         } catch (\Exception $e) {
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
