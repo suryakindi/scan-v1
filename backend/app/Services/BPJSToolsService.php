@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\BPJSTools;
+use App\Models\MasterDepartemen;
+use App\Models\MasterRuangan;
 use App\Models\SettingServiceName;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -412,6 +414,104 @@ class BPJSToolsService
             ], 500);
         }
     }
+
+    public function getPoliReferensi($id_client, array $data, $service_name)
+    {
+        $set = $this->getBPJSToolsById($id_client);
+        $row = $data['row'] ?? 1;
+        $limit = $data['limit'] ?? 100;
+        foreach ($set['service_name'] as $key => $item) {
+            if($item['service_name'] == $service_name){
+                $base_url = $item['base_url'] . '/poli/fktp/'.$row.'/'.$limit;
+                break;
+            }
+        }
+        if (!$base_url) {
+            return response()->json(['error' => 'Base URL untuk PCare tidak ditemukan'], 400);
+        }
+        $headers = $this->SetUpHeader($id_client, $service_name);
+        $connect = new \GuzzleHttp\Client();
+        try {
+            $response = $connect->get($base_url, [
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=utf-8',
+                    'X-cons-id' => $this->cons_id,
+                    'X-signature' => $headers['X-signature'],
+                    'X-timestamp' => $headers['X-timestamp'],
+                    'X-authorization' => $headers['X-authorization'],
+                    'user_key' => $headers['user_key'],
+                ],
+                'timeout' => 10, // Set timeout 10 detik
+            
+            ]);
+    
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody();
+            $responseData = json_decode($body, true);
+         
+            // return $responseData;
+            return $this->DecryptResponse($responseData);
+            
+    
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+    public function sinkronisasiPoli($id_client, $service_name)
+    {
+        $ruangan = MasterRuangan::where('cdfix', $id_client)
+                    ->where('is_active', true)
+                    ->get();
+
+        // Mencari Departemen dengan nama_departemen "Rawat Jalan" secara case-insensitive
+        $departemen = MasterDepartemen::whereRaw("LOWER(nama_departemen) ILIKE LOWER(?)", ['Rawat Jalan'])->first();
+
+        if (!$departemen) {
+            throw new Exception('Departemen "Rawat Jalan" tidak ditemukan');
+        }
+
+        if ($ruangan->isNotEmpty()) {
+            return 'Data Ruangan Sudah Ada!';
+        }
+
+        // Ambil data dari BPJS
+        $getpoliBpjs = $this->getPoliReferensi($id_client, ['row' => 1, 'limit' => 100], $service_name);
+        $decodedResponse = $getpoliBpjs->getData(true);
+
+        // Pastikan list poli ada dalam response
+        if (!isset($decodedResponse['data']['list']) || empty($decodedResponse['data']['list'])) {
+            throw new Exception('Data Poli BPJS tidak tersedia');
+        }
+
+        $listPoli = $decodedResponse['data']['list'];
+        DB::beginTransaction();
+        try {
+            foreach ($listPoli as $list) {
+                if($list['poliSakit'] == true){
+                    MasterRuangan::create([
+                        'nama_ruangan'  => $list['nmPoli'],
+                        'kodeexternal'  => $list['kdPoli'],
+                        'id_departemen' => $departemen->id,
+                        'cdfix'         => $id_client,
+                    ]);
+                }
+                
+            }
+            DB::commit();
+            return response()->json(['success' => 'Sinkronisasi Poli BPJS berhasil'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new Exception('Terjadi kesalahan saat sinkronisasi');
+        }
+    }
+
+
 
     
 }

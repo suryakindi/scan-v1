@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\MasterAlergi;
+use App\Models\MasterDepartemen;
 use Illuminate\Http\Request;
 use App\Services\MasterDataService;
 use App\Models\MasterJenisKunjungan;
+use App\Models\MasterRuangan;
 use Exception;
 class MasterDataController extends Controller
 {
@@ -113,6 +115,98 @@ class MasterDataController extends Controller
             return $this->baseResponse('Master Diagnosa berhasil didapatkan', null, $diagnosa, 200);
         } catch (\Exception $e) {
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function createDepartemen(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'nama_departemen' => 'required|string',
+                'cdfix'=>'required',
+                'is_active'=>'nullable',
+            ]);
+            $MasterDataService = $this->MasterDataService->createDepartemen($validatedData);
+            return $this->baseResponse('Master Departemen berhasil dibuat', null, $MasterDataService, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Alergi', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getMasterDepartemen()
+    {
+        try {
+            $masterdepartemen = $this->MasterDataService->getMasterDepartemen();
+            return $this->baseResponse('Master Departemen berhasil didapatkan', null, $masterdepartemen, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master departemen', $e->getMessage(), null, 500);
+        }
+    }
+    
+    public function editMasterJenisDepartemen(MasterDepartemen $id_departemen, Request $request)
+    {
+        try {
+            $masterdepartemen = $this->MasterDataService->editMasterJenisDepartemen($id_departemen, $request->all());
+            return $this->baseResponse('Master Departemen berhasil update', null, $masterdepartemen, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master departemen', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteMasterDepartemen(MasterDepartemen $id_departemen)
+    {
+        try {
+            $Departemen = $this->MasterDataService->deleteMasterDepartemen($id_departemen);
+            return $this->baseResponse('Delete berhasil', null, $Departemen, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat memperbarui', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function createMasterRuangan(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'nama_ruangan' => 'required|string',
+                'id_departemen'=>'required',
+                'cdfix'=>'required',
+                'is_active'=>'nullable',
+            ]);
+            $MasterDataService = $this->MasterDataService->createMasterRuangan($validatedData);
+            return $this->baseResponse('Master Ruangan berhasil dibuat', null, $MasterDataService, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Alergi', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function editMasterRuangan(MasterRuangan $id_ruangan, Request $request)
+    {
+      
+        try {
+            $masterRuangan = $this->MasterDataService->editMasterRuangan($id_ruangan, $request->all());
+            return $this->baseResponse('Master Ruangan berhasil update', null, $masterRuangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master departemen', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteMasterRuangan(MasterRuangan $id_ruangan)
+    {
+        try {
+            $Ruangan = $this->MasterDataService->deleteMasterRuangan($id_ruangan);
+            return $this->baseResponse('Delete berhasil', null, $Ruangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat memperbarui', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getMasterRuangan()
+    {
+        try {
+            $masterRuangan = $this->MasterDataService->getMasterRuangan();
+            return $this->baseResponse('Master Ruangan berhasil didapatkan', null, $masterRuangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master ruangan', $e->getMessage(), null, 500);
         }
     }
 }
