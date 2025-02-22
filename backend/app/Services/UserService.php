@@ -102,11 +102,17 @@ class UserService
 
         // Jika berhasil, buat token
         $token = $user->createToken('scan')->plainTextToken;
+
+        $data = [
+            'id' => $user->id,
+            'name'=>$user->name,
+            'role'=>$user->role,
+        ];
         return [
             'status' => true,
             'message' => 'Login Sukses',
             'data' => [
-                'data' => $user,
+                'data' => $data,
                 'token' => $token
             ],
             'code' => 200

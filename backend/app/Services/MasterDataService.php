@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\MasterAlergi;
+use App\Models\MasterDepartemen;
 use App\Models\MasterDiagnosa;
 use App\Models\MasterJenisKunjungan;
+use App\Models\MasterRuangan;
 use App\Models\Module;
 use App\Models\Permission;
 use App\Models\Role;
@@ -138,6 +140,111 @@ class MasterDataService
             return $diagnosa->paginate(100); // Perbaikan: Return hasil query
         } catch (\Throwable $e) { // Menggunakan Throwable untuk menangkap semua error
             throw new \Exception("Gagal mendapatkan Master Diagnosa: " . $e->getMessage());
+        }
+    }
+
+    public function createDepartemen(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $departemen = MasterDepartemen::create($data);
+            DB::commit();
+            return $departemen;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal membuat departemen: " . $e->getMessage());
+        }
+    }
+
+    public function getMasterDepartemen()
+    {
+        try {
+            $departemen = MasterDepartemen::where('is_active', TRUE)->paginate(100);
+            return $departemen;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function editMasterJenisDepartemen(MasterDepartemen $id_departemen, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $id_departemen->update($data);
+            DB::commit();
+            return $id_departemen;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteMasterDepartemen(MasterDepartemen $id_departemen)
+    {
+        DB::beginTransaction();
+        try {
+            $id_departemen->update([
+                'is_active'=>false
+            ]);
+            DB::commit();
+            return $id_departemen;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function createMasterRuangan(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $Ruangan = MasterRuangan::create($data);
+            DB::commit();
+            return $Ruangan;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal membuat ruangan: " . $e->getMessage());
+        }
+    }
+
+    public function editMasterRuangan(MasterRuangan $id_ruangan, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $id_ruangan->update($data);
+            DB::commit();
+            return $id_ruangan;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteMasterRuangan(MasterRuangan $id_ruangan)
+    {
+        DB::beginTransaction();
+        try {
+            $id_ruangan->update([
+                'is_active'=>false
+            ]);
+            DB::commit();
+            return $id_ruangan;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function getMasterRuangan()
+    {
+        try {
+            $getMasterRuangan = MasterRuangan::join('master_departemens', 'master_departemens.id', '=', 'master_ruangans.id_departemen')
+            ->where('master_ruangans.is_active', true)
+            ->select('master_ruangans.*', 'master_departemens.nama_departemen')
+            ->paginate(100);
+            return $getMasterRuangan;
+        } catch (\Exception $e) {
+            throw new Exception("Gagal Mendapatkan Ruangan: " . $e->getMessage());
         }
     }
 }

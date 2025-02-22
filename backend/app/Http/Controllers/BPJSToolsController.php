@@ -115,4 +115,26 @@ class BPJSToolsController extends Controller
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
+
+    public function getPoliReferensi($id_client, Request $request)
+    {
+        $service_name = 'pcare-rest';
+        try {
+            $getpoliRef = $this->BPJSToolsService->getPoliReferensi($id_client, $request->all(), $service_name);
+            return $this->baseResponse('Poli BPJS Berhasil Didapatkan', null, $getpoliRef, 200); 
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function sinkronisasiPoli($id_client)
+    {
+        $service_name = 'pcare-rest';
+        try {
+            $sinkronPoli = $this->BPJSToolsService->sinkronisasiPoli($id_client, $service_name);
+            return $this->baseResponse('Poli BPJS Berhasil Didapatkan', null, $sinkronPoli, 200); 
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
 }

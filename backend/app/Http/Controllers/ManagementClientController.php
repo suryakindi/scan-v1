@@ -68,6 +68,7 @@ class ManagementClientController extends Controller
      */
     public function delete(ManagementClient $client): JsonResponse
     {
+        
         try {
             $updatedClient = $this->managementClientService->deleteClient($client);
             return $this->baseResponse('Client berhasil dinonaktifkan', null, $updatedClient, 200);

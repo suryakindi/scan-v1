@@ -75,8 +75,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('create-master-jeniskunjungan', [MasterDataController::class, 'createMasterJenisKunjungan'])->middleware('permission:Master-Data,create');
         Route::put('edit-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'editMasterJenisKunjungan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'deleteMasterJenisKunjungan'])->middleware('permission:Master-Data,delete');
-        Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Management-Client,view');
-        Route::get('get-master-diagnosa', [MasterDataController::class, 'getMasterDiagnosa'])->middleware('permission:Management-Client,view');
+        Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Master-Data,view');
+        Route::get('get-master-diagnosa', [MasterDataController::class, 'getMasterDiagnosa'])->middleware('permission:Master-Data,view');
+        
+        Route::post('create-master-departemen', [MasterDataController::class, 'createDepartemen'])->middleware('permission:Master-Data,create');
+        Route::get('get-master-departemen', [MasterDataController::class, 'getMasterDepartemen'])->middleware('permission:Management-Client,view');
+        Route::put('edit-master-departemen/{id_departemen}', [MasterDataController::class, 'editMasterJenisDepartemen'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-departemen/{id_departemen}', [MasterDataController::class, 'deleteMasterDepartemen'])->middleware('permission:Master-Data,delete');
+        
+        Route::post('create-master-ruangan', [MasterDataController::class, 'createMasterRuangan'])->middleware('permission:Master-Data,create');
+        Route::get('get-master-ruangan', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Management-Client,view');
+        Route::put('edit-master-ruangan/{id_ruangan}', [MasterDataController::class, 'editMasterRuangan'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-ruangan/{id_ruangan}', [MasterDataController::class, 'deleteMasterRuangan'])->middleware('permission:Master-Data,delete');
     });
     
     Route::prefix('integerasi-sistem')->middleware('permission:Integrasi-Tools,view')->group(function () {
@@ -91,6 +101,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
        Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Integrasi-Tools,view');
        Route::get('/kunjungan/riwayat-bpjs/{id_client}', [BPJSToolsController::class, 'getKunjunganBPJS'])->middleware('permission:Integrasi-Tools,view');
        Route::get('/antrean/get-poli/{id_client}', [BPJSToolsController::class, 'getPoliAntrean'])->middleware('permission:Integrasi-Tools,view');
+       Route::get('get-poli/{id_client}', [BPJSToolsController::class, 'getPoliReferensi'])->middleware('permission:Integrasi-Tools,view');
+       Route::post('sinkronisasi-poli/{id_client}', [BPJSToolsController::class, 'sinkronisasiPoli'])->middleware('permission:Integrasi-Tools,create');
 
 
        Route::post('create-satu-sehat',[SatuSehatController::class, 'createSatuSehat'])->middleware('permission:Integrasi-Tools,create');
