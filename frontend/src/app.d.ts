@@ -63,6 +63,7 @@ interface UserT {
   roles: UserRoleT;
 }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 interface LoaderMakeT {
   module?: ModuleT;
@@ -71,5 +72,7 @@ interface LoaderMakeT {
 interface LoaderT {
   permission: PermissionT | (Omit<PermissionT, "module"> & { module: null });
 }
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes

@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { FC, Suspense, useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import Fallback from "./components/Fallback";
@@ -7,6 +8,8 @@ import Login from "./pages/auth/Login";
 import { api } from "./utils/api";
 import { AuthenticatedRoutes } from "./AuthenticatedRoutes";
 =======
+=======
+>>>>>>> Stashed changes
 import { FC, Suspense } from "react";
 import { createBrowserRouter, RouteObject, RouterProvider } from "react-router";
 import Fallback from "./components/Fallback";
@@ -66,6 +69,9 @@ const main: RouteObjectExtend[] = [
     ],
   },
 ];
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 const Routes: FC = () => {
@@ -79,7 +85,11 @@ const Routes: FC = () => {
         </Suspense>
       ),
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       children: AuthenticatedRoutes,
+=======
+      children: main,
+>>>>>>> Stashed changes
 =======
       children: main,
 >>>>>>> Stashed changes
@@ -90,6 +100,7 @@ const Routes: FC = () => {
     },
   ]);
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   useEffect(() => {
     return () => {
@@ -118,6 +129,8 @@ const Routes: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 =======
+=======
+>>>>>>> Stashed changes
   // router.subscribe(async ({ location, matches }) => {
   //   try {
   //     const route = matches.find(
@@ -146,6 +159,9 @@ const Routes: FC = () => {
   //   };
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
   return <RouterProvider router={router} />;
