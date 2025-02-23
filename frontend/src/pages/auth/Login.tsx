@@ -1,7 +1,6 @@
 import { FC, FormEventHandler, useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router";
-import { checkToken } from "../../utils/token";
 import Fallback from "../../components/Fallback";
 
 const Login: FC = () => {
@@ -33,8 +32,18 @@ const Login: FC = () => {
     return () => {
       const validate = async () => {
         try {
-          const valid = await checkToken();
-          if (valid) navigate("/");
+          const token = localStorage.getItem("token");
+          const response = await api.get<
+            ResponseT<{
+              user: UserT;
+              role_permissions: PermissionT;
+              user_permissions: PermissionT;
+            }>
+          >("/check-token", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.data.data.user) navigate("/");
         } catch (error) {
           console.error(error);
         } finally {

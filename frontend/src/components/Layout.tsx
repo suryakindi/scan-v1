@@ -1,7 +1,5 @@
 import { FC } from "react";
 import { NavLink, Outlet } from "react-router";
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 import clsx from "clsx";
 
 const Layout: FC = () => {
@@ -54,45 +52,6 @@ const Layout: FC = () => {
               )}
             </li>
           ))}
-=======
-=======
->>>>>>> Stashed changes
-
-const Layout: FC = () => {
-  return (
-    <div className="flex">
-      <div>
-        <ul>
-          <li>
-            <NavLink to="/">Dashboard</NavLink>
-          </li>
-          <li>
-            <NavLink to="/pasien">Pasien</NavLink>
-          </li>
-          <li>
-            <span>BPJS</span>
-            <ul>
-              <li>
-                <NavLink to="/bpjs/kunjungan">Kunjungan</NavLink>
-              </li>
-              <li>
-                <NavLink to="/bpjs/dokter">Dokter</NavLink>
-              </li>
-              <li>
-                <NavLink to="/bpjs/hfis">Hfis</NavLink>
-              </li>
-              <li>
-                <NavLink to="/bpjs/tindakan">Tindakan</NavLink>
-              </li>
-              <li>
-                <NavLink to="/bpjs/prolanis">Prolanis</NavLink>
-              </li>
-            </ul>
-          </li>
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         </ul>
       </div>
       <div>
