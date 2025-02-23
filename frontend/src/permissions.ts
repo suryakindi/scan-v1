@@ -2,14 +2,22 @@ export const permissions: PermissionT[] = [
   {
     module: "Management-Client",
     can_view: true,
+<<<<<<< Updated upstream
     can_edit: true,
+=======
+    can_edit: false,
+>>>>>>> Stashed changes
     can_create: false,
     can_delete: false,
   },
   {
     module: "Management-Client",
     can_view: true,
+<<<<<<< Updated upstream
     can_edit: false,
+=======
+    can_edit: true,
+>>>>>>> Stashed changes
     can_create: true,
     can_delete: false,
   },
