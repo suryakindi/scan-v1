@@ -1,30 +1,52 @@
 import { RouteObject } from "react-router";
 import LazyLoad from "./components/LazyLoad";
-import { permissions } from "./permissions";
+import { api } from "./utils/api";
 
 const make = async ({ module }: LoaderMakeT = {}) => {
-  // const token = localStorage.getItem("token") ?? "";
-  const permission = permissions.reduce(
-    (acc, curr) => ({
-      ...acc,
-      [curr.module]: {
-        module: curr.module,
-        can_view: acc[curr.module]?.can_view || curr.can_view || false,
-        can_edit: acc[curr.module]?.can_edit || curr.can_edit || false,
-        can_create: acc[curr.module]?.can_create || curr.can_create || false,
-        can_delete: acc[curr.module]?.can_delete || curr.can_delete || false,
-      },
-    }),
-    {} as Record<ModuleT, PermissionT>
-  )[(module ?? "") as ModuleT] ?? {
-    module: null,
-    can_view: true,
-    can_edit: true,
-    can_create: true,
-    can_delete: true,
-  };
+  try {
+    const token = localStorage.getItem("token") ?? "";
+    const user = await api.get<
+      ResponseT<{
+        user: UserT;
+        role_permissions: PermissionT;
+        user_permissions: PermissionT;
+      }>
+    >("/check-token", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  return { permission } as LoaderT;
+    const permission = [
+      user.data.data.role_permissions,
+      user.data.data.user_permissions,
+    ]
+      .flat(1)
+      .reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.module]: {
+            module: curr.module,
+            can_view: acc[curr.module]?.can_view || curr.can_view || false,
+            can_edit: acc[curr.module]?.can_edit || curr.can_edit || false,
+            can_create:
+              acc[curr.module]?.can_create || curr.can_create || false,
+            can_delete:
+              acc[curr.module]?.can_delete || curr.can_delete || false,
+          },
+        }),
+        {} as Record<ModuleT, PermissionT>
+      )[(module ?? "") as ModuleT] ?? {
+      module: null,
+      can_view: true,
+      can_edit: true,
+      can_create: true,
+      can_delete: true,
+    };
+
+    return { permission, token, user: user.data.data.user } as LoaderT;
+  } catch (error) {
+    console.error(error);
+    return {};
+  }
 };
 
 export const AuthenticatedRoutes: RouteObject[] = [
@@ -71,5 +93,10 @@ export const AuthenticatedRoutes: RouteObject[] = [
         loader: () => make(),
       },
     ],
+  },
+  {
+    path: "/management-client",
+    element: LazyLoad(() => import("./pages/management-client/index")),
+    loader: () => make({ module: "Management-Client" }),
   },
 ];
