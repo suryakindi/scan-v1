@@ -1,0 +1,333 @@
+import { FC, useEffect, useState } from "react";
+import { api } from "../../utils/api";
+import { useLoaderData } from "react-router";
+import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { initForm } from "./attributes";
+import {
+  getDistricts,
+  getProvinces,
+  getRegencies,
+  getVillages,
+} from "../../utils/lokasi/lokasi";
+import { AxiosRequestConfig } from "axios";
+
+const ManagementClient: FC = () => {
+  const { token, permission } = useLoaderData<LoaderT>();
+  const [showModalTambah, setShowModalTambah] = useState<boolean>(false);
+  const [provinces, setProvinces] = useState<ProvinceT[]>([]);
+  const [regencies, setRegencies] = useState<RegencieT[]>([]);
+  const [districts, setDistricts] = useState<DistrictT[]>([]);
+  const [villages, setVillages] = useState<VillageT[]>([]);
+  const [dataToSend, setDataToSend] = useState<CreateClientPropsT>(initForm());
+
+  const requestConfig: AxiosRequestConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
+
+  const getAllClient = async () => {
+    try {
+      const response = await api.get("/management/get-clients", requestConfig);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      getProvinces().then((res) => {
+        setProvinces(res);
+      });
+
+      getAllClient();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault();
+    try {
+      const response = await api.post(
+        "/management/create-client",
+        dataToSend,
+        requestConfig
+      );
+
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setShowModalTambah(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="card p-4 shadow-2xl">
+        <div className="grid-cols-1 w-full">
+          <div className="flex justify-end mb-2">
+            {permission.can_create && (
+              <button
+                type="button"
+                className="btn primary flex justify-center items-center"
+                onClick={() => setShowModalTambah(true)}
+              >
+                <span className="ti-plus text-xs mr-1.5"></span>
+                <span>Tambah</span>
+              </button>
+            )}
+          </div>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>NO</th>
+                <th>NAMA FASKES</th>
+                <th>KAB/KOTA</th>
+                <th>BPJS</th>
+                <th>SATUSEHAT</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NO</td>
+                <td>NAMA FASKES</td>
+                <td>KAB/KOTA</td>
+                <td>BPJS</td>
+                <td>SATUSEHAT</td>
+                <td>ACTION</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <Dialog open={showModalTambah} onClose={() => setShowModalTambah(false)}>
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-black/20">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <DialogPanel
+              transition
+              className="flex flex-col w-full max-w-7xl rounded-md bg-white p-4 duration-300 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0"
+            >
+              <DialogTitle as="span" className="text-lg font-medium mb-2">
+                Tambah Client
+              </DialogTitle>
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="nama-client">Nama Client</label>
+                    <input
+                      type="text"
+                      id="nama-client"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.nama_client}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          nama_client: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="notelp">No Telp</label>
+                    <input
+                      type="text"
+                      id="notelp"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.notelp}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          notelp: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="email">Email</label>
+                    <input
+                      type="text"
+                      id="email"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.email}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          email: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      type="text"
+                      id="website"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.website}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          website: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="alamat">Alamat</label>
+                    <input
+                      type="text"
+                      id="alamat"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.alamat}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          alamat: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="provinsi_id">Provinsi</label>
+                    <select
+                      id="provinsi_id"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.provinsi_id}
+                      onChange={(e) => {
+                        const id = e.currentTarget.value;
+                        setDataToSend({ ...dataToSend, provinsi_id: id });
+                        getRegencies(Number(id)).then((res) =>
+                          setRegencies(res)
+                        );
+                      }}
+                    >
+                      <option value="">Pilih</option>
+                      {provinces.map((province) => (
+                        <option key={province.id} value={province.id}>
+                          {province.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="kabupaten_id">Kab/Kota</label>
+                    <select
+                      id="kabupaten_id"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.kabupaten_id}
+                      onChange={(e) => {
+                        const id = e.currentTarget.value;
+                        setDataToSend({ ...dataToSend, kabupaten_id: id });
+                        getDistricts(Number(id)).then((res) =>
+                          setDistricts(res)
+                        );
+                      }}
+                    >
+                      <option value="">Pilih</option>
+                      {regencies.map((regency) => (
+                        <option key={regency.id} value={regency.id}>
+                          {regency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="kecamatan_id">Kecamatan</label>
+                    <select
+                      id="kecamatan_id"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.kecamatan_id}
+                      onChange={(e) => {
+                        const id = e.currentTarget.value;
+                        setDataToSend({ ...dataToSend, kecamatan_id: id });
+                        getVillages(Number(id)).then((res) => setVillages(res));
+                      }}
+                    >
+                      <option value="">Pilih</option>
+                      {districts.map((district) => (
+                        <option key={district.id} value={district.id}>
+                          {district.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="kelurahan_id">Kelurahan</label>
+                    <select
+                      id="kelurahan_id"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.kelurahan_id}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          kelurahan_id: e.currentTarget.value,
+                        })
+                      }
+                    >
+                      <option value="">Pilih</option>
+                      {villages.map((village) => (
+                        <option key={village.id} value={village.id}>
+                          {village.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="koordinat1">Koordinat 1</label>
+                    <input
+                      type="text"
+                      id="koordinat1"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.koordinat1}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          koordinat1: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col mb-2">
+                    <label htmlFor="koordinat2">Koordinat 2</label>
+                    <input
+                      type="text"
+                      id="koordinat2"
+                      className="border border-blue-200 rounded-sm p-1 outline-none"
+                      value={dataToSend.koordinat2}
+                      onChange={(e) =>
+                        setDataToSend({
+                          ...dataToSend,
+                          koordinat2: e.currentTarget.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end items-center">
+                  <button type="submit" className="btn primary">
+                    Simpan
+                  </button>
+                </div>
+              </form>
+            </DialogPanel>
+          </div>
+        </div>
+      </Dialog>
+    </>
+  );
+};
+
+export default ManagementClient;

@@ -17,6 +17,7 @@ const Layout: FC = () => {
         { to: "/bpjs/prolanis", name: "Prolanis" },
       ],
     },
+    { to: "/management-client", name: "Management Client" },
   ];
 
   return (
@@ -54,7 +55,7 @@ const Layout: FC = () => {
           ))}
         </ul>
       </div>
-      <div>
+      <div className="w-6/7 py-4 px-6">
         <Outlet />
       </div>
     </div>
