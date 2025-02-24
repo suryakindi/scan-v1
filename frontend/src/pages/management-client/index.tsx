@@ -13,12 +13,14 @@ import { AxiosRequestConfig } from "axios";
 
 const ManagementClient: FC = () => {
   const { token, permission } = useLoaderData<LoaderT>();
-  const [showModalTambah, setShowModalTambah] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [provinces, setProvinces] = useState<ProvinceT[]>([]);
   const [regencies, setRegencies] = useState<RegencieT[]>([]);
   const [districts, setDistricts] = useState<DistrictT[]>([]);
   const [villages, setVillages] = useState<VillageT[]>([]);
   const [dataToSend, setDataToSend] = useState<CreateClientPropsT>(initForm());
+  const [data, setData] = useState<PaginateT<ClientT[]> | null>(null);
 
   const requestConfig: AxiosRequestConfig = {
     headers: { Authorization: `Bearer ${token}` },
@@ -26,8 +28,14 @@ const ManagementClient: FC = () => {
 
   const getAllClient = async () => {
     try {
-      const response = await api.get("/management/get-clients", requestConfig);
-      console.log(response);
+      const response = await api.get<ResponseT<PaginateT<ClientT[]>>>(
+        "/management/get-clients",
+        requestConfig
+      );
+
+      if (response.data.data) {
+        setData(response.data.data);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -49,17 +57,43 @@ const ManagementClient: FC = () => {
   ): Promise<void> => {
     e.preventDefault();
     try {
-      const response = await api.post(
-        "/management/create-client",
-        dataToSend,
-        requestConfig
-      );
+      if (isEdit) {
+        const response = await api.put(
+          `/management/update-client/${dataToSend.id}`,
+          dataToSend,
+          requestConfig
+        );
 
-      console.log(response);
+        console.log(response);
+      } else {
+        const response = await api.post(
+          "/management/create-client",
+          dataToSend,
+          requestConfig
+        );
+
+        console.log(response);
+      }
     } catch (error) {
       console.error(error);
     } finally {
-      setShowModalTambah(false);
+      setDataToSend(initForm());
+      setShowModal(false);
+      setIsEdit(false);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    try {
+      if (confirm("Hapus")) {
+        const response = await api.delete(
+          `/management/delete-client/${id}`,
+          requestConfig
+        );
+        console.log(response);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -67,43 +101,120 @@ const ManagementClient: FC = () => {
     <>
       <div className="card p-4 shadow-2xl">
         <div className="grid-cols-1 w-full">
-          <div className="flex justify-end mb-2">
+          <div className="flex justify-end mb-4">
             {permission.can_create && (
               <button
                 type="button"
                 className="btn primary flex justify-center items-center"
-                onClick={() => setShowModalTambah(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  setIsEdit(false);
+                  setDataToSend(initForm());
+                }}
               >
                 <span className="ti-plus text-xs mr-1.5"></span>
                 <span>Tambah</span>
               </button>
             )}
           </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>NO</th>
-                <th>NAMA FASKES</th>
-                <th>KAB/KOTA</th>
-                <th>BPJS</th>
-                <th>SATUSEHAT</th>
-                <th>ACTION</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>NO</td>
-                <td>NAMA FASKES</td>
-                <td>KAB/KOTA</td>
-                <td>BPJS</td>
-                <td>SATUSEHAT</td>
-                <td>ACTION</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <div className="w-full overflow-auto">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>NO</th>
+                  <th>NAMA FASKES</th>
+                  <th>KAB/KOTA</th>
+                  <th>BPJS</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data && data.data.length > 0 ? (
+                  data.data.map((item, index) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{item.nama_client}</td>
+                      <td>{item.alamat}</td>
+                      <td>{item.connect_bpjs}</td>
+                      <td>
+                        <div className="flex gap-2 w-full items-center justify-center">
+                          <button type="button" className="btn primary">
+                            Details
+                          </button>
+                          <button
+                            type="button"
+                            className="btn primary"
+                            onClick={() => {
+                              setShowModal(true);
+                              setIsEdit(true);
+                              getRegencies(item.provinsi_id).then(
+                                (regencies) => {
+                                  setRegencies(regencies);
+                                  getDistricts(item.kabupaten_id).then(
+                                    (districts) => {
+                                      setDistricts(districts);
+                                      getVillages(item.kecamatan_id).then(
+                                        (villages) => {
+                                          setVillages(villages);
+
+                                          setDataToSend({
+                                            ...dataToSend,
+                                            id: item.id,
+                                            nama_client: item.nama_client,
+                                            notelp: item.notelp,
+                                            email: item.email,
+                                            website: item.website ?? "",
+                                            alamat: item.alamat,
+                                            koordinat1: item.koordinat1,
+                                            koordinat2: item.koordinat2,
+                                            provinsi_id:
+                                              item.provinsi_id.toString(),
+                                            kabupaten_id:
+                                              item.kabupaten_id.toString(),
+                                            kecamatan_id:
+                                              item.kecamatan_id.toString(),
+                                            kelurahan_id:
+                                              item.kelurahan_id.toString(),
+                                          });
+                                        }
+                                      );
+                                    }
+                                  );
+                                }
+                              );
+                            }}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn primary"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5}>Empty of data</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* <div>
+            1
+          </div> */}
         </div>
       </div>
-      <Dialog open={showModalTambah} onClose={() => setShowModalTambah(false)}>
+
+      <Dialog open={showModal} onClose={() => setShowModal(false)}>
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-black/20">
           <div className="flex min-h-full items-center justify-center p-4">
             <DialogPanel
@@ -111,7 +222,7 @@ const ManagementClient: FC = () => {
               className="flex flex-col w-full max-w-7xl rounded-md bg-white p-4 duration-300 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0"
             >
               <DialogTitle as="span" className="text-lg font-medium mb-2">
-                Tambah Client
+                {isEdit ? "Edit Client" : "Tambah Client"}
               </DialogTitle>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4">
