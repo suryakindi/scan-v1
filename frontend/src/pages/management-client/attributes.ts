@@ -1,4 +1,5 @@
 export const initForm = (): CreateClientPropsT => ({
+  id: null,
   nama_client: "",
   notelp: "",
   email: "",

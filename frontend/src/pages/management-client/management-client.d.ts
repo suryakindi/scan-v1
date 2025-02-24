@@ -1,4 +1,24 @@
+interface ClientT {
+  id: number;
+  is_active: boolean;
+  connect_bpjs: boolean;
+  nama_client: string;
+  notelp: string;
+  email: string;
+  website: string | null;
+  alamat: string;
+  kelurahan_id: number;
+  kecamatan_id: number;
+  kabupaten_id: number;
+  provinsi_id: number;
+  koordinat1: string;
+  koordinat2: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface CreateClientPropsT {
+  id: number | null;
   nama_client: string;
   notelp: string;
   email: string;
