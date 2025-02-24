@@ -80,4 +80,17 @@ class SatuSehatController extends Controller
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
+
+
+    public function GetKFAv2(Request $request) {
+        $cdfix = Auth()->user()->cdfix;
+        $credentials = $this->SatuSehatService->getSatuSehatCredentials($cdfix);
+        try {
+            $Accesstoken = $this->SatuSehatService->getTokenAccess($credentials);
+            $satusehat = $this->SatuSehatService->GetKFAv2($Accesstoken, $request->all());
+            return $this->baseResponse('satusehat berhasil', null, $satusehat, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
 }

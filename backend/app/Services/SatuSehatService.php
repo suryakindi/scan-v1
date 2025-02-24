@@ -130,5 +130,27 @@ class SatuSehatService
             throw $e;
         }
     }
+
+
+    public function GetKFAv2($key, array $data)
+    {
+        $token = $key['access_token'];
+
+        try {
+            $client = new Client();
+            $url = "https://api-satusehat.kemkes.go.id/kfa-v2/products/all?page=1&size=100&product_type=farmasi?&keyword=".$data['keyword'];
+            $response = $client->get($url, [
+                'headers' => [
+                    'Authorization' => "Bearer $token",
+                ]
+            ]);
+            $body = json_decode($response->getBody(), true);
+            return $body;
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
     
 }
