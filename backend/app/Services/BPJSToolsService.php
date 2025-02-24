@@ -224,7 +224,6 @@ class BPJSToolsService
             $statusCode = $response->getStatusCode();
             $body = $response->getBody();
             $responseData = json_decode($body, true);
-         
             // return $responseData;
             return $this->DecryptResponse($responseData);
             

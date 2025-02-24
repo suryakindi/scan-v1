@@ -110,7 +110,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
        Route::delete('delete-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'deleteSatuSehat'])->middleware('permission:Integrasi-Tools,delete');
        Route::get('/ihs/patients/{nik}', [SatuSehatController::class, 'getIhsPatientByNik'])->middleware('permission:Integrasi-Tools,view');   
        Route::get('check-satu-sehat',[SatuSehatController::class, 'getTokenAccess'])->middleware('permission:Integrasi-Tools,view');
-    
+       Route::get('check-kfav2', [SatuSehatController::class, 'GetKFAv2'])->middleware('permission:Integrasi-Tools,view');
        
 
        Route::get('get-role', [PermissionController::class, 'getRole'])->middleware('permission:Integrasi-Tools,view');

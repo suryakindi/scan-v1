@@ -213,17 +213,15 @@ const ManagementClient: FC = () => {
           </div> */}
         </div>
       </div>
-
       <Dialog open={showModal} onClose={() => setShowModal(false)}>
-        <div className="fixed inset-0 z-10 w-screen overflow-y-auto bg-black/20">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <DialogPanel
-              transition
-              className="flex flex-col w-full max-w-7xl rounded-md bg-white p-4 duration-300 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0"
-            >
-              <DialogTitle as="span" className="text-lg font-medium mb-2">
-                {isEdit ? "Edit Client" : "Tambah Client"}
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-2xl bg-white rounded-lg p-6 shadow-lg">
+              <DialogTitle as="span" className="text-xl font-semibold mb-4 block text-center text-gray-800">
+                {isEdit ? "✏️ Edit Client" : "✨ Tambah Client✨"}
               </DialogTitle>
+
+              {/* Divider (Garis Pemisah) */}
+              <div className="w-full border-b-2 border-gray-300 mb-6"></div>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4">
                   <div className="flex flex-col mb-2">
@@ -433,10 +431,10 @@ const ManagementClient: FC = () => {
                   </button>
                 </div>
               </form>
-            </DialogPanel>
           </div>
         </div>
       </Dialog>
+    
     </>
   );
 };
