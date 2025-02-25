@@ -89,3 +89,5 @@ export const useXState = <T extends XState, R = unknown>(
 
   return [data, setData, { submit, reset, status }];
 };
+
+export type { XStatus };
