@@ -4,13 +4,6 @@ import { useNavigate } from "react-router";
 import Fallback from "../../components/Fallback";
 import { useXState } from "../../utils/hooks";
 
-type LoginPayloadT = {
-  username: string;
-  password: string;
-};
-
-type LoginResponseT = ResponseT<{ user: UserT; token: string }>;
-
 const Login: FC = () => {
   const navigate = useNavigate();
   const [form, setForm, formFn] = useXState<LoginPayloadT, LoginResponseT>(
