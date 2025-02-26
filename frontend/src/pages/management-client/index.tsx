@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { api } from "../../utils/api";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { Dialog, DialogTitle } from "@headlessui/react";
 import { initForm } from "./attributes";
 import {
@@ -181,13 +181,13 @@ const ManagementClient: FC = () => {
 
   return (
     <>
-      <div className="card p-4 shadow-2xl">
+      <div className="card">
         <div className="grid-cols-1 w-full">
           <div className="flex justify-end mb-4">
             {permission.can_create && (
               <button
                 type="button"
-                className="btn primary flex justify-center items-center"
+                className="btn btn-primary flex justify-center items-center"
                 onClick={() => {
                   setShowModal(true);
                   setIsEdit(false);
@@ -201,7 +201,7 @@ const ManagementClient: FC = () => {
           </div>
 
           <div className="w-full overflow-auto">
-            <table className="table">
+            <table className="table table-responsive">
               <thead>
                 <tr>
                   <th>NO</th>
@@ -215,29 +215,32 @@ const ManagementClient: FC = () => {
                 {data && data.data.length > 0 ? (
                   data.data.map((item, index) => (
                     <tr key={index}>
-                      <td>{index + 1}</td>
+                      <td className="text-center">{index + 1}</td>
                       <td>{item.nama_client}</td>
                       <td>{item.alamat}</td>
                       <td>{item.connect_bpjs}</td>
                       <td>
                         <div className="flex gap-2 w-full items-center justify-center">
-                          <button type="button" className="btn primary">
-                            Details
-                          </button>
+                          <Link
+                            to={`/management-client/details/${item.id}`}
+                            className="btn btn-secondary"
+                          >
+                            <span className="ti-help"></span>
+                          </Link>
                           <button
                             type="button"
-                            className="btn primary"
+                            className="btn btn-primary"
                             onClick={() => handleEditForm(item)}
                           >
-                            Edit
+                            <span className="ti-pencil"></span>
                           </button>
 
                           <button
                             type="button"
-                            className="btn primary"
+                            className="btn btn-danger"
                             onClick={() => handleDelete(item.id)}
                           >
-                            Hapus
+                            <span className="ti-trash"></span>
                           </button>
                         </div>
                       </td>
@@ -257,6 +260,7 @@ const ManagementClient: FC = () => {
           </div> */}
         </div>
       </div>
+
       <Dialog open={showModal} onClose={() => setShowModal(false)}>
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50 overflow-auto">
           <div className="w-full max-w-2xl bg-white rounded-lg p-6 shadow-lg">
@@ -469,7 +473,7 @@ const ManagementClient: FC = () => {
                 </div>
               </div>
               <div className="mt-4 flex justify-end items-center">
-                <button type="submit" className="btn primary">
+                <button type="submit" className="btn btn-success">
                   Simpan
                 </button>
               </div>

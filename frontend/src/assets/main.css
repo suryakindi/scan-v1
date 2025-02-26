@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./fonts/themify-icons.css";
+@import "./bs-to-tw.css";
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -7,45 +8,4 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.card {
-  background-color: white;
-  display: flex;
-  border-radius: var(--radius-md);
-}
-
-.table {
-  width: 100%;
-  text-align: center;
-}
-
-.table th,
-.table td {
-  padding: calc(var(--spacing) * 2);
-}
-
-.table th {
-  background-color: var(--color-green-200);
-  border-bottom: 1px solid var(--color-green-300);
-}
-
-.table td {
-  border-bottom: 1px solid var(--color-gray-200);
-}
-
-.table tbody tr:hover {
-  background-color: var(--color-green-100);
-}
-
-.btn {
-  padding-inline: calc(var(--spacing) * 3);
-  padding-block: calc(var(--spacing) * 1.5);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.primary {
-  background-color: var(--color-blue-500);
-  color: var(--color-white);
 }
