@@ -55,7 +55,7 @@ const Layout: FC = () => {
           ))}
         </ul>
       </div>
-      <div className="w-6/7 py-4 px-6">
+      <div className="w-6/7 py-4 px-6 overflow-auto">
         <Outlet />
       </div>
     </div>
