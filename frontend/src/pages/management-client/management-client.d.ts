@@ -17,8 +17,7 @@ interface ClientT {
   updated_at: string;
 }
 
-interface CreateClientPropsT {
-  id: number | null;
+type CreateClientPropsT = {
   nama_client: string;
   notelp: string;
   email: string;
@@ -31,4 +30,6 @@ interface CreateClientPropsT {
   koordinat1: string;
   koordinat2: string;
   is_active?: boolean;
-}
+};
+
+type UpdateClientPropsT = CreateClientPropsT & { id: string };

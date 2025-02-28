@@ -201,7 +201,7 @@ const ManagementClient: FC = () => {
           </div>
 
           <div className="w-full overflow-auto">
-            <table className="table table-responsive">
+            <table className="table table-responsive table-sm table-bordered text-center">
               <thead>
                 <tr>
                   <th>NO</th>
@@ -223,13 +223,13 @@ const ManagementClient: FC = () => {
                         <div className="flex gap-2 w-full items-center justify-center">
                           <Link
                             to={`/management-client/details/${item.id}`}
-                            className="btn btn-secondary"
+                            className="btn btn-info btn-sm"
                           >
                             <span className="ti-help"></span>
                           </Link>
                           <button
                             type="button"
-                            className="btn btn-primary"
+                            className="btn btn-warning btn-sm"
                             onClick={() => handleEditForm(item)}
                           >
                             <span className="ti-pencil"></span>
@@ -237,7 +237,7 @@ const ManagementClient: FC = () => {
 
                           <button
                             type="button"
-                            className="btn btn-danger"
+                            className="btn btn-danger btn-sm"
                             onClick={() => handleDelete(item.id)}
                           >
                             <span className="ti-trash"></span>

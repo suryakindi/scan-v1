@@ -6,7 +6,7 @@
   @apply pointer-events-none opacity-65;
 }
 .btn {
-  @apply transition-colors duration-150 ease-in-out shadow bg-transparent rounded-md border border-transparent select-none cursor-pointer align-middle text-center inline-block px-3 py-1.5 text-gray-900;
+  @apply transition-colors duration-150 ease-in-out bg-transparent rounded-sm shadow-2xl border border-transparent select-none cursor-pointer align-middle text-center inline-block px-3 py-1.5 text-gray-900;
 }
 @media (prefers-reduced-motion: reduce) {
   .btn {
@@ -46,18 +46,18 @@ fieldset:disabled .btn {
   disabled:text-white disabled:bg-green-600 disabled:border-green-600 disabled:opacity-50;
 }
 .btn-info {
-  @apply text-black bg-cyan-400 border-cyan-400
-  hover:text-black hover:bg-cyan-300 hover:border-cyan-300
+  @apply text-white bg-cyan-400 border-cyan-400
+  hover:text-white hover:bg-cyan-300 hover:border-cyan-300
   focus:ring focus:ring-cyan-500
-  active:text-black active:bg-cyan-300 active:border-cyan-300 active:shadow-inner
-  disabled:text-black disabled:bg-cyan-400 disabled:border-cyan-400 disabled:opacity-50;
+  active:text-white active:bg-cyan-300 active:border-cyan-300 active:shadow-inner
+  disabled:text-white disabled:bg-cyan-400 disabled:border-cyan-400 disabled:opacity-50;
 }
 .btn-warning {
-  @apply text-black bg-yellow-400 border-yellow-400
-  hover:text-black hover:bg-yellow-300 hover:border-yellow-300
-  focus:ring focus:ring-yellow-500
-  active:text-black active:bg-yellow-300 active:border-yellow-300 active:shadow-inner
-  disabled:text-black disabled:bg-yellow-400 disabled:border-yellow-400 disabled:opacity-50;
+  @apply text-white bg-amber-400 border-amber-400
+  hover:text-white hover:bg-amber-300 hover:border-amber-300
+  focus:ring focus:ring-amber-500
+  active:text-white active:bg-amber-300 active:border-amber-300 active:shadow-inner
+  disabled:text-white disabled:bg-amber-400 disabled:border-amber-400 disabled:opacity-50;
 }
 .btn-danger {
   @apply text-white bg-red-600 border-red-600
@@ -150,6 +150,29 @@ fieldset:disabled .btn {
 .btn-group-sm > .btn,
 .btn-sm {
   @apply py-1 px-2 text-sm rounded;
+}
+
+.me-table {
+  @apply w-full mb-4 align-text-top text-center;
+}
+.me-table > thead,
+.me-table > tbody {
+  @apply align-middle;
+}
+.me-table > thead > * {
+  @apply bg-slate-200;
+}
+.me-table > :not(caption) > * {
+  @apply border-y border-gray-200/40;
+}
+.me-table > :not(caption) > * > * {
+  @apply px-1 py-1 border-x border-gray-200;
+}
+.me-table > tbody > tr:nth-of-type(odd) > * {
+  @apply bg-slate-100/50;
+}
+.me-table > tbody > tr:hover > * {
+  @apply bg-slate-100;
 }
 
 .table {

@@ -24,6 +24,10 @@ const Routes: FC = () => {
     },
   ]);
 
+  router.subscribe(({navigation}) => {
+    console.log(navigation.state);
+  });
+
   useEffect(() => {
     return () => {
       const validate = async () => {

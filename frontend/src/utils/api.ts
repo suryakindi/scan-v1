@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { useCallback, useState } from "react";
 
 const baseURL = "http://127.0.0.1:1337/api";
+const token = localStorage.getItem("token");
 
 /**
  * Cliet global API
@@ -91,6 +92,10 @@ export const useXState = <T extends XState, R = unknown>(
         baseURL: config.baseURL ?? baseURL,
         ...config,
         ...(config.method?.toUpperCase() !== "GET" && { data }),
+        headers: {
+          ...config.headers,
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
       setStatus("success");
       return response.data as R;
