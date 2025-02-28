@@ -57,6 +57,11 @@ const Layout: FC = () => {
       </div>
       <div className="w-6/7 py-4 px-6 overflow-auto">
         <Outlet />
+        <div className="mt-6">
+          <span className="font-light">
+            COPYRIGHT © 2025 SCAN Nusantara , All rights Reserved
+          </span>
+        </div>
       </div>
     </div>
   );

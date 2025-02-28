@@ -2,8 +2,17 @@
 @import "./fonts/themify-icons.css";
 @import "./bs-to-tw.css";
 
+@font-face {
+  font-family: "Roboto";
+  src: url("./fonts/roboto/Roboto-VariableFont_wdth_wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-stretch: 75% 125%;
+  font-style: normal;
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Roboto, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
