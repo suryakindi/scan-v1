@@ -4,12 +4,16 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { FC, Fragment } from "react";
+import { FC, Fragment, ReactNode } from "react";
 
-const Modal: FC = () => {
+const Modal: FC<{
+  onClose?: () => void;
+  show?: boolean;
+  children?: ReactNode;
+}> = ({ onClose = () => {}, show = false, children }) => {
   return (
-    <Transition appear show={false} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={() => {}}>
+    <Transition appear show={show} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
@@ -19,7 +23,7 @@ const Modal: FC = () => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-50" />
+          <div className="fixed inset-0 bg-black/50" />
         </TransitionChild>
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -32,10 +36,8 @@ const Modal: FC = () => {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <DialogPanel className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum
-              hic iure ex earum modi nulla voluptas optio! Aliquid molestias eum
-              sed quisquam aperiam modi! Aut fuga soluta similique earum ullam?
+            <DialogPanel className="bg-white rounded-lg p-6 shadow-xl max-w-xl w-full">
+              {children}
             </DialogPanel>
           </TransitionChild>
         </div>

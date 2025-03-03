@@ -2,6 +2,7 @@ import { FC, Fragment, useState } from "react";
 import {
   createBrowserRouter,
   NavLink,
+  Outlet,
   RouteObject,
   RouterProvider,
   useLocation,
@@ -10,10 +11,19 @@ import * as HOutline from "@heroicons/react/24/outline";
 import * as HSolid from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { BarLoader } from "react-spinners";
+
+type ModuleT =
+  | "Registrasi"
+  | "Pasien"
+  | "Integrasi-Tools"
+  | "Management-Client"
+  | "Master-Data";
 
 type WrapRoute = RouteObject & {
   name?: string;
   nav?: boolean;
+  module?: ModuleT;
   children?: WrapRoute[];
   Icon?: FC<React.SVGProps<SVGSVGElement>>;
 };
@@ -23,32 +33,38 @@ const routes: WrapRoute[] = [
     path: "bpjs",
     name: "BPJS",
     nav: true,
+    module: "Integrasi-Tools",
     Icon: HOutline.ShieldCheckIcon,
     children: [
       {
         path: "/bpjs/kunjungan",
         name: "Kunjungan",
         nav: true,
+        module: "Integrasi-Tools",
       },
       {
         path: "/bpjs/dokter",
         name: "Dokter",
         nav: true,
+        module: "Integrasi-Tools",
       },
       {
         path: "/bpjs/hfis",
         name: "HFIS",
         nav: true,
+        module: "Integrasi-Tools",
       },
       {
         path: "/bpjs/tindakan",
         name: "Tindakan",
         nav: true,
+        module: "Integrasi-Tools",
       },
       {
         path: "/bpjs/prolanis",
         name: "Prolanis",
         nav: true,
+        module: "Integrasi-Tools",
       },
     ],
   },
@@ -56,10 +72,42 @@ const routes: WrapRoute[] = [
     path: "/management-client",
     name: "Management Client",
     nav: true,
+    module: "Management-Client",
     Icon: HOutline.UsersIcon,
-    children: [{ index: true }, { path: "/management-client/details/:id" }],
+    children: [
+      {
+        path: "/management-client/client",
+        nav: true,
+        name: "Client",
+        module: "Integrasi-Tools",
+      },
+      {
+        path: "/management-client/base-url",
+        nav: true,
+        name: "Base URL",
+        module: "Integrasi-Tools",
+      },
+      { path: "/management-client/details/:id", module: "Integrasi-Tools" },
+    ],
   },
 ];
+
+const LoadingOverlay: FC = () => {
+  return (
+    <div className="bg-white absolute flex flex-col justify-center items-center w-screen h-screen z-10">
+      <div className="w-1/10">
+        <img src="/images/logo_t.png" />
+      </div>
+      <BarLoader
+        color="#1447e6"
+        height={4}
+        loading={true}
+        speedMultiplier={1}
+        width={300}
+      />
+    </div>
+  );
+};
 
 const Error404: FC = () => {
   return <p>404</p>;
@@ -68,6 +116,7 @@ const Error404: FC = () => {
 const Layout: FC = () => {
   const [show, setShow] = useState<boolean>(true);
   const [open, setOpen] = useState<string | undefined>(undefined);
+  const [isProcess, setIsProcess] = useState<boolean>(false);
 
   const { pathname } = useLocation();
 
@@ -90,7 +139,7 @@ const Layout: FC = () => {
     <Fragment>
       <nav
         className={clsx(
-          "fixed bg-white w-1/6 top-0 bottom-0 left-0 shadow-2xl overflow-auto font-light transition-all ease-in-out duration-150",
+          "fixed bg-white w-1/8 top-0 bottom-0 left-0 shadow-2xl overflow-auto font-light transition-all ease-in-out duration-150 text-sm",
           show ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -172,13 +221,13 @@ const Layout: FC = () => {
           className={clsx(
             "transition-all ease-in-out duration-150",
             "before:flex before:h-20",
-            show ? "w-5/6" : "w-full"
+            show ? "w-7/8" : "w-full"
           )}
         >
           <header
             className={clsx(
               "fixed top-0 flex pt-4 px-4 backdrop-blur-md transition-all ease-in-out duration-150 text-sm",
-              show ? "w-5/6" : "w-full"
+              show ? "w-7/8" : "w-full"
             )}
           >
             <div className="flex bg-white w-full h-14 items-center justify-between px-4 rounded-md shadow-2xl">
@@ -213,21 +262,21 @@ const Layout: FC = () => {
                   >
                     <MenuItem
                       as="button"
-                      className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center"
+                      className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center w-full"
                     >
                       <HOutline.UserIcon className="size-4 mr-2" />
                       <span>Profile</span>
                     </MenuItem>
                     <MenuItem
                       as="button"
-                      className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center"
+                      className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center w-full"
                     >
                       <HOutline.ArrowTrendingUpIcon className="size-4 mr-2" />
                       <span>Activity</span>
                     </MenuItem>
                     <MenuItem
                       as="button"
-                      className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center"
+                      className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center w-full"
                     >
                       <HOutline.PowerIcon className="size-4 mr-2" />
                       <span>Logout</span>
@@ -237,6 +286,8 @@ const Layout: FC = () => {
               </div>
             </div>
           </header>
+
+          <Outlet context={{ setIsProcess }} />
           <div>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos dolore
             ipsam placeat fugiat, odit culpa alias, numquam quos voluptates
@@ -588,23 +639,53 @@ const Layout: FC = () => {
           </div>
         </div>
       </div>
+
+      {isProcess && (
+        <div className="fixed top-0 right-0 left-0 z-50 bg-white/50">
+          <BarLoader
+            color="#1447e6"
+            height={3}
+            loading={true}
+            speedMultiplier={1}
+            width="100%"
+          />
+        </div>
+      )}
     </Fragment>
   );
 };
 
-const App: FC = () => {
-  return (
-    <RouterProvider
-      router={createBrowserRouter([
-        {
-          path: "/",
-          element: <Layout />,
-          children: routes,
-        },
-        { path: "*", element: <Error404 /> },
-      ])}
-    />
+const routeLoader = (module: ModuleT): WrapRoute["loader"] => {
+  return async () =>
+    new Promise<ModuleT>((resolve) => {
+      setTimeout(() => {
+        resolve(module);
+      }, 1000);
+    });
+};
+
+const appendLoader = (routes: WrapRoute[]): WrapRoute[] =>
+  routes.map(
+    (route) =>
+      ({
+        ...route,
+        ...(route.module ? { loader: routeLoader(route.module) } : {}),
+        ...(route.children ? { children: appendLoader(route.children) } : {}),
+      } as WrapRoute)
   );
+
+const App: FC = () => {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Layout />,
+      children: appendLoader(routes),
+      HydrateFallback: LoadingOverlay,
+    },
+    { path: "*", element: <Error404 /> },
+  ]);
+
+  return <RouterProvider router={router} />;
 };
 
 export default App;
