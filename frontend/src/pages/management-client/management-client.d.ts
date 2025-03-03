@@ -33,3 +33,11 @@ type CreateClientPropsT = {
 };
 
 type UpdateClientPropsT = CreateClientPropsT & { id: string };
+
+type BaseURLT = {
+  base_url: string;
+  kdAplikasi: string;
+  updated_at: string;
+  created_at: string;
+  id: number;
+};

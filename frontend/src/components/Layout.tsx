@@ -17,7 +17,14 @@ const Layout: FC = () => {
         { to: "/bpjs/prolanis", name: "Prolanis" },
       ],
     },
-    { to: "/management-client", name: "Management Client" },
+    {
+      to: "/management-client",
+      name: "Management Client",
+      children: [
+        { to: "/management-client/client", name: "Client" },
+        { to: "/management-client/base-url", name: "Base URL" },
+      ],
+    },
   ];
 
   return (

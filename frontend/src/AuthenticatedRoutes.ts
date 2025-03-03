@@ -98,13 +98,18 @@ export const AuthenticatedRoutes: RouteObject[] = [
     path: "/management-client",
     children: [
       {
-        index: true,
-        element: LazyLoad(() => import("./pages/management-client/index")),
+        path: "/management-client/client",
+        element: LazyLoad(() => import("./pages/management-client/client")),
         loader: () => make({ module: "Management-Client" }),
       },
       {
         path: "/management-client/details/:id",
         element: LazyLoad(() => import("./pages/management-client/details")),
+        loader: () => make({ module: "Management-Client" }),
+      },
+      {
+        path: "/management-client/base-url",
+        element: LazyLoad(() => import("./pages/management-client/base-url")),
         loader: () => make({ module: "Management-Client" }),
       },
     ],
