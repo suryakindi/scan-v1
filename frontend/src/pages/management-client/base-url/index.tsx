@@ -1,8 +1,9 @@
 import { FC, FormEventHandler, Fragment, useState } from "react";
 import * as HeroSolid from "@heroicons/react/24/solid";
-import Modal from "../../components/modal/Modal";
-import { ResponseT, useXState } from "../../utils/api";
 import Swal from "sweetalert2";
+import { ResponseT, useXState } from "../../../utils/api";
+import { BaseURLT } from "./types";
+import Modal from "../../../components/modal/Modal";
 
 const BaseURL: FC = () => {
   const [showModalAdd, setShowModalAdd] = useState<boolean>(false);

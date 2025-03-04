@@ -37,8 +37,8 @@ Route::prefix('auth')->group(function () {
             'message' => 'Unauthorized',
         ], 401);
     })->name('login');
-   
-    
+
+
     Route::post('login-user', [AuthController::class, 'LoginUser']);
 });
 
@@ -77,57 +77,57 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('delete-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'deleteMasterJenisKunjungan'])->middleware('permission:Master-Data,delete');
         Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Master-Data,view');
         Route::get('get-master-diagnosa', [MasterDataController::class, 'getMasterDiagnosa'])->middleware('permission:Master-Data,view');
-        
+
         Route::post('create-master-departemen', [MasterDataController::class, 'createDepartemen'])->middleware('permission:Master-Data,create');
         Route::get('get-master-departemen', [MasterDataController::class, 'getMasterDepartemen'])->middleware('permission:Management-Client,view');
         Route::put('edit-master-departemen/{id_departemen}', [MasterDataController::class, 'editMasterJenisDepartemen'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-departemen/{id_departemen}', [MasterDataController::class, 'deleteMasterDepartemen'])->middleware('permission:Master-Data,delete');
-        
+
         Route::post('create-master-ruangan', [MasterDataController::class, 'createMasterRuangan'])->middleware('permission:Master-Data,create');
         Route::get('get-master-ruangan', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Management-Client,view');
         Route::put('edit-master-ruangan/{id_ruangan}', [MasterDataController::class, 'editMasterRuangan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-ruangan/{id_ruangan}', [MasterDataController::class, 'deleteMasterRuangan'])->middleware('permission:Master-Data,delete');
     });
-    
-    Route::prefix('integerasi-sistem')->middleware('permission:Integrasi-Tools,view')->group(function () {
-       Route::post('create-base-url',[BaseUrlController::class, 'create'])->middleware('permission:Integrasi-Tools,create');
-       Route::put('edit-base-url/{id_baseurl}',[BaseUrlController::class, 'update'])->middleware('permission:Integrasi-Tools,edit');
-       Route::post('create-bpjs-tools/{id_client}', [BPJSToolsController::class, 'create'])->middleware('permission:Integrasi-Tools,create');
-       Route::post('create-service-bpjs/{id_bpjs_tools}', [BPJSToolsController::class, 'createServiceBPJS'])->middleware('permission:Integrasi-Tools,create');
-       Route::get('get-bpjs-tools/{id_client}', [BPJSToolsController::class, 'getBPJSToolsById'])->middleware('permission:Integrasi-Tools,view');
-       Route::put('update-bpjs-tools/{id_client}', [BPJSToolsController::class, 'update'])->middleware('permission:Integrasi-Tools,edit');
-       Route::put('update-service-bpjs/{id_service_bpjs}', [BPJSToolsController::class, 'updateServiceBPJSById'])->middleware('permission:Integrasi-Tools,edit');
-       Route::get('get-dokter-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getDokterByBPJS'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('/kunjungan/riwayat-bpjs/{id_client}', [BPJSToolsController::class, 'getKunjunganBPJS'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('/antrean/get-poli/{id_client}', [BPJSToolsController::class, 'getPoliAntrean'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('get-poli/{id_client}', [BPJSToolsController::class, 'getPoliReferensi'])->middleware('permission:Integrasi-Tools,view');
-       Route::post('sinkronisasi-poli/{id_client}', [BPJSToolsController::class, 'sinkronisasiPoli'])->middleware('permission:Integrasi-Tools,create');
+
+    Route::prefix('integerasi-sistem')->middleware('permission:Management-Client,view')->group(function () {
+        Route::post('create-base-url', [BaseUrlController::class, 'create'])->middleware('permission:Management-Client,create');
+        Route::put('edit-base-url/{id_baseurl}', [BaseUrlController::class, 'update'])->middleware('permission:Management-Client,edit');
+        Route::post('create-bpjs-tools/{id_client}', [BPJSToolsController::class, 'create'])->middleware('permission:Management-Client,create');
+        Route::post('create-service-bpjs/{id_bpjs_tools}', [BPJSToolsController::class, 'createServiceBPJS'])->middleware('permission:Management-Client,create');
+        Route::get('get-bpjs-tools/{id_client}', [BPJSToolsController::class, 'getBPJSToolsById'])->middleware('permission:Management-Client,view');
+        Route::put('update-bpjs-tools/{id_client}', [BPJSToolsController::class, 'update'])->middleware('permission:Management-Client,edit');
+        Route::put('update-service-bpjs/{id_service_bpjs}', [BPJSToolsController::class, 'updateServiceBPJSById'])->middleware('permission:Management-Client,edit');
+        Route::get('get-dokter-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getDokterByBPJS'])->middleware('permission:Management-Client,view');
+        Route::get('get-peserta-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'getPesertaByBPJS'])->middleware('permission:Management-Client,view');
+        Route::get('/kunjungan/riwayat-bpjs/{id_client}', [BPJSToolsController::class, 'getKunjunganBPJS'])->middleware('permission:Management-Client,view');
+        Route::get('/antrean/get-poli/{id_client}', [BPJSToolsController::class, 'getPoliAntrean'])->middleware('permission:Management-Client,view');
+        Route::get('get-poli/{id_client}', [BPJSToolsController::class, 'getPoliReferensi'])->middleware('permission:Management-Client,view');
+        Route::post('sinkronisasi-poli/{id_client}', [BPJSToolsController::class, 'sinkronisasiPoli'])->middleware('permission:Management-Client,create');
 
 
-       Route::post('create-satu-sehat',[SatuSehatController::class, 'createSatuSehat'])->middleware('permission:Integrasi-Tools,create');
-       Route::put('edit-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'editSatuSehat'])->middleware('permission:Integrasi-Tools,edit');
-       Route::delete('delete-satu-sehat/{id_satusehat}',[SatuSehatController::class, 'deleteSatuSehat'])->middleware('permission:Integrasi-Tools,delete');
-       Route::get('/ihs/patients/{nik}', [SatuSehatController::class, 'getIhsPatientByNik'])->middleware('permission:Integrasi-Tools,view');   
-       Route::get('check-satu-sehat',[SatuSehatController::class, 'getTokenAccess'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('check-kfav2', [SatuSehatController::class, 'GetKFAv2'])->middleware('permission:Integrasi-Tools,view');
-       
+        Route::post('create-satu-sehat', [SatuSehatController::class, 'createSatuSehat'])->middleware('permission:Management-Client,create');
+        Route::put('edit-satu-sehat/{id_satusehat}', [SatuSehatController::class, 'editSatuSehat'])->middleware('permission:Management-Client,edit');
+        Route::delete('delete-satu-sehat/{id_satusehat}', [SatuSehatController::class, 'deleteSatuSehat'])->middleware('permission:Management-Client,delete');
+        Route::get('/ihs/patients/{nik}', [SatuSehatController::class, 'getIhsPatientByNik'])->middleware('permission:Management-Client,view');
+        Route::get('check-satu-sehat', [SatuSehatController::class, 'getTokenAccess'])->middleware('permission:Management-Client,view');
+        Route::get('check-kfav2', [SatuSehatController::class, 'GetKFAv2'])->middleware('permission:Management-Client,view');
 
-       Route::get('get-role', [PermissionController::class, 'getRole'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('get-modul', [PermissionController::class, 'getModul'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('get-role-permission/{role_id}', [PermissionController::class, 'getPermission'])->middleware('permission:Integrasi-Tools,view');
-       Route::get('get-user-permission/{user_id}', [PermissionController::class, 'getUserPermission'])->middleware('permission:Integrasi-Tools,view');
-       Route::delete('delete-role-permission/{id_permission}', [PermissionController::class, 'deletePermission'])->middleware('permission:Integrasi-Tools,delete');
-       Route::delete('delete-user-permission/{id_user_permission}', [PermissionController::class, 'deleteUserPermission'])->middleware('permission:Integrasi-Tools,delete');
-       Route::post('create-permission/role', [PermissionController::class, 'createPermissionRole'])->middleware('permission:Integrasi-Tools,create');
-       Route::post('create-user-permission/user', [PermissionController::class, 'createPermissionUser'])->middleware('permission:Integrasi-Tools,create');
-       Route::put('update-user-permission/{id_user_permission}', [PermissionController::class, 'UpdateUserPermissionRole'])->middleware('permission:Integrasi-Tools,edit');   
-       Route::put('update-permission/permission/{id_permission}', [PermissionController::class, 'UpdatePermissionRole'])->middleware('permission:Integrasi-Tools,edit');   
+
+        Route::get('get-role', [PermissionController::class, 'getRole'])->middleware('permission:Management-Client,view');
+        Route::get('get-modul', [PermissionController::class, 'getModul'])->middleware('permission:Management-Client,view');
+        Route::get('get-role-permission/{role_id}', [PermissionController::class, 'getPermission'])->middleware('permission:Management-Client,view');
+        Route::get('get-user-permission/{user_id}', [PermissionController::class, 'getUserPermission'])->middleware('permission:Management-Client,view');
+        Route::delete('delete-role-permission/{id_permission}', [PermissionController::class, 'deletePermission'])->middleware('permission:Management-Client,delete');
+        Route::delete('delete-user-permission/{id_user_permission}', [PermissionController::class, 'deleteUserPermission'])->middleware('permission:Management-Client,delete');
+        Route::post('create-permission/role', [PermissionController::class, 'createPermissionRole'])->middleware('permission:Management-Client,create');
+        Route::post('create-user-permission/user', [PermissionController::class, 'createPermissionUser'])->middleware('permission:Management-Client,create');
+        Route::put('update-user-permission/{id_user_permission}', [PermissionController::class, 'UpdateUserPermissionRole'])->middleware('permission:Management-Client,edit');
+        Route::put('update-permission/permission/{id_permission}', [PermissionController::class, 'UpdatePermissionRole'])->middleware('permission:Management-Client,edit');
     });
 
 
-    
 
-    
+
+
 
 });

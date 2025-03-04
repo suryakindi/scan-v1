@@ -1,13 +1,19 @@
 import { FC, FormEventHandler, useEffect } from "react";
-import { api, useXState } from "../../utils/api";
 import { Link, useLoaderData, useParams } from "react-router";
 import { AxiosRequestConfig } from "axios";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { useLokasi } from "../../utils/lokasi/lokasi";
 import Swal from "sweetalert2";
 import * as HeroSolid from "@heroicons/react/24/solid";
 import * as HeroOutline from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import { LoaderT } from "../../../user";
+import { useLokasi } from "../../../utils/lokasi";
+import { api, ResponseT, useXState } from "../../../utils/api";
+import type {
+  ClientT,
+  UpdateClientPayload,
+  UpdateClientResponse,
+} from "./types";
 
 const Details: FC = () => {
   const param = useParams();
@@ -22,8 +28,8 @@ const Details: FC = () => {
   ] = useLokasi();
 
   const [clientForm, setClientForm, clientFn] = useXState<
-    CreateClientPropsT,
-    UpdateClientPropsT
+    UpdateClientPayload,
+    UpdateClientResponse
   >(
     {
       nama_client: "",
