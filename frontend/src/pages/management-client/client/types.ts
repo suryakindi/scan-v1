@@ -1,3 +1,5 @@
+import type { ResponseT } from "../../../utils/api";
+
 interface ClientT {
   id: number;
   is_active: boolean;
@@ -17,7 +19,7 @@ interface ClientT {
   updated_at: string;
 }
 
-type CreateClientPropsT = {
+type BaseClientPayload = {
   nama_client: string;
   notelp: string;
   email: string;
@@ -32,12 +34,30 @@ type CreateClientPropsT = {
   is_active?: boolean;
 };
 
-type UpdateClientPropsT = CreateClientPropsT & { id: string };
+type CreateClientPayload = BaseClientPayload;
 
-type BaseURLT = {
-  base_url: string;
-  kdAplikasi: string;
-  updated_at: string;
-  created_at: string;
-  id: number;
+type CreateClientResponse = ResponseT<
+  BaseClientPayload & {
+    id: number;
+    updated_at: string;
+    created_at: string;
+  }
+>;
+
+type UpdateClientPayload = BaseClientPayload;
+
+type UpdateClientResponse = ResponseT<
+  BaseClientPayload & {
+    id: number;
+    updated_at: string;
+    created_at: string;
+  }
+>;
+
+export type {
+  ClientT,
+  CreateClientPayload,
+  CreateClientResponse,
+  UpdateClientPayload,
+  UpdateClientResponse,
 };

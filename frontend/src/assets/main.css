@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "./fonts/themify-icons.css";
-@import "./bs-to-tw.css";
 
 @font-face {
   font-family: "Roboto";
@@ -17,4 +16,27 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.me-table {
+  @apply w-full mb-4 align-text-top text-center;
+}
+.me-table > thead,
+.me-table > tbody {
+  @apply align-middle;
+}
+.me-table > thead > * {
+  @apply bg-slate-200;
+}
+.me-table > :not(caption) > * {
+  @apply border-y border-gray-200/40;
+}
+.me-table > :not(caption) > * > * {
+  @apply px-1 py-1 border-x border-gray-200;
+}
+.me-table > tbody > tr:nth-of-type(odd) > * {
+  @apply bg-slate-100/50;
+}
+.me-table > tbody > tr:hover > * {
+  @apply bg-slate-100;
 }
