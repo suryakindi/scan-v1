@@ -29,6 +29,21 @@ const appendLoader = (routes: WrapRoute[]): WrapRoute[] =>
 
 const raw: WrapRoute[] = [
   {
+    path: "/registrasi",
+    name: "Registrasi",
+    nav: true,
+    Icon: HOutline.UserPlusIcon,
+    children: [
+      {
+        path: "/registrasi/pasien",
+        name: "Pasien Baru",
+        nav: true,
+        module: "Registrasi",
+        element: LazyLoad(() => import("./pages/registrasi/pasien/index")),
+      },
+    ],
+  },
+  {
     path: "/management-client",
     name: "Management Client",
     nav: true,

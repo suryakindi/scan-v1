@@ -3,10 +3,12 @@ import { useXState } from "../../../utils/api";
 import { useLokasi } from "../../../utils/lokasi";
 import Swal from "sweetalert2";
 import type { CreateClientPayload, CreateClientResponse } from "./types";
-import { useNavigate } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
+import { LayoutContext } from "../../../layout/types";
 
 const ClientAdd: FC = () => {
   const navigate = useNavigate();
+  const { setIsProcess } = useOutletContext<LayoutContext>();
 
   const [clientForm, setClientForm, clientFn] = useXState<
     CreateClientPayload,
@@ -41,6 +43,7 @@ const ClientAdd: FC = () => {
   ) => {
     e.preventDefault();
     try {
+      setIsProcess(true);
       const {
         data: { id },
       } = await clientFn.submit();
@@ -68,6 +71,8 @@ const ClientAdd: FC = () => {
         title: "Gagal",
         text: "Terjadi kesalahan",
       });
+    } finally {
+      setIsProcess(false);
     }
   };
 

@@ -4,8 +4,11 @@ import Swal from "sweetalert2";
 import { ResponseT, useXState } from "../../../utils/api";
 import { BaseURLT } from "./types";
 import Modal from "../../../components/modal/Modal";
+import { useOutletContext } from "react-router";
+import { LayoutContext } from "../../../layout/types";
 
 const BaseURL: FC = () => {
+  const { setIsProcess } = useOutletContext<LayoutContext>();
   const [showModalAdd, setShowModalAdd] = useState<boolean>(false);
   const [addForm, setAddForm, addFormFn] = useXState<
     {
@@ -21,6 +24,7 @@ const BaseURL: FC = () => {
   const handleAddFormSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
+      setIsProcess(true);
       const response = await addFormFn.submit();
       console.log(response);
       Swal.fire({
@@ -45,15 +49,12 @@ const BaseURL: FC = () => {
       });
     } finally {
       setShowModalAdd(false);
+      setIsProcess(false);
     }
   };
 
   return (
     <Fragment>
-      <div className="flex mb-6">
-        <span className="font-extrabold text-2xl">Base URL</span>
-      </div>
-
       <div className="bg-white shadow-lg p-6 rounded-md mb-6 grid gap-4 auto-rows-min">
         <div className="flex items-center justify-end">
           <button

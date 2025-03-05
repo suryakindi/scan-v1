@@ -1,7 +1,6 @@
-import { FC, FormEventHandler, useEffect } from "react";
-import { api, useXState } from "../../utils/api";
+import { FC, FormEventHandler } from "react";
+import { useXState } from "../../utils/api";
 import { useNavigate } from "react-router";
-import Fallback from "../../components/Fallback";
 
 const Login: FC = () => {
   const navigate = useNavigate();
@@ -22,34 +21,8 @@ const Login: FC = () => {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      const validate = async () => {
-        try {
-          const token = localStorage.getItem("token");
-          const response = await api.get<
-            ResponseT<{
-              user: UserT;
-              role_permissions: PermissionT;
-              user_permissions: PermissionT;
-            }>
-          >("/check-token", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (response.data.data.user) navigate("/");
-        } catch (error) {
-          console.error(error);
-        }
-      };
-
-      validate();
-    };
-  }, [navigate]);
-
   return (
     <>
-      {formFn.status === "loading" && <Fallback />}
       <div className="flex flex-col max-w-1/6">
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col p-2">
