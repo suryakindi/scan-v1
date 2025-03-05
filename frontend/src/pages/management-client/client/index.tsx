@@ -1,16 +1,18 @@
 import { FC, useEffect, useState } from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link, useLoaderData, useOutletContext } from "react-router";
 import { AxiosRequestConfig } from "axios";
-import Swal from "sweetalert2";
 import * as HOutline from "@heroicons/react/24/outline";
 import { api, ResponseT } from "../../../utils/api";
 import { LoaderT } from "../../../user";
 import { ClientT } from "./types";
 import { PaginateT } from "../../../utils/paginate";
+import { Alert, Confirm, Toast } from "../../../utils/alert";
+import { LayoutContext } from "../../../layout/types";
 
 const ManagementClient: FC = () => {
   const { token, permission } = useLoaderData<LoaderT>();
   const [data, setData] = useState<PaginateT<ClientT[]> | null>(null);
+  const { setIsProcess } = useOutletContext<LayoutContext>();
 
   const requestConfig: AxiosRequestConfig = {
     headers: { Authorization: `Bearer ${token}` },
@@ -18,6 +20,7 @@ const ManagementClient: FC = () => {
 
   const getAllClient = async () => {
     try {
+      setIsProcess(true);
       const response = await api.get<ResponseT<PaginateT<ClientT[]>>>(
         "/management/get-clients",
         requestConfig
@@ -28,6 +31,8 @@ const ManagementClient: FC = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsProcess(false);
     }
   };
 
@@ -39,41 +44,36 @@ const ManagementClient: FC = () => {
   }, []);
 
   const handleDelete = async (id: string | number) => {
-    try {
-      if (confirm("Hapus")) {
-        const response = await api.delete(
-          `/management/delete-client/${id}`,
-          requestConfig
-        );
-        console.log(response);
-
-        Swal.fire({
-          timer: 1000,
-          position: "top-right",
-          showConfirmButton: false,
-          toast: true,
-          icon: "success",
-          title: "Berhasil menghapus",
-          text: "Berhasil menghapus data",
-        });
+    Confirm.fire({ title: "Hapus client", text: "Hapus client ?" }).then(
+      async ({ isConfirmed }) => {
+        if (isConfirmed) {
+          try {
+            setIsProcess(true);
+            await api.delete(`/management/delete-client/${id}`, requestConfig);
+            Toast.fire({
+              icon: "success",
+              title: "Berhasil",
+              text: "Berhasil menghapus data",
+            });
+          } catch (error) {
+            console.error(error);
+            Alert.fire({
+              icon: "error",
+              title: "Gagal",
+              text: "Terjadi error saat menghapus data",
+            });
+          } finally {
+            await getAllClient();
+            setIsProcess(false);
+          }
+        }
       }
-    } catch (error) {
-      Swal.fire({
-        timer: 1000,
-        showConfirmButton: false,
-        position: "top-right",
-        toast: true,
-        icon: "error",
-        title: "Gagal menghapus",
-        text: "Terjadi error saat menghapus data",
-      });
-      console.error(error);
-    }
+    );
   };
 
   return (
     <>
-      <div className="card">
+      <div className="bg-white shadow-lg p-6 rounded-md mb-6">
         <div className="grid-cols-1 w-full">
           <div className="flex justify-end mb-4">
             {permission.can_create && (
@@ -110,17 +110,17 @@ const ManagementClient: FC = () => {
                         <div className="flex gap-2 w-full items-center justify-center">
                           <Link
                             to={`/management-client/client/details/${item.id}`}
-                            className="btn btn-info btn-sm"
+                            className="p-1.5 bg-cyan-500 hover:bg-cyan-400 text-white aspect-square rounded-md flex items-center justify-center outline-none"
                           >
-                            <span className="ti-help"></span>
+                            <HOutline.QuestionMarkCircleIcon className="size-6" />
                           </Link>
 
                           <button
                             type="button"
-                            className="btn btn-danger btn-sm"
+                            className="p-1.5 bg-red-600 hover:bg-red-500 text-white aspect-square rounded-md flex items-center justify-center outline-none cursor-pointer"
                             onClick={() => handleDelete(item.id)}
                           >
-                            <span className="ti-trash"></span>
+                            <HOutline.TrashIcon className="size-6" />
                           </button>
                         </div>
                       </td>

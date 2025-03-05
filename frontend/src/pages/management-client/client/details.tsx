@@ -1,5 +1,5 @@
 import { FC, FormEventHandler, useEffect } from "react";
-import { Link, useLoaderData, useParams } from "react-router";
+import { Link, useLoaderData, useOutletContext, useParams } from "react-router";
 import { AxiosRequestConfig } from "axios";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import Swal from "sweetalert2";
@@ -14,10 +14,12 @@ import type {
   UpdateClientPayload,
   UpdateClientResponse,
 } from "./types";
+import { LayoutContext } from "../../../layout/types";
 
 const Details: FC = () => {
   const param = useParams();
   const { token } = useLoaderData<LoaderT>();
+  const { setIsProcess } = useOutletContext<LayoutContext>();
   const requestConfig: AxiosRequestConfig = {
     headers: { Authorization: `Bearer ${token}` },
   };
@@ -52,6 +54,7 @@ const Details: FC = () => {
 
   const getClientById = async (id: string | number) => {
     try {
+      setIsProcess(true);
       const response = await api.get<ResponseT<ClientT>>(
         `/management/get-client/id/${id}`,
         requestConfig
@@ -79,6 +82,8 @@ const Details: FC = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsProcess(false);
     }
   };
 
@@ -87,6 +92,7 @@ const Details: FC = () => {
   ) => {
     e.preventDefault();
     try {
+      setIsProcess(true);
       await clientFn.submit();
       Swal.fire({
         timer: 1000,
@@ -107,6 +113,8 @@ const Details: FC = () => {
         title: "Gagal",
         text: "Terjadi kesalahan",
       });
+    } finally {
+      setIsProcess(false);
     }
   };
 
@@ -122,7 +130,7 @@ const Details: FC = () => {
     <>
       <div className="grid grid-cols-[4fr_1fr] gap-6">
         <div className="grid grid-cols-1 gap-6">
-          <div className="card flex flex-row">
+          <div className="bg-white shadow-lg p-6 rounded-md flex flex-row">
             <div className="max-w-28 mr-6">
               <img src="/images/logo_t.png" alt="logo..." />
             </div>
