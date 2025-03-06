@@ -40,5 +40,16 @@ class BaseUrlService
             throw new Exception("Gagal memperbarui baseUrl: " . $e->getMessage());
         }
     }
+
+    public function getBaseUrl()
+    {
+        try {
+            $baseUrl = BaseUrl::get();
+            return $baseUrl;
+        } catch (\Exception $e) {
+            throw new Exception("Gagal memperbarui baseUrl: " . $e->getMessage());
+        }
+       
+    }
     
 }

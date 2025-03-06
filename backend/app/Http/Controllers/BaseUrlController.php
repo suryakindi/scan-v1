@@ -45,4 +45,14 @@ class BaseUrlController extends Controller
         }
     }
 
+    public function getBaseUrl()
+    {
+
+        try {
+            $baseUrl = $this->BaseUrlService->getBaseUrl();
+            return $this->baseResponse('Base URL', null, $baseUrl, 200); 
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
 }
