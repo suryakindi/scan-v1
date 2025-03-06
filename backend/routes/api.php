@@ -91,6 +91,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('integerasi-sistem')->middleware('permission:Management-Client,view')->group(function () {
         Route::post('create-base-url', [BaseUrlController::class, 'create'])->middleware('permission:Management-Client,create');
+        Route::get('get-base-url', [BaseUrlController::class, 'getBaseUrl'])->middleware('permission:Management-Client,view');
         Route::put('edit-base-url/{id_baseurl}', [BaseUrlController::class, 'update'])->middleware('permission:Management-Client,edit');
         Route::post('create-bpjs-tools/{id_client}', [BPJSToolsController::class, 'create'])->middleware('permission:Management-Client,create');
         Route::post('create-service-bpjs/{id_bpjs_tools}', [BPJSToolsController::class, 'createServiceBPJS'])->middleware('permission:Management-Client,create');
