@@ -4,8 +4,8 @@ import { routes } from "./routes";
 import Layout from "./layout";
 import LoadingOverlay from "./layout/loading-ovarelay";
 import Error404 from "./layout/404";
-import Login from "./pages/auth/login";
 import { loginLoader } from "./pages/auth/loader";
+import Login from "./pages/auth/Login";
 
 const App: FC = () => {
   const router = createBrowserRouter([
