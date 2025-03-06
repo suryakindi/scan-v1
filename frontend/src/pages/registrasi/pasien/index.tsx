@@ -11,6 +11,13 @@ import {
 } from "../../../utils/enums";
 import { useOutletContext } from "react-router";
 import { LayoutContext } from "../../../layout/types";
+import Select from "react-select";
+import {
+  cast,
+  findValue,
+  mapOptions,
+  styles,
+} from "../../../utils/react-select";
 
 const Pasien: FC = () => {
   const { setIsProcess } = useOutletContext<LayoutContext>();
@@ -50,6 +57,24 @@ const Pasien: FC = () => {
     { url: "/pasien/register-pasien", method: "POST" }
   );
 
+  const agama = Object.values(Agama).map((i) => ({ value: i, label: i }));
+  const pendidikan = Object.values(Pendidikan).map((i) => ({
+    value: i,
+    label: i,
+  }));
+  const pekerjaan = Object.values(Pekerjaan).map((i) => ({
+    value: i,
+    label: i,
+  }));
+  const perkawinan = Object.values(Perkawinan).map((i) => ({
+    value: i,
+    label: i,
+  }));
+  const golonganDarah = Object.values(GolonganDarah).map((i) => ({
+    value: i,
+    label: i,
+  }));
+
   const [
     { provinces, regencies, districts, villages },
     { getProvinces, getRegencies, getDistricts, getVillages },
@@ -70,6 +95,7 @@ const Pasien: FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <form className="grid grid-cols-1 gap-6" onSubmit={handleSubmit}>
       <div className="grid grid-cols-2 gap-6">
@@ -94,6 +120,8 @@ const Pasien: FC = () => {
               type="text"
               id="no-bpjs"
               className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+              value={form.no_bpjs}
+              onChange={(e) => setForm({ no_bpjs: e.currentTarget.value })}
             />
           </div>
         </div>
@@ -126,28 +154,6 @@ const Pasien: FC = () => {
           />
         </div>
 
-        {/* <div className="flex flex-col">
-          <label className="mb-1" htmlFor="jenis-kelamin">
-            jenis-kelamin
-          </label>
-          <input
-            type="text"
-            id="jenis-kelamin"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1" htmlFor="rm-rsud">
-            rm-rsud
-          </label>
-          <input
-            type="text"
-            id="rm-rsud"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-          />
-        </div> */}
-
         <div className="flex flex-col">
           <label className="mb-1" htmlFor="tempat-lahir">
             Tempat Lahir
@@ -178,65 +184,74 @@ const Pasien: FC = () => {
           <label className="mb-1" htmlFor="agama">
             Agama
           </label>
-          <select
-            id="agama"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-            value={form.agama}
-            onChange={(e) => setForm({ agama: e.currentTarget.value as Agama })}
-          >
-            <option value="">Pilih</option>
-            {Object.values(Agama).map((i, k) => (
-              <option key={k} value={i}>
-                {i}
-              </option>
-            ))}
-          </select>
+          <Select
+            inputId="agama"
+            className="w-full"
+            isClearable={true}
+            isSearchable={true}
+            styles={styles}
+            placeholder="Pilih..."
+            menuPlacement="bottom"
+            options={agama}
+            value={findValue(agama, { value: form.agama }, { label: "value" })}
+            onChange={(e) =>
+              cast<{ value: Agama; label: string }>(e, ({ value }) => {
+                setForm({ agama: value });
+              })
+            }
+          />
         </div>
 
         <div className="flex flex-col">
           <label className="mb-1" htmlFor="pendidikan-terakhir">
             Pendidikan Terakhir
           </label>
-          <select
-            id="pendidikan-terakhir"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-            value={form.pendidikan_terakhir}
+          <Select
+            inputId="pendidikan-terakhir"
+            className="w-full"
+            isClearable={true}
+            isSearchable={true}
+            styles={styles}
+            placeholder="Pilih..."
+            menuPlacement="bottom"
+            options={pendidikan}
+            value={findValue(
+              pendidikan,
+              { value: form.pendidikan_terakhir },
+              { label: "value" }
+            )}
             onChange={(e) =>
-              setForm({
-                pendidikan_terakhir: e.currentTarget.value as Pendidikan,
+              cast<{ value: Pendidikan; label: string }>(e, ({ value }) => {
+                setForm({ pendidikan_terakhir: value });
               })
             }
-          >
-            <option value="">Pilih</option>
-            {Object.values(Pendidikan).map((i, k) => (
-              <option key={k} value={i}>
-                {i}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <div className="flex flex-col">
           <label className="mb-1" htmlFor="pekerjaan">
             Pekerjaan
           </label>
-          <select
-            id="pekerjaan"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-            value={form.pekerjaan}
+          <Select
+            inputId="pekerjaan"
+            className="w-full"
+            isClearable={true}
+            isSearchable={true}
+            styles={styles}
+            placeholder="Pilih..."
+            menuPlacement="bottom"
+            options={pekerjaan}
+            value={findValue(
+              pekerjaan,
+              { value: form.pekerjaan },
+              { label: "value" }
+            )}
             onChange={(e) =>
-              setForm({
-                pekerjaan: e.currentTarget.value as Pekerjaan,
+              cast<{ value: Pekerjaan; label: string }>(e, ({ value }) => {
+                setForm({ pekerjaan: value });
               })
             }
-          >
-            <option value="">Pilih</option>
-            {Object.values(Pekerjaan).map((i, k) => (
-              <option key={k} value={i}>
-                {i}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <div className="flex flex-col">
@@ -282,23 +297,26 @@ const Pasien: FC = () => {
           <label className="mb-1" htmlFor="status-perkawinan">
             Status Perkawinan
           </label>
-          <select
-            id="status-perkawinan"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-            value={form.status_perkawinan}
+          <Select
+            inputId="status-perkawinan"
+            className="w-full"
+            isClearable={true}
+            isSearchable={true}
+            styles={styles}
+            placeholder="Pilih..."
+            menuPlacement="bottom"
+            options={perkawinan}
+            value={findValue(
+              perkawinan,
+              { value: form.status_perkawinan },
+              { label: "value" }
+            )}
             onChange={(e) =>
-              setForm({
-                status_perkawinan: e.currentTarget.value as Perkawinan,
+              cast<{ value: Perkawinan; label: string }>(e, ({ value }) => {
+                setForm({ status_perkawinan: value });
               })
             }
-          >
-            <option value="">Pilih</option>
-            {Object.values(Perkawinan).map((i, k) => (
-              <option key={k} value={i}>
-                {i}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <div className="flex flex-col">
@@ -318,23 +336,26 @@ const Pasien: FC = () => {
           <label className="mb-1" htmlFor="gol-darah">
             Golongan Darah
           </label>
-          <select
-            id="gol-darah"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-            value={form.golongan_darah}
+          <Select
+            inputId="gol-darah"
+            className="w-full"
+            isClearable={true}
+            isSearchable={true}
+            styles={styles}
+            placeholder="Pilih..."
+            menuPlacement="bottom"
+            options={golonganDarah}
+            value={findValue(
+              golonganDarah,
+              { value: form.golongan_darah },
+              { label: "value" }
+            )}
             onChange={(e) =>
-              setForm({
-                golongan_darah: e.currentTarget.value as GolonganDarah,
+              cast<{ value: GolonganDarah; label: string }>(e, ({ value }) => {
+                setForm({ golongan_darah: value });
               })
             }
-          >
-            <option value="">Pilih</option>
-            {Object.values(GolonganDarah).map((i, k) => (
-              <option key={k} value={i}>
-                {i}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
@@ -348,6 +369,12 @@ const Pasien: FC = () => {
               type="text"
               id="alamat-ktp"
               className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+              value={form.alamat.alamat}
+              onChange={(e) =>
+                setForm({
+                  alamat: { ...form.alamat, alamat: e.currentTarget.value },
+                })
+              }
             />
           </div>
 
@@ -357,11 +384,23 @@ const Pasien: FC = () => {
               <input
                 type="text"
                 className="py-1.5 px-2 outline-none border-none flex-1"
+                value={form.alamat.rt}
+                onChange={(e) =>
+                  setForm({
+                    alamat: { ...form.alamat, rt: e.currentTarget.value },
+                  })
+                }
               />
               <hr className="h-5 border-l border-gray-300" />
               <input
                 type="text"
                 className="py-1.5 px-2 outline-none border-none flex-1"
+                value={form.alamat.rw}
+                onChange={(e) =>
+                  setForm({
+                    alamat: { ...form.alamat, rw: e.currentTarget.value },
+                  })
+                }
               />
             </div>
           </div>
@@ -372,128 +411,163 @@ const Pasien: FC = () => {
             <label className="mb-1" htmlFor="provinsi">
               Provinsi
             </label>
-            <select
-              id="provinsi"
-              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-              value={form.alamat.id_provinsi}
-              onChange={async (e) => {
-                setIsProcess(true);
-                setForm({
-                  alamat: {
-                    ...form.alamat,
-                    id_provinsi: e.currentTarget.value,
-                    id_kabupaten: "",
-                    id_kecamatan: "",
-                    id_kelurahan: "",
-                  },
-                });
-                await getRegencies(e.currentTarget.value);
-                setIsProcess(false);
-              }}
-            >
-              <option value="">Pilih</option>
-              {provinces.map((i, k) => (
-                <option key={k} value={i.id}>
-                  {i.name}
-                </option>
-              ))}
-            </select>
+            <Select
+              inputId="provinsi"
+              className="w-full"
+              isClearable={true}
+              isSearchable={true}
+              styles={styles}
+              placeholder="Pilih..."
+              menuPlacement="top"
+              options={mapOptions(provinces, { l: "name", v: "id" })}
+              value={findValue(
+                provinces,
+                {
+                  id: Number(form.alamat.id_provinsi),
+                },
+                { label: "name", value: "id" }
+              )}
+              onChange={(e) =>
+                cast<{ label: string; value: number }>(e, async ({ value }) => {
+                  setIsProcess(true);
+                  setForm({
+                    alamat: {
+                      ...form.alamat,
+                      id_provinsi: String(value),
+                      id_kabupaten: "",
+                      id_kecamatan: "",
+                      id_kelurahan: "",
+                    },
+                  });
+                  await getRegencies(value);
+                  setIsProcess(false);
+                })
+              }
+            />
           </div>
 
           <div className="flex flex-col">
             <label className="mb-1" htmlFor="kabupaten-kota">
               Kabupaten/Kota
             </label>
-            <select
-              id="kabupaten-kota"
-              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-              value={form.alamat.id_kabupaten}
-              onChange={async (e) => {
-                setIsProcess(true);
-                setForm({
-                  alamat: {
-                    ...form.alamat,
-                    id_kabupaten: e.currentTarget.value,
-                    id_kecamatan: "",
-                    id_kelurahan: "",
-                  },
-                });
-                await getDistricts(e.currentTarget.value);
-                setIsProcess(false);
-              }}
-            >
-              <option value="">Pilih</option>
-              {![form.alamat.id_provinsi].includes("") &&
-                regencies.map((i, k) => (
-                  <option key={k} value={i.id}>
-                    {i.name}
-                  </option>
-                ))}
-            </select>
+            <Select
+              inputId="kabupaten-kota"
+              className="w-full"
+              isClearable={true}
+              isSearchable={true}
+              styles={styles}
+              placeholder="Pilih..."
+              menuPlacement="top"
+              options={
+                [form.alamat.id_provinsi].includes("")
+                  ? []
+                  : mapOptions(regencies, { l: "name", v: "id" })
+              }
+              value={findValue(
+                regencies,
+                {
+                  id: Number(form.alamat.id_kabupaten),
+                },
+                { label: "name", value: "id" }
+              )}
+              onChange={(e) =>
+                cast<{ label: string; value: number }>(e, async ({ value }) => {
+                  setIsProcess(true);
+                  setForm({
+                    alamat: {
+                      ...form.alamat,
+                      id_kabupaten: String(value),
+                      id_kecamatan: "",
+                      id_kelurahan: "",
+                    },
+                  });
+                  await getDistricts(value);
+                  setIsProcess(false);
+                })
+              }
+            />
           </div>
 
           <div className="flex flex-col">
             <label className="mb-1" htmlFor="kecamatan">
               Kecamatan
             </label>
-            <select
-              id="kecamatan"
-              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-              value={form.alamat.id_kecamatan}
-              onChange={async (e) => {
-                setIsProcess(true);
-                setForm({
-                  alamat: {
-                    ...form.alamat,
-                    id_kecamatan: e.currentTarget.value,
-                    id_kelurahan: "",
-                  },
-                });
-                await getVillages(e.currentTarget.value);
-                setIsProcess(false);
-              }}
-            >
-              <option value="">Pilih</option>
-              {![form.alamat.id_provinsi, form.alamat.id_kabupaten].includes(
-                ""
-              ) &&
-                districts.map((i, k) => (
-                  <option key={k} value={i.id}>
-                    {i.name}
-                  </option>
-                ))}
-            </select>
+            <Select
+              inputId="kecamatan"
+              className="w-full"
+              isClearable={true}
+              isSearchable={true}
+              styles={styles}
+              placeholder="Pilih..."
+              menuPlacement="top"
+              options={
+                [form.alamat.id_provinsi, form.alamat.id_kabupaten].includes("")
+                  ? []
+                  : mapOptions(districts, { l: "name", v: "id" })
+              }
+              value={findValue(
+                districts,
+                {
+                  id: Number(form.alamat.id_kecamatan),
+                },
+                { label: "name", value: "id" }
+              )}
+              onChange={(e) =>
+                cast<{ label: string; value: number }>(e, async ({ value }) => {
+                  setIsProcess(true);
+                  setForm({
+                    alamat: {
+                      ...form.alamat,
+                      id_kecamatan: String(value),
+                      id_kelurahan: "",
+                    },
+                  });
+                  await getVillages(value);
+                  setIsProcess(false);
+                })
+              }
+            />
           </div>
 
           <div className="flex flex-col">
             <label className="mb-1" htmlFor="kelurahan">
               Kelurahan
             </label>
-            <select
-              id="kelurahan"
-              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-              value={form.alamat.id_kelurahan}
+            <Select
+              inputId="kelurahan"
+              className="w-full"
+              isClearable={true}
+              isSearchable={true}
+              styles={styles}
+              placeholder="Pilih..."
+              menuPlacement="top"
+              options={
+                [
+                  form.alamat.id_provinsi,
+                  form.alamat.id_kabupaten,
+                  form.alamat.id_kecamatan,
+                ].includes("")
+                  ? []
+                  : mapOptions(villages, { l: "name", v: "id" })
+              }
+              value={findValue(
+                villages,
+                {
+                  id: Number(form.alamat.id_kelurahan),
+                },
+                { label: "name", value: "id" }
+              )}
               onChange={(e) =>
-                setForm({
-                  alamat: {
-                    ...form.alamat,
-                    id_kelurahan: e.currentTarget.value,
-                  },
+                cast<{ label: string; value: number }>(e, ({ value }) => {
+                  setForm({
+                    alamat: {
+                      ...form.alamat,
+                      id_kelurahan: String(value),
+                    },
+                  });
                 })
               }
-            >
-              <option value="">Pilih</option>
-              {![
-                form.alamat.id_provinsi,
-                form.alamat.id_kabupaten,
-                form.alamat.id_kecamatan,
-              ].includes("") &&
-                villages.map((i, k) => (
-                  <option key={k} value={i.id}>
-                    {i.name}
-                  </option>
-                ))}
-            </select>
+            />
           </div>
         </div>
       </div>

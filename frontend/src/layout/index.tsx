@@ -123,7 +123,7 @@ const Layout: FC = () => {
         >
           <header
             className={clsx(
-              "fixed top-0 flex pt-4 px-4 backdrop-blur-md transition-all ease-in-out duration-150 text-sm",
+              "fixed top-0 flex pt-4 px-4 backdrop-blur-md transition-all ease-in-out duration-150 text-sm z-10",
               show ? "w-7/8" : "w-full"
             )}
           >
