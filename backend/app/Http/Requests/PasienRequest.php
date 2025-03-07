@@ -22,6 +22,7 @@ class PasienRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'norm' => 'nullable',
             'is_active' => 'boolean',
             'nama' => 'required|string|max:255',
             'no_bpjs' => 'nullable|string|max:255',

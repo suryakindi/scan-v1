@@ -14,6 +14,7 @@ class Pasien extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'norm',
         'is_active',
         'nama',
         'no_bpjs',
