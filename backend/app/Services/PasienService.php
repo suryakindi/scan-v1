@@ -19,6 +19,7 @@ class PasienService
         DB::beginTransaction();
     
         try {
+            return response()->json($pasienData);
             // 1. Simpan data pasien terlebih dahulu tanpa `id_alamat_pasien`
             $pasien = Pasien::create($pasienData);
     

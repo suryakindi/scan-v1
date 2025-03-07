@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->boolean('is_active')->default(true);
             $table->string('nama');
+            $table->string('norm')->unique();
             $table->string('no_bpjs')->nullable();
             $table->string('ihs_number')->nullable();
             $table->string('nik')->nullable()->unique();
