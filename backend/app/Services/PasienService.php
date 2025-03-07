@@ -17,27 +17,35 @@ class PasienService
     public function createPasien(array $pasienData, array $alamatData)
     {
         DB::beginTransaction();
-    
+
         try {
-            return response()->json($pasienData);
+            // Cek jika norm adalah "is_auto", maka generate otomatis
+            if ($pasienData['norm'] === "is_auto") {
+                $latestPasien = Pasien::latest()->first(); // Ambil pasien terakhir
+                $lastNorm = $latestPasien ? intval($latestPasien->norm) : 0; // Ambil nomor terakhir
+                $newNorm = str_pad($lastNorm + 1, 6, '0', STR_PAD_LEFT); // Format dengan 6 digit
+                $pasienData['norm'] = $newNorm;
+            }
+
             // 1. Simpan data pasien terlebih dahulu tanpa `id_alamat_pasien`
             $pasien = Pasien::create($pasienData);
-    
+
             // 2. Simpan data alamat dengan `id_pasien`
             $alamatData['id_pasien'] = $pasien->id; // Hubungkan alamat ke pasien
             $alamat = AlamatPasien::create($alamatData);
-    
+
             // 3. Update pasien dengan `id_alamat_pasien` yang baru saja dibuat
             $pasien->update(['id_alamat_pasien' => $alamat->id]);
-    
+
             DB::commit();
             return $pasien;
-    
+
         } catch (\Exception $e) {
             DB::rollback();
             throw new \Exception('Gagal membuat pasien dan alamat: ' . $e->getMessage());
         }
     }
+
 
     public function getPasien($cdfix)
     {
