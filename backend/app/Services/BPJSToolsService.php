@@ -101,7 +101,7 @@ class BPJSToolsService
         DB::beginTransaction();
         try {
             $bpjstools = BPJSTools::create([
-                'id_client' => $data['id_client'],
+                'id_client' => $id_client,
                 'cons_id'=>$data['cons_id'],
                 'secretkey'=>$data['secretkey'],
                 'provider_id'=>$data['provider_id'],

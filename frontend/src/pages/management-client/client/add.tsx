@@ -1,10 +1,10 @@
 import { FC, FormEventHandler, useEffect } from "react";
 import { useXState } from "../../../utils/api";
 import { useLokasi } from "../../../utils/lokasi";
-import Swal from "sweetalert2";
 import type { CreateClientPayload, CreateClientResponse } from "./types";
 import { useNavigate, useOutletContext } from "react-router";
 import { LayoutContext } from "../../../layout/types";
+import { Toast } from "../../../utils/alert";
 
 const ClientAdd: FC = () => {
   const navigate = useNavigate();
@@ -48,28 +48,20 @@ const ClientAdd: FC = () => {
         data: { id },
       } = await clientFn.submit();
 
-      Swal.fire({
-        timer: 1000,
-        showConfirmButton: false,
-        position: "top-right",
-        toast: true,
+      Toast.fire({
         icon: "success",
         title: "Berhasil",
-        text: "Berhasil mengubah data",
+        text: "Data berhasil disimpan",
       });
 
       clientFn.reset();
 
       navigate(`/management-client/details/${id}`, { replace: true });
     } catch {
-      Swal.fire({
-        timer: 1000,
-        showConfirmButton: false,
-        position: "top-right",
-        toast: true,
+      Toast.fire({
         icon: "error",
         title: "Gagal",
-        text: "Terjadi kesalahan",
+        text: "Data gagal disimpan",
       });
     } finally {
       setIsProcess(false);

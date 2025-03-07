@@ -1,13 +1,8 @@
-import { ComponentType, lazy, Suspense } from "react";
-import Fallback from "./Fallback";
+import { ComponentType, lazy } from "react";
 
 const LazyLoad = (load: () => Promise<{ default: ComponentType }>) => {
   const Component = lazy(load);
-  return (
-    <Suspense fallback={<Fallback />}>
-      <Component />
-    </Suspense>
-  );
+  return <Component />;
 };
 
 export default LazyLoad;

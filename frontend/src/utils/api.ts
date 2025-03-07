@@ -19,7 +19,10 @@ export type { ResponseT };
 export const api = axios.create({
   baseURL,
   timeout: 10000,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  },
 });
 
 /**

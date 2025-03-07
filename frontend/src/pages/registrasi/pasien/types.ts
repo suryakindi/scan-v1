@@ -7,7 +7,7 @@ import {
 } from "../../../utils/enums";
 
 interface BasePasienPayload {
-  is_active: boolean;
+  norm: string | "is_auto";
   nama: string;
   no_bpjs: string;
   nik: string;
