@@ -17,7 +17,7 @@ class PasienService
     public function createPasien(array $pasienData, array $alamatData)
     {
         DB::beginTransaction();
-
+        
         try {
             // Cek jika norm adalah "is_auto", maka generate otomatis
             if ($pasienData['norm'] === "is_auto") {
