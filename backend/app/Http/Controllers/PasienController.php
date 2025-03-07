@@ -32,6 +32,7 @@ class PasienController extends Controller
     
             // Validasi alamat manual di controller
             $validator = Validator::make($alamat ?? [], [
+                'norm'           => 'nullable',
                 'alamat'         => 'required|max:255',
                 'rt'             => 'required|max:5',
                 'rw'             => 'required|max:5',
