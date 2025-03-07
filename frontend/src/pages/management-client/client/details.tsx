@@ -1,20 +1,31 @@
-import { FC, FormEventHandler, useEffect } from "react";
+import { FC, FormEventHandler, useEffect, useState } from "react";
 import { Link, useLoaderData, useOutletContext, useParams } from "react-router";
 import { AxiosRequestConfig } from "axios";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import Swal from "sweetalert2";
 import * as HeroSolid from "@heroicons/react/24/solid";
 import * as HeroOutline from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { LoaderT } from "../../../user";
 import { useLokasi } from "../../../utils/lokasi";
 import { api, ResponseT, useXState } from "../../../utils/api";
+import Select from "react-select";
 import type {
+  BPJSPCarePayload,
+  BPJSPCareTool,
+  BPJSPCareToolServiceName,
   ClientT,
   UpdateClientPayload,
   UpdateClientResponse,
 } from "./types";
 import { LayoutContext } from "../../../layout/types";
+import { Toast } from "../../../utils/alert";
+import {
+  cast,
+  findValue,
+  mapOptions,
+  styles,
+} from "../../../utils/react-select";
+import { BaseURLT } from "../base-url/types";
 
 const Details: FC = () => {
   const param = useParams();
@@ -29,32 +40,8 @@ const Details: FC = () => {
     { getProvinces, getRegencies, getDistricts, getVillages },
   ] = useLokasi();
 
-  const [clientForm, setClientForm, clientFn] = useXState<
-    UpdateClientPayload,
-    UpdateClientResponse
-  >(
-    {
-      nama_client: "",
-      notelp: "",
-      email: "",
-      website: "",
-      alamat: "",
-      kelurahan_id: "",
-      kecamatan_id: "",
-      kabupaten_id: "",
-      provinsi_id: "",
-      koordinat1: "",
-      koordinat2: "",
-    },
-    {
-      method: "PUT",
-      url: `/management/update-client/${param.id}`,
-    }
-  );
-
   const getClientById = async (id: string | number) => {
     try {
-      setIsProcess(true);
       const response = await api.get<ResponseT<ClientT>>(
         `/management/get-client/id/${id}`,
         requestConfig
@@ -82,39 +69,6 @@ const Details: FC = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsProcess(false);
-    }
-  };
-
-  const handleSaveClientSubmit: FormEventHandler<HTMLFormElement> = async (
-    e
-  ) => {
-    e.preventDefault();
-    try {
-      setIsProcess(true);
-      await clientFn.submit();
-      Swal.fire({
-        timer: 1000,
-        showConfirmButton: false,
-        position: "top-right",
-        toast: true,
-        icon: "success",
-        title: "Berhasil",
-        text: "Berhasil mengubah data",
-      });
-    } catch {
-      Swal.fire({
-        timer: 1000,
-        showConfirmButton: false,
-        position: "top-right",
-        toast: true,
-        icon: "error",
-        title: "Gagal",
-        text: "Terjadi kesalahan",
-      });
-    } finally {
-      setIsProcess(false);
     }
   };
 
@@ -124,6 +78,145 @@ const Details: FC = () => {
         getClientById(param.id ?? "");
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [clientForm, setClientForm, clientFn] = useXState<
+    UpdateClientPayload,
+    UpdateClientResponse
+  >(
+    {
+      nama_client: "",
+      notelp: "",
+      email: "",
+      website: "",
+      alamat: "",
+      kelurahan_id: "",
+      kecamatan_id: "",
+      kabupaten_id: "",
+      provinsi_id: "",
+      koordinat1: "",
+      koordinat2: "",
+    },
+    {
+      method: "PUT",
+      url: `/management/update-client/${param.id}`,
+    }
+  );
+
+  const handleSaveClientSubmit: FormEventHandler<HTMLFormElement> = async (
+    e
+  ) => {
+    e.preventDefault();
+    try {
+      setIsProcess(true);
+      await clientFn.submit();
+      Toast.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Data berhasil disimpan",
+      });
+    } catch {
+      Toast.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Data gagal disimpan",
+      });
+    } finally {
+      setIsProcess(false);
+    }
+  };
+
+  const [dataUrls, setDataUrls] = useState<BaseURLT[]>([]);
+  const getDataUrls = async () => {
+    try {
+      const response = await api.get<ResponseT<BaseURLT[]>>(
+        "/integerasi-sistem/get-base-url"
+      );
+      if (response.data.data) {
+        setDataUrls(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const [BPJSPCareForm, setBPJSPCareForm, BPJSPCareFormFn] =
+    useXState<BPJSPCarePayload>(
+      {
+        id_base_url: null as unknown as BPJSPCarePayload["id_base_url"],
+        cons_id: "",
+        secretkey: "",
+        provider_id: "",
+        service_name: "pcare-rest",
+        userkey: "",
+        username: "",
+        password: "",
+      },
+      {
+        method: "POST",
+        url: `/integerasi-sistem/create-bpjs-tools/${param.id}`,
+      }
+    );
+
+  const getBPJSPCareById = async () => {
+    try {
+      const response = await api.get<
+        ResponseT<{
+          bpjs_tools: BPJSPCareTool;
+          service_name: BPJSPCareToolServiceName[];
+        }>
+      >(`/integerasi-sistem/get-bpjs-tools/${param.id}`);
+
+      if (response.data.data) {
+        setBPJSPCareForm({
+          id_base_url: response.data.data.bpjs_tools.id,
+          cons_id: response.data.data.bpjs_tools.cons_id,
+          secretkey: response.data.data.bpjs_tools.secretkey,
+          provider_id: response.data.data.bpjs_tools.provider_id,
+          service_name: response.data.data.service_name[0]?.service_name,
+          userkey: response.data.data.service_name[0]?.userkey,
+          username: response.data.data.service_name[0]?.username,
+          password: response.data.data.service_name[0]?.password,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveSetting: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    try {
+      setIsProcess(true);
+      const response = await BPJSPCareFormFn.submit();
+      console.log(response);
+
+      Toast.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Data berhasil disimpan",
+      });
+    } catch {
+      Toast.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Data gagal disimpan",
+      });
+    } finally {
+      setIsProcess(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      (async () => {
+        setIsProcess(true);
+        await getBPJSPCareById();
+        await getDataUrls();
+        setIsProcess(false);
+      })();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -261,111 +354,173 @@ const Details: FC = () => {
                         <label className="mb-1" htmlFor="provinsi_id">
                           Provinsi
                         </label>
-                        <select
-                          id="provinsi_id"
-                          className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-                          value={clientForm.provinsi_id}
-                          onChange={(e) => {
-                            setClientForm({
-                              provinsi_id: e.currentTarget.value,
-                              kabupaten_id: "",
-                              kecamatan_id: "",
-                              kelurahan_id: "",
-                            });
-                            getRegencies(e.currentTarget.value);
-                          }}
-                        >
-                          <option value="">Pilih</option>
-                          {provinces.map((province, key) => (
-                            <option key={key} value={province.id}>
-                              {province.name}
-                            </option>
-                          ))}
-                        </select>
+                        <Select
+                          inputId="provinsi"
+                          className="w-full"
+                          isClearable={true}
+                          isSearchable={true}
+                          styles={styles}
+                          placeholder="Pilih..."
+                          menuPlacement="top"
+                          required={true}
+                          options={mapOptions(provinces, {
+                            l: "name",
+                            v: "id",
+                          })}
+                          value={findValue(
+                            provinces,
+                            {
+                              id: Number(clientForm.provinsi_id),
+                            },
+                            { label: "name", value: "id" }
+                          )}
+                          onChange={(e) =>
+                            cast<{ label: string; value: number }>(
+                              e,
+                              async ({ value }) => {
+                                setIsProcess(true);
+                                setClientForm({
+                                  provinsi_id: String(value),
+                                  kabupaten_id: "",
+                                  kecamatan_id: "",
+                                  kelurahan_id: "",
+                                });
+                                await getRegencies(value);
+                                setIsProcess(false);
+                              }
+                            )
+                          }
+                        />
                       </div>
 
                       <div className="flex flex-col">
                         <label className="mb-1" htmlFor="kabupaten_id">
                           Kab/Kota
                         </label>
-                        <select
-                          id="kabupaten_id"
-                          className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-                          value={clientForm.kabupaten_id}
-                          onChange={(e) => {
-                            setClientForm({
-                              kabupaten_id: e.currentTarget.value,
-                              kecamatan_id: "",
-                              kelurahan_id: "",
-                            });
-                            getDistricts(e.currentTarget.value);
-                          }}
-                        >
-                          <option value="">Pilih</option>
-                          {![clientForm.provinsi_id].includes("") &&
-                            regencies.map((regency, key) => (
-                              <option key={key} value={regency.id}>
-                                {regency.name}
-                              </option>
-                            ))}
-                        </select>
+                        <Select
+                          inputId="kabupaten_id"
+                          className="w-full"
+                          isClearable={true}
+                          isSearchable={true}
+                          styles={styles}
+                          placeholder="Pilih..."
+                          menuPlacement="top"
+                          required={true}
+                          options={
+                            [clientForm.provinsi_id].includes("")
+                              ? []
+                              : mapOptions(regencies, { l: "name", v: "id" })
+                          }
+                          value={findValue(
+                            regencies,
+                            {
+                              id: Number(clientForm.kabupaten_id),
+                            },
+                            { label: "name", value: "id" }
+                          )}
+                          onChange={(e) =>
+                            cast<{ label: string; value: number }>(
+                              e,
+                              async ({ value }) => {
+                                setIsProcess(true);
+                                setClientForm({
+                                  kabupaten_id: String(value),
+                                  kecamatan_id: "",
+                                  kelurahan_id: "",
+                                });
+                                await getDistricts(value);
+                                setIsProcess(false);
+                              }
+                            )
+                          }
+                        />
                       </div>
 
                       <div className="flex flex-col">
                         <label className="mb-1" htmlFor="kecamatan_id">
                           Kecamatan
                         </label>
-                        <select
-                          id="kecamatan_id"
-                          className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-                          value={clientForm.kecamatan_id}
-                          onChange={(e) => {
-                            setClientForm({
-                              kecamatan_id: e.currentTarget.value,
-                              kelurahan_id: "",
-                            });
-                            getVillages(e.currentTarget.value);
-                          }}
-                        >
-                          <option value="">Pilih</option>
-                          {![
-                            clientForm.provinsi_id,
-                            clientForm.kabupaten_id,
-                          ].includes("") &&
-                            districts.map((district, key) => (
-                              <option key={key} value={district.id}>
-                                {district.name}
-                              </option>
-                            ))}
-                        </select>
+                        <Select
+                          inputId="kecamatan_id"
+                          className="w-full"
+                          isClearable={true}
+                          isSearchable={true}
+                          styles={styles}
+                          placeholder="Pilih..."
+                          menuPlacement="top"
+                          required={true}
+                          options={
+                            [
+                              clientForm.provinsi_id,
+                              clientForm.kabupaten_id,
+                            ].includes("")
+                              ? []
+                              : mapOptions(districts, { l: "name", v: "id" })
+                          }
+                          value={findValue(
+                            districts,
+                            {
+                              id: Number(clientForm.kecamatan_id),
+                            },
+                            { label: "name", value: "id" }
+                          )}
+                          onChange={(e) =>
+                            cast<{ label: string; value: number }>(
+                              e,
+                              async ({ value }) => {
+                                setIsProcess(true);
+                                setClientForm({
+                                  kecamatan_id: String(value),
+                                  kelurahan_id: "",
+                                });
+                                await getVillages(value);
+                                setIsProcess(false);
+                              }
+                            )
+                          }
+                        />
                       </div>
 
                       <div className="flex flex-col">
                         <label className="mb-1" htmlFor="kelurahan_id">
                           Kelurahan
                         </label>
-                        <select
-                          id="kelurahan_id"
-                          className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-                          value={clientForm.kelurahan_id}
-                          onChange={(e) =>
-                            setClientForm({
-                              kelurahan_id: e.currentTarget.value,
-                            })
+                        <Select
+                          inputId="kelurahan_id"
+                          className="w-full"
+                          isClearable={true}
+                          isSearchable={true}
+                          styles={styles}
+                          placeholder="Pilih..."
+                          menuPlacement="top"
+                          required={true}
+                          options={
+                            [
+                              clientForm.provinsi_id,
+                              clientForm.kabupaten_id,
+                              clientForm.kecamatan_id,
+                            ].includes("")
+                              ? []
+                              : mapOptions(villages, { l: "name", v: "id" })
                           }
-                        >
-                          <option value="">Pilih</option>
-                          {![
-                            clientForm.provinsi_id,
-                            clientForm.kabupaten_id,
-                            clientForm.kecamatan_id,
-                          ].includes("") &&
-                            villages.map((village, key) => (
-                              <option key={key} value={village.id}>
-                                {village.name}
-                              </option>
-                            ))}
-                        </select>
+                          value={findValue(
+                            villages,
+                            {
+                              id: Number(clientForm.kelurahan_id),
+                            },
+                            { label: "name", value: "id" }
+                          )}
+                          onChange={(e) =>
+                            cast<{ label: string; value: number }>(
+                              e,
+                              ({ value }) => {
+                                setClientForm({
+                                  kelurahan_id: String(value),
+                                });
+                              }
+                            )
+                          }
+                        />
                       </div>
 
                       <div className="flex flex-col">
@@ -477,7 +632,7 @@ const Details: FC = () => {
               <TabPanel>
                 <form
                   autoComplete="off"
-                  onSubmit={() => {}}
+                  onSubmit={handleSaveSetting}
                   className="grid grid-cols-1 gap-6 auto-rows-min"
                 >
                   <div className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-4 auto-rows-min">
@@ -577,27 +732,35 @@ const Details: FC = () => {
                     <div className="grid grid-cols-2 gap-4 auto-rows-min">
                       <div className="grid grid-cols-1 gap-4 auto-rows-min">
                         <div className="flex flex-col">
-                          <label
-                            className="mb-1"
-                            htmlFor="bpjs-pcare-kode-aplikasi"
-                          >
-                            Kode Aplikasi
-                          </label>
-                          <input
-                            type="text"
-                            id="bpjs-pcare-kode-aplikasi"
-                            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-                          />
-                        </div>
-
-                        <div className="flex flex-col">
                           <label className="mb-1" htmlFor="bpjs-pcare-base-url">
                             Base URL
                           </label>
-                          <input
-                            type="text"
-                            id="bpjs-pcare-base-url"
-                            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                          <Select
+                            inputId="bpjs-pcare-base-url"
+                            className="w-full"
+                            isClearable={true}
+                            isSearchable={true}
+                            styles={styles}
+                            placeholder="Pilih..."
+                            menuPlacement="bottom"
+                            required={true}
+                            options={mapOptions(dataUrls, {
+                              l: "base_url",
+                              v: "id",
+                            })}
+                            value={findValue(
+                              dataUrls,
+                              { id: BPJSPCareForm.id_base_url },
+                              { label: "base_url", value: "id" }
+                            )}
+                            onChange={(e) =>
+                              cast<{ label: string; value: number }>(
+                                e,
+                                ({ value }) => {
+                                  setBPJSPCareForm({ id_base_url: value });
+                                }
+                              )
+                            }
                           />
                         </div>
 
@@ -611,7 +774,12 @@ const Details: FC = () => {
                           <input
                             type="text"
                             id="bpjs-pcare-service-name"
-                            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            className={clsx(
+                              "border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
+                              "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300"
+                            )}
+                            disabled={true}
+                            value={BPJSPCareForm.service_name}
                           />
                         </div>
 
@@ -626,6 +794,12 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-pcare-provider-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSPCareForm.provider_id}
+                            onChange={(e) =>
+                              setBPJSPCareForm({
+                                provider_id: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -638,6 +812,13 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-pcare-cons-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            required={true}
+                            value={BPJSPCareForm.cons_id}
+                            onChange={(e) =>
+                              setBPJSPCareForm({
+                                cons_id: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
 
@@ -652,6 +833,13 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-pcare-secret-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            required={true}
+                            value={BPJSPCareForm.secretkey}
+                            onChange={(e) =>
+                              setBPJSPCareForm({
+                                secretkey: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
 
@@ -663,6 +851,13 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-pcare-user-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            required={true}
+                            value={BPJSPCareForm.userkey}
+                            onChange={(e) =>
+                              setBPJSPCareForm({
+                                userkey: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
 
@@ -674,6 +869,13 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-pcare-username"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            required={true}
+                            value={BPJSPCareForm.username}
+                            onChange={(e) =>
+                              setBPJSPCareForm({
+                                username: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
 
@@ -685,6 +887,13 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-pcare-password"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            required={true}
+                            value={BPJSPCareForm.password}
+                            onChange={(e) =>
+                              setBPJSPCareForm({
+                                password: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
                       </div>

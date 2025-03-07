@@ -22,7 +22,7 @@ class BPJSRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_client'   => 'required|exists:management_clients,id', 
+            'id_client'   => 'exists:management_clients,id', 
             'id_base_url' => 'required',
             'service_name' => 'required', 
             'userkey'     => 'required', 

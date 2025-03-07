@@ -54,10 +54,43 @@ type UpdateClientResponse = ResponseT<
   }
 >;
 
+type BPJSPCarePayload = {
+  id_base_url: number;
+  cons_id: string;
+  secretkey: string;
+  provider_id: string;
+  service_name: string;
+  userkey: string;
+  username: string;
+  password: string;
+};
+
+type BPJSPCareTool = {
+  id: 1;
+  id_client: 3;
+  cons_id: string;
+  secretkey: string;
+  provider_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type BPJSPCareToolServiceName = {
+  service_name: string;
+  userkey: string;
+  username: string;
+  password: string;
+  base_url: string;
+  kdAplikasi: string;
+};
+
 export type {
   ClientT,
   CreateClientPayload,
   CreateClientResponse,
   UpdateClientPayload,
   UpdateClientResponse,
+  BPJSPCarePayload,
+  BPJSPCareTool,
+  BPJSPCareToolServiceName,
 };

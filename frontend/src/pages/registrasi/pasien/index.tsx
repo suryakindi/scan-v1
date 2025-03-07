@@ -9,7 +9,7 @@ import {
   Pendidikan,
   Perkawinan,
 } from "../../../utils/enums";
-import { useOutletContext } from "react-router";
+import { useLoaderData, useOutletContext } from "react-router";
 import { LayoutContext } from "../../../layout/types";
 import Select from "react-select";
 import {
@@ -18,15 +18,20 @@ import {
   mapOptions,
   styles,
 } from "../../../utils/react-select";
+import clsx from "clsx";
+import { Toast } from "../../../utils/alert";
+import { LoaderT } from "../../../user";
 
 const Pasien: FC = () => {
   const { setIsProcess } = useOutletContext<LayoutContext>();
+  const { user } = useLoaderData<LoaderT>();
 
   const [form, setForm, formFn] = useXState<
     CreatePasienPayload,
     Record<string, string>
   >(
     {
+      norm: "is_auto",
       is_active: true,
       nama: "",
       no_bpjs: "",
@@ -42,7 +47,7 @@ const Pasien: FC = () => {
       status_perkawinan: "" as Perkawinan,
       nama_pasangan: "",
       golongan_darah: "" as GolonganDarah,
-      cdfix: "1",
+      cdfix: String(user.cdfix),
       alamat: {
         alamat: "",
         rt: "",
@@ -51,7 +56,7 @@ const Pasien: FC = () => {
         id_kecamatan: "",
         id_kabupaten: "",
         id_provinsi: "",
-        cdfix: "1",
+        cdfix: String(user.cdfix),
       },
     },
     { url: "/pasien/register-pasien", method: "POST" }
@@ -83,9 +88,20 @@ const Pasien: FC = () => {
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
-      formFn.submit();
+      await formFn.submit();
+      Toast.fire({
+        icon: "success",
+        title: "Berhasil !",
+        text: "Data pasien berhasil disimpan",
+      });
+      formFn.reset();
     } catch (error) {
       console.error(error);
+      Toast.fire({
+        icon: "error",
+        title: "Gagal !",
+        text: "Terjadi kesalahan saat menyimpan data pasien",
+      });
     }
   };
 
@@ -104,11 +120,33 @@ const Pasien: FC = () => {
             <label className="mb-1" htmlFor="no-medical-record">
               No Medical Record
             </label>
-            <input
-              type="text"
-              id="no-medical-record"
-              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-            />
+            <div className="flex items-center gap-4">
+              <input
+                type="text"
+                id="no-medical-record"
+                className={clsx(
+                  "border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 flex-1",
+                  "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300"
+                )}
+                disabled={form.norm === "is_auto"}
+                value={form.norm === "is_auto" ? "" : form.norm}
+                onChange={(e) => setForm({ norm: e.currentTarget.value })}
+              />
+              <button
+                type="button"
+                className={clsx(
+                  "px-4 py-2 cursor-pointer rounded-sm",
+                  form.norm === "is_auto"
+                    ? "bg-blue-600 hover:bg-blue-500 text-white"
+                    : "bg-gray-300 hover:bg-gray-300/80 text-gray-800"
+                )}
+                onClick={() =>
+                  setForm({ norm: form.norm === "is_auto" ? "" : "is_auto" })
+                }
+              >
+                Auto
+              </button>
+            </div>
           </div>
         </div>
         <div className="bg-white shadow-lg p-6 rounded-md grid gap-4 auto-rows-min">
@@ -138,6 +176,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.nama}
             onChange={(e) => setForm({ nama: e.currentTarget.value })}
+            required={true}
           />
         </div>
 
@@ -151,6 +190,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.nik}
             onChange={(e) => setForm({ nik: e.currentTarget.value })}
+            required={true}
           />
         </div>
 
@@ -164,6 +204,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.tempatlahir}
             onChange={(e) => setForm({ tempatlahir: e.currentTarget.value })}
+            required={true}
           />
         </div>
 
@@ -177,6 +218,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.tanggal_lahir}
             onChange={(e) => setForm({ tanggal_lahir: e.currentTarget.value })}
+            required={true}
           />
         </div>
 
@@ -192,6 +234,7 @@ const Pasien: FC = () => {
             styles={styles}
             placeholder="Pilih..."
             menuPlacement="bottom"
+            required={true}
             options={agama}
             value={findValue(agama, { value: form.agama }, { label: "value" })}
             onChange={(e) =>
@@ -214,6 +257,7 @@ const Pasien: FC = () => {
             styles={styles}
             placeholder="Pilih..."
             menuPlacement="bottom"
+            required={true}
             options={pendidikan}
             value={findValue(
               pendidikan,
@@ -240,6 +284,7 @@ const Pasien: FC = () => {
             styles={styles}
             placeholder="Pilih..."
             menuPlacement="bottom"
+            required={true}
             options={pekerjaan}
             value={findValue(
               pekerjaan,
@@ -264,6 +309,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.notelp}
             onChange={(e) => setForm({ notelp: e.currentTarget.value })}
+            required={false}
           />
         </div>
 
@@ -277,6 +323,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.nama_bapak}
             onChange={(e) => setForm({ nama_bapak: e.currentTarget.value })}
+            required={true}
           />
         </div>
 
@@ -290,6 +337,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.nama_ibu}
             onChange={(e) => setForm({ nama_ibu: e.currentTarget.value })}
+            required={true}
           />
         </div>
 
@@ -305,6 +353,7 @@ const Pasien: FC = () => {
             styles={styles}
             placeholder="Pilih..."
             menuPlacement="bottom"
+            required={true}
             options={perkawinan}
             value={findValue(
               perkawinan,
@@ -329,6 +378,7 @@ const Pasien: FC = () => {
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
             value={form.nama_pasangan}
             onChange={(e) => setForm({ nama_pasangan: e.currentTarget.value })}
+            required={false}
           />
         </div>
 
@@ -344,6 +394,7 @@ const Pasien: FC = () => {
             styles={styles}
             placeholder="Pilih..."
             menuPlacement="bottom"
+            required={true}
             options={golonganDarah}
             value={findValue(
               golonganDarah,
@@ -369,6 +420,7 @@ const Pasien: FC = () => {
               type="text"
               id="alamat-ktp"
               className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+              required={true}
               value={form.alamat.alamat}
               onChange={(e) =>
                 setForm({
@@ -384,6 +436,7 @@ const Pasien: FC = () => {
               <input
                 type="text"
                 className="py-1.5 px-2 outline-none border-none flex-1"
+                required={true}
                 value={form.alamat.rt}
                 onChange={(e) =>
                   setForm({
@@ -395,6 +448,7 @@ const Pasien: FC = () => {
               <input
                 type="text"
                 className="py-1.5 px-2 outline-none border-none flex-1"
+                required={true}
                 value={form.alamat.rw}
                 onChange={(e) =>
                   setForm({
@@ -419,6 +473,7 @@ const Pasien: FC = () => {
               styles={styles}
               placeholder="Pilih..."
               menuPlacement="top"
+              required={true}
               options={mapOptions(provinces, { l: "name", v: "id" })}
               value={findValue(
                 provinces,
@@ -458,6 +513,7 @@ const Pasien: FC = () => {
               styles={styles}
               placeholder="Pilih..."
               menuPlacement="top"
+              required={true}
               options={
                 [form.alamat.id_provinsi].includes("")
                   ? []
@@ -500,6 +556,7 @@ const Pasien: FC = () => {
               styles={styles}
               placeholder="Pilih..."
               menuPlacement="top"
+              required={true}
               options={
                 [form.alamat.id_provinsi, form.alamat.id_kabupaten].includes("")
                   ? []
@@ -541,6 +598,7 @@ const Pasien: FC = () => {
               styles={styles}
               placeholder="Pilih..."
               menuPlacement="top"
+              required={true}
               options={
                 [
                   form.alamat.id_provinsi,
