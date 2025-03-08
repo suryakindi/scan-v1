@@ -31,6 +31,7 @@ const Details: FC = () => {
   const param = useParams();
   const { token } = useLoaderData<LoaderT>();
   const { setIsProcess } = useOutletContext<LayoutContext>();
+  const [Online, setOnline] = useState(false);
   const requestConfig: AxiosRequestConfig = {
     headers: { Authorization: `Bearer ${token}` },
   };
@@ -140,6 +141,22 @@ const Details: FC = () => {
       console.error(error);
     }
   };
+  const ConnectionBPJSGetDokter = async () => {
+    try {
+      const response = await api.get(
+        `/integerasi-sistem/get-dokter-bpjs/id_client/${param.id}?start=1&end=100`
+      );
+      if (response.data.data) {
+        setOnline(true);
+        console.log('sukses konek bpjs');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+
+  
 
   const [BPJSPCareForm, setBPJSPCareForm, BPJSPCareFormFn] =
     useXState<BPJSPCarePayload>(
@@ -214,6 +231,7 @@ const Details: FC = () => {
         setIsProcess(true);
         await getBPJSPCareById();
         await getDataUrls();
+        await ConnectionBPJSGetDokter();
         setIsProcess(false);
       })();
     };
@@ -646,9 +664,7 @@ const Details: FC = () => {
                           <HeroOutline.EyeSlashIcon className="size-5" />
                         </button>
                       </div>
-                      <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
-                        Online
-                      </span>
+                     
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 auto-rows-min">
@@ -724,9 +740,16 @@ const Details: FC = () => {
                           <HeroOutline.EyeSlashIcon className="size-5" />
                         </button>
                       </div>
-                      <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
-                        Online
-                      </span>
+                      {Online ? (
+                        <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
+                          Online
+                        </span>
+                      ) : (
+                        <span className="text-sm bg-red-500 text-white px-4 py-1 rounded-sm">
+                          Offline
+                        </span>
+                      )}
+
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 auto-rows-min">
