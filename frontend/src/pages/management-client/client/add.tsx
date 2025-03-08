@@ -56,7 +56,7 @@ const ClientAdd: FC = () => {
 
       clientFn.reset();
 
-      navigate(`/management-client/details/${id}`, { replace: true });
+      navigate(`/management-client/client/details/${id}`, { replace: true });
     } catch {
       Toast.fire({
         icon: "error",
