@@ -84,6 +84,15 @@ type BPJSPCareToolServiceName = {
   kdAplikasi: string;
 };
 
+type SatuSehatPayload = {
+  kode_fayankes: string;
+  organization_id: string;
+  client_key: string;
+  secret_key: string;
+  id_base_url: number;
+  cdfix: string;
+};
+
 export type {
   ClientT,
   CreateClientPayload,
@@ -93,4 +102,5 @@ export type {
   BPJSPCarePayload,
   BPJSPCareTool,
   BPJSPCareToolServiceName,
+  SatuSehatPayload,
 };
