@@ -14,6 +14,7 @@ import type {
   BPJSPCareTool,
   BPJSPCareToolServiceName,
   ClientT,
+  SatuSehatPayload,
   UpdateClientPayload,
   UpdateClientResponse,
 } from "./types";
@@ -27,11 +28,20 @@ import {
 } from "../../../utils/react-select";
 import { BaseURLT } from "../base-url/types";
 
+type ClientSettings = Record<
+  "satuSehat" | "BPJSPCare" | "BPJSAntrol",
+  { online: boolean; showKey: boolean }
+>;
+
 const Details: FC = () => {
   const param = useParams();
-  const { token } = useLoaderData<LoaderT>();
+  const { token, user } = useLoaderData<LoaderT>();
   const { setIsProcess } = useOutletContext<LayoutContext>();
-  const [Online, setOnline] = useState(false);
+  const [settings, setSettings] = useState<ClientSettings>({
+    satuSehat: { online: false, showKey: false },
+    BPJSPCare: { online: false, showKey: false },
+    BPJSAntrol: { online: false, showKey: false },
+  });
   const requestConfig: AxiosRequestConfig = {
     headers: { Authorization: `Bearer ${token}` },
   };
@@ -141,22 +151,45 @@ const Details: FC = () => {
       console.error(error);
     }
   };
+
   const ConnectionBPJSGetDokter = async () => {
     try {
       const response = await api.get(
         `/integerasi-sistem/get-dokter-bpjs/id_client/${param.id}?start=1&end=100`
       );
       if (response.data.data) {
-        setOnline(true);
-        console.log('sukses konek bpjs');
+        setSettings((prev) => ({
+          ...prev,
+          BPJSPCare: { ...prev.BPJSPCare, online: true },
+        }));
+        console.log("sukses konek bpjs");
       }
     } catch (error) {
       console.error(error);
     }
   };
-  
 
-  
+  const [satuSehatForm, setSatuSehatForm, satuSehatFormFn] =
+    useXState<SatuSehatPayload>(
+      {
+        kode_fayankes: "",
+        organization_id: "",
+        client_key: "",
+        secret_key: "",
+        id_base_url: null as unknown as SatuSehatPayload["id_base_url"],
+        cdfix: String(user.cdfix),
+      },
+      { url: "/integerasi-sistem/create-satu-sehat", method: "POST" }
+    );
+
+  const getSatuSehat = async () => {
+    try {
+      const response = await api.get<ResponseT>("");
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const [BPJSPCareForm, setBPJSPCareForm, BPJSPCareFormFn] =
     useXState<BPJSPCarePayload>(
@@ -206,8 +239,9 @@ const Details: FC = () => {
     e.preventDefault();
     try {
       setIsProcess(true);
-      const response = await BPJSPCareFormFn.submit();
-      console.log(response);
+      const res_satuSehat = await satuSehatFormFn.submit();
+      const res_BPJSPCare = await BPJSPCareFormFn.submit();
+      console.log(res_satuSehat, res_BPJSPCare);
 
       Toast.fire({
         icon: "success",
@@ -229,6 +263,7 @@ const Details: FC = () => {
     return () => {
       (async () => {
         setIsProcess(true);
+        await getSatuSehat();
         await getBPJSPCareById();
         await getDataUrls();
         await ConnectionBPJSGetDokter();
@@ -659,16 +694,70 @@ const Details: FC = () => {
                         <span className="font-medium text-lg">SatuSehat</span>
                         <button
                           type="button"
-                          className="hover:bg-slate-200 rounded-full p-1 ml-2"
+                          className="hover:bg-slate-200 rounded-full p-1 ml-2 cursor-pointer"
+                          onClick={() =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              satuSehat: {
+                                ...prev.satuSehat,
+                                showKey: !prev.satuSehat.showKey,
+                              },
+                            }))
+                          }
                         >
-                          <HeroOutline.EyeSlashIcon className="size-5" />
+                          {settings.satuSehat.showKey ? (
+                            <HeroOutline.EyeIcon className="size-5" />
+                          ) : (
+                            <HeroOutline.EyeSlashIcon className="size-5" />
+                          )}
                         </button>
                       </div>
-                     
+                      {settings.satuSehat.online ? (
+                        <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
+                          Online
+                        </span>
+                      ) : (
+                        <span className="text-sm bg-red-500 text-white px-4 py-1 rounded-sm">
+                          Offline
+                        </span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 auto-rows-min">
                       <div className="grid grid-cols-1 gap-4 auto-rows-min">
+                        <div className="flex flex-col">
+                          <label className="mb-1" htmlFor="satusehat-base-url">
+                            Base URL
+                          </label>
+                          <Select
+                            inputId="satusehat-base-url"
+                            className="w-full"
+                            isClearable={true}
+                            isSearchable={true}
+                            styles={styles}
+                            placeholder="Pilih..."
+                            menuPlacement="bottom"
+                            required={true}
+                            options={mapOptions(dataUrls, {
+                              l: "base_url",
+                              v: "id",
+                            })}
+                            value={findValue(
+                              dataUrls,
+                              { id: satuSehatForm.id_base_url },
+                              { label: "base_url", value: "id" }
+                            )}
+                            onChange={(e) =>
+                              cast<{ label: string; value: number }>(
+                                e,
+                                ({ value }) => {
+                                  setSatuSehatForm({ id_base_url: value });
+                                }
+                              )
+                            }
+                          />
+                        </div>
+
                         <div className="flex flex-col">
                           <label
                             className="mb-1"
@@ -680,6 +769,12 @@ const Details: FC = () => {
                             type="text"
                             id="satusehat-kode-fasyankes"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={satuSehatForm.kode_fayankes}
+                            onChange={(e) =>
+                              setSatuSehatForm({
+                                kode_fayankes: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
 
@@ -694,6 +789,12 @@ const Details: FC = () => {
                             type="text"
                             id="satusehat-organization-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={satuSehatForm.organization_id}
+                            onChange={(e) =>
+                              setSatuSehatForm({
+                                organization_id: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -706,9 +807,17 @@ const Details: FC = () => {
                             Client Key
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.satuSehat.showKey ? "text" : "password"
+                            }
                             id="satusehat-client-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={satuSehatForm.client_key}
+                            onChange={(e) =>
+                              setSatuSehatForm({
+                                client_key: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
 
@@ -720,9 +829,17 @@ const Details: FC = () => {
                             Secret Key
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.satuSehat.showKey ? "text" : "password"
+                            }
                             id="satusehat-secret-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={satuSehatForm.secret_key}
+                            onChange={(e) =>
+                              setSatuSehatForm({
+                                secret_key: e.currentTarget.value,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -735,12 +852,25 @@ const Details: FC = () => {
                         <span className="font-medium text-lg">BPJS Pcare</span>
                         <button
                           type="button"
-                          className="hover:bg-slate-200 rounded-full p-1 ml-2"
+                          className="hover:bg-slate-200 rounded-full p-1 ml-2 cursor-pointer"
+                          onClick={() =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              BPJSPCare: {
+                                ...prev.BPJSPCare,
+                                showKey: !prev.BPJSPCare.showKey,
+                              },
+                            }))
+                          }
                         >
-                          <HeroOutline.EyeSlashIcon className="size-5" />
+                          {settings.BPJSPCare.showKey ? (
+                            <HeroOutline.EyeIcon className="size-5" />
+                          ) : (
+                            <HeroOutline.EyeSlashIcon className="size-5" />
+                          )}
                         </button>
                       </div>
-                      {Online ? (
+                      {settings.BPJSPCare.online ? (
                         <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
                           Online
                         </span>
@@ -749,7 +879,6 @@ const Details: FC = () => {
                           Offline
                         </span>
                       )}
-
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 auto-rows-min">
@@ -832,7 +961,9 @@ const Details: FC = () => {
                             Cons ID
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSPCare.showKey ? "text" : "password"
+                            }
                             id="bpjs-pcare-cons-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                             required={true}
@@ -853,7 +984,9 @@ const Details: FC = () => {
                             Secret Key
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSPCare.showKey ? "text" : "password"
+                            }
                             id="bpjs-pcare-secret-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                             required={true}
@@ -871,7 +1004,9 @@ const Details: FC = () => {
                             User Key
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSPCare.showKey ? "text" : "password"
+                            }
                             id="bpjs-pcare-user-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                             required={true}
@@ -889,7 +1024,9 @@ const Details: FC = () => {
                             Username
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSPCare.showKey ? "text" : "password"
+                            }
                             id="bpjs-pcare-username"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                             required={true}
@@ -907,7 +1044,9 @@ const Details: FC = () => {
                             Password
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSPCare.showKey ? "text" : "password"
+                            }
                             id="bpjs-pcare-password"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                             required={true}
@@ -929,14 +1068,33 @@ const Details: FC = () => {
                         <span className="font-medium text-lg">BPJS Antrol</span>
                         <button
                           type="button"
-                          className="hover:bg-slate-200 rounded-full p-1 ml-2"
+                          className="hover:bg-slate-200 rounded-full p-1 ml-2 cursor-pointer"
+                          onClick={() =>
+                            setSettings((prev) => ({
+                              ...prev,
+                              BPJSAntrol: {
+                                ...prev.BPJSAntrol,
+                                showKey: !prev.BPJSAntrol.showKey,
+                              },
+                            }))
+                          }
                         >
-                          <HeroOutline.EyeSlashIcon className="size-5" />
+                          {settings.BPJSAntrol.showKey ? (
+                            <HeroOutline.EyeIcon className="size-5" />
+                          ) : (
+                            <HeroOutline.EyeSlashIcon className="size-5" />
+                          )}
                         </button>
                       </div>
-                      <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
-                        Online
-                      </span>
+                      {settings.BPJSAntrol.online ? (
+                        <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
+                          Online
+                        </span>
+                      ) : (
+                        <span className="text-sm bg-red-500 text-white px-4 py-1 rounded-sm">
+                          Offline
+                        </span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 auto-rows-min">
@@ -989,7 +1147,9 @@ const Details: FC = () => {
                             Cons Id
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSAntrol.showKey ? "text" : "password"
+                            }
                             id="bpjs-antrol-cons-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                           />
@@ -1003,7 +1163,9 @@ const Details: FC = () => {
                             Secret Key
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSAntrol.showKey ? "text" : "password"
+                            }
                             id="bpjs-antrol-secret-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                           />
@@ -1017,7 +1179,9 @@ const Details: FC = () => {
                             User Key
                           </label>
                           <input
-                            type="text"
+                            type={
+                              settings.BPJSAntrol.showKey ? "text" : "password"
+                            }
                             id="bpjs-antrol-user-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                           />
