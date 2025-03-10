@@ -9,7 +9,7 @@ export const styles: StylesConfig = {
   multiValue: (base) => ({
     ...base,
     color: "#ffffff",
-    backgroundColor: "#193cb8",
+    backgroundColor: "#155dfc",
   }),
   multiValueRemove: (base) => ({
     ...base,
