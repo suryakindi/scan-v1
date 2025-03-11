@@ -93,6 +93,20 @@ type SatuSehatPayload = {
   cdfix: string;
 };
 
+type SatuSehatT = {
+  id: number;
+  is_active: boolean;
+  id_base_url: string;
+  kode_fayankes: string;
+  organization_id: string;
+  client_key: string;
+  secret_key: string;
+  status: string;
+  cdfix: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type {
   ClientT,
   CreateClientPayload,
@@ -103,4 +117,5 @@ export type {
   BPJSPCareTool,
   BPJSPCareToolServiceName,
   SatuSehatPayload,
+  SatuSehatT,
 };

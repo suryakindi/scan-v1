@@ -15,6 +15,7 @@ import type {
   BPJSPCareToolServiceName,
   ClientT,
   SatuSehatPayload,
+  SatuSehatT,
   UpdateClientPayload,
   UpdateClientResponse,
 } from "./types";
@@ -184,8 +185,32 @@ const Details: FC = () => {
 
   const getSatuSehat = async () => {
     try {
-      const response = await api.get<ResponseT>("");
-      console.log(response);
+      const response = await api.get<ResponseT<SatuSehatT>>(
+        `/integerasi-sistem/get-satu-sehat/${user.cdfix}`
+      );
+      if (response.data.data) {
+        setSatuSehatForm({
+          kode_fayankes: response.data.data.kode_fayankes,
+          organization_id: response.data.data.organization_id,
+          client_key: response.data.data.client_key,
+          secret_key: response.data.data.secret_key,
+          id_base_url: Number(response.data.data.id_base_url),
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const connectionSatuSehat = async () => {
+    try {
+      const response = await api.get("/integerasi-sistem/check-satu-sehat");
+      if (response.data.data) {
+        setSettings((prev) => ({
+          ...prev,
+          satuSehat: { ...prev.satuSehat, online: true },
+        }));
+      }
     } catch (error) {
       console.error(error);
     }
@@ -267,6 +292,7 @@ const Details: FC = () => {
         await getBPJSPCareById();
         await getDataUrls();
         await ConnectionBPJSGetDokter();
+        await connectionSatuSehat();
         setIsProcess(false);
       })();
     };
