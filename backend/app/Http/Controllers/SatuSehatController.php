@@ -93,4 +93,14 @@ class SatuSehatController extends Controller
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
+
+    public function getSatuSehat($id_client)
+    {
+        try {
+            $satusehat = $this->SatuSehatService->getSatuSehat($id_client);
+            return $this->baseResponse('satusehat berhasil Didapatkan', null, $satusehat, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
 }

@@ -112,6 +112,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/ihs/patients/{nik}', [SatuSehatController::class, 'getIhsPatientByNik'])->middleware('permission:Management-Client,view');
         Route::get('check-satu-sehat', [SatuSehatController::class, 'getTokenAccess'])->middleware('permission:Management-Client,view');
         Route::get('check-kfav2', [SatuSehatController::class, 'GetKFAv2'])->middleware('permission:Management-Client,view');
+        Route::get('get-satu-sehat/{id_client}', [SatuSehatController::class, 'getSatuSehat'])->middleware('permission:Management-Client,view');
 
 
         Route::get('get-role', [PermissionController::class, 'getRole'])->middleware('permission:Management-Client,view');

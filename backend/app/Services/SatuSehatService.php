@@ -152,5 +152,11 @@ class SatuSehatService
             throw $e;
         }
     }
+
+    public function getSatuSehat($id_client)
+    {
+        $satusehat = SatuSehatTools::where('cdfix', $id_client)->first();
+        return $satusehat;
+    }
     
 }
