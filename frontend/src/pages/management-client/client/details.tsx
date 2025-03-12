@@ -1,6 +1,5 @@
 import { FC, FormEventHandler, useEffect, useState } from "react";
 import { Link, useLoaderData, useOutletContext, useParams } from "react-router";
-import { AxiosRequestConfig } from "axios";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import * as HeroSolid from "@heroicons/react/24/solid";
 import * as HeroOutline from "@heroicons/react/24/outline";
@@ -28,6 +27,7 @@ import {
   styles,
 } from "../../../utils/react-select";
 import { BaseURLT } from "../base-url/types";
+import { AxiosRequestConfig } from "axios";
 
 type ClientSettings = Record<
   "satuSehat" | "BPJSPCare" | "BPJSAntrol",
@@ -36,27 +36,23 @@ type ClientSettings = Record<
 
 const Details: FC = () => {
   const param = useParams();
-  const { token, user } = useLoaderData<LoaderT>();
+  const { user } = useLoaderData<LoaderT>();
   const { setIsProcess } = useOutletContext<LayoutContext>();
   const [settings, setSettings] = useState<ClientSettings>({
     satuSehat: { online: false, showKey: false },
     BPJSPCare: { online: false, showKey: false },
     BPJSAntrol: { online: false, showKey: false },
   });
-  const requestConfig: AxiosRequestConfig = {
-    headers: { Authorization: `Bearer ${token}` },
-  };
 
   const [
     { provinces, regencies, districts, villages },
     { getProvinces, getRegencies, getDistricts, getVillages },
   ] = useLokasi();
 
-  const getClientById = async (id: string | number) => {
+  const getClientById = async (id: string | number): Promise<void> => {
     try {
       const response = await api.get<ResponseT<ClientT>>(
-        `/management/get-client/id/${id}`,
-        requestConfig
+        `/management/get-client/id/${id}`
       );
 
       if (response.data.data) {
@@ -170,6 +166,11 @@ const Details: FC = () => {
     }
   };
 
+  const [satuSehatConf, setSatuSehatConf] = useState<AxiosRequestConfig>({
+    url: "/integerasi-sistem/create-satu-sehat",
+    method: "POST",
+  });
+
   const [satuSehatForm, setSatuSehatForm, satuSehatFormFn] =
     useXState<SatuSehatPayload>(
       {
@@ -180,7 +181,7 @@ const Details: FC = () => {
         id_base_url: null as unknown as SatuSehatPayload["id_base_url"],
         cdfix: String(user.cdfix),
       },
-      { url: "/integerasi-sistem/create-satu-sehat", method: "POST" }
+      satuSehatConf
     );
 
   const getSatuSehat = async () => {
@@ -195,6 +196,11 @@ const Details: FC = () => {
           client_key: response.data.data.client_key,
           secret_key: response.data.data.secret_key,
           id_base_url: Number(response.data.data.id_base_url),
+        });
+
+        setSatuSehatConf({
+          url: `/integerasi-sistem/edit-satu-sehat/${user.cdfix}`,
+          method: "PUT",
         });
       }
     } catch (error) {
@@ -216,6 +222,11 @@ const Details: FC = () => {
     }
   };
 
+  const [BPJSPCareConf, setBPJSPCareConf] = useState<AxiosRequestConfig>({
+    method: "POST",
+    url: `/integerasi-sistem/create-bpjs-tools/${param.id}`,
+  });
+
   const [BPJSPCareForm, setBPJSPCareForm, BPJSPCareFormFn] =
     useXState<BPJSPCarePayload>(
       {
@@ -228,10 +239,7 @@ const Details: FC = () => {
         username: "",
         password: "",
       },
-      {
-        method: "POST",
-        url: `/integerasi-sistem/create-bpjs-tools/${param.id}`,
-      }
+      BPJSPCareConf
     );
 
   const getBPJSPCareById = async () => {
@@ -254,35 +262,35 @@ const Details: FC = () => {
           username: response.data.data.service_name[0]?.username,
           password: response.data.data.service_name[0]?.password,
         });
+
+        setBPJSPCareConf({
+          method: "PUT",
+          url: `/integerasi-sistem/update-bpjs-tools/${param.id}`,
+        });
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleSaveSetting: FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    try {
-      setIsProcess(true);
-      const res_satuSehat = await satuSehatFormFn.submit();
-      const res_BPJSPCare = await BPJSPCareFormFn.submit();
-      console.log(res_satuSehat, res_BPJSPCare);
-
-      Toast.fire({
-        icon: "success",
-        title: "Berhasil",
-        text: "Data berhasil disimpan",
-      });
-    } catch {
-      Toast.fire({
-        icon: "error",
-        title: "Gagal",
-        text: "Data gagal disimpan",
-      });
-    } finally {
-      setIsProcess(false);
-    }
-  };
+  const [BPJSAntrolForm, setBPJSAntrolForm] = useXState<{
+    1: string;
+    2: string;
+    3: string;
+    4: string;
+    5: string;
+    6: string;
+  }>(
+    {
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": "",
+      "6": "",
+    },
+    {}
+  );
 
   useEffect(() => {
     return () => {
@@ -709,12 +717,31 @@ const Details: FC = () => {
                 </div>
               </TabPanel>
               <TabPanel>
-                <form
-                  autoComplete="off"
-                  onSubmit={handleSaveSetting}
-                  className="grid grid-cols-1 gap-6 auto-rows-min"
-                >
-                  <div className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-4 auto-rows-min">
+                <div className="grid grid-cols-1 gap-6 auto-rows-min">
+                  <form
+                    autoComplete="off"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      try {
+                        setIsProcess(true);
+                        await satuSehatFormFn.submit();
+                        Toast.fire({
+                          icon: "success",
+                          title: "Berhasil",
+                          text: "Data berhasil disimpan",
+                        });
+                      } catch {
+                        Toast.fire({
+                          icon: "error",
+                          title: "Gagal",
+                          text: "Data gagal disimpan",
+                        });
+                      } finally {
+                        setIsProcess(false);
+                      }
+                    }}
+                    className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-6 auto-rows-min"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <span className="font-medium text-lg">SatuSehat</span>
@@ -870,9 +897,41 @@ const Details: FC = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-4 auto-rows-min">
+                    <div className="flex">
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm"
+                      >
+                        Simpan
+                      </button>
+                    </div>
+                  </form>
+
+                  <form
+                    autoComplete="off"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      try {
+                        setIsProcess(true);
+                        await BPJSPCareFormFn.submit();
+                        Toast.fire({
+                          icon: "success",
+                          title: "Berhasil",
+                          text: "Data berhasil disimpan",
+                        });
+                      } catch {
+                        Toast.fire({
+                          icon: "error",
+                          title: "Gagal",
+                          text: "Data gagal disimpan",
+                        });
+                      } finally {
+                        setIsProcess(false);
+                      }
+                    }}
+                    className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-6 auto-rows-min"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <span className="font-medium text-lg">BPJS Pcare</span>
@@ -1086,9 +1145,22 @@ const Details: FC = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-4 auto-rows-min">
+                    <div className="flex">
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm"
+                      >
+                        Simpan
+                      </button>
+                    </div>
+                  </form>
+
+                  <form
+                    autoComplete="off"
+                    onSubmit={(e) => e.preventDefault()}
+                    className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-6 auto-rows-min"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <span className="font-medium text-lg">BPJS Antrol</span>
@@ -1136,6 +1208,10 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-antrol-base-url"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSAntrolForm[1]}
+                            onChange={(e) =>
+                              setBPJSAntrolForm({ "1": e.currentTarget.value })
+                            }
                           />
                         </div>
 
@@ -1150,6 +1226,10 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-antrol-service-name"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSAntrolForm[2]}
+                            onChange={(e) =>
+                              setBPJSAntrolForm({ "2": e.currentTarget.value })
+                            }
                           />
                         </div>
 
@@ -1164,6 +1244,10 @@ const Details: FC = () => {
                             type="text"
                             id="bpjs-antrol-provider-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSAntrolForm[3]}
+                            onChange={(e) =>
+                              setBPJSAntrolForm({ "3": e.currentTarget.value })
+                            }
                           />
                         </div>
                       </div>
@@ -1178,6 +1262,10 @@ const Details: FC = () => {
                             }
                             id="bpjs-antrol-cons-id"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSAntrolForm[4]}
+                            onChange={(e) =>
+                              setBPJSAntrolForm({ "4": e.currentTarget.value })
+                            }
                           />
                         </div>
 
@@ -1194,6 +1282,10 @@ const Details: FC = () => {
                             }
                             id="bpjs-antrol-secret-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSAntrolForm[5]}
+                            onChange={(e) =>
+                              setBPJSAntrolForm({ "5": e.currentTarget.value })
+                            }
                           />
                         </div>
 
@@ -1210,21 +1302,25 @@ const Details: FC = () => {
                             }
                             id="bpjs-antrol-user-key"
                             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                            value={BPJSAntrolForm[6]}
+                            onChange={(e) =>
+                              setBPJSAntrolForm({ "6": e.currentTarget.value })
+                            }
                           />
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm"
-                    >
-                      Simpan
-                    </button>
-                  </div>
-                </form>
+                    <div className="flex">
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm"
+                      >
+                        Simpan
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </TabPanel>
             </TabPanels>
           </TabGroup>

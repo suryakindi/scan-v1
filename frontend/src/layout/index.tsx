@@ -1,5 +1,11 @@
 import { FC, Fragment, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigation } from "react-router";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigation,
+} from "react-router";
 import clsx from "clsx";
 import * as HOutline from "@heroicons/react/24/outline";
 import * as HSolid from "@heroicons/react/24/solid";
@@ -109,6 +115,19 @@ const Layout: FC = () => {
               )}
             </li>
           ))}
+
+          {/* additional navs */}
+          <li className="mt-1 px-2">
+            <Link
+              to="/viewer"
+              className="flex h-12 px-4 items-center justify-between w-full rounded-md hover:bg-slate-200"
+            >
+              <div className="flex items-center">
+                <HOutline.PuzzlePieceIcon className="size-6" />
+                <span className="ml-2">Viewer</span>
+              </div>
+            </Link>
+          </li>
         </ul>
       </nav>
 
