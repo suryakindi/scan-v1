@@ -63,8 +63,54 @@ const FormPasien: FC = () => {
                     <label className="mb-1" htmlFor="poliklinik-klinik">
                       Klinik
                     </label>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        inputId="poliklinik-klinik"
+                        className="w-full"
+                        isClearable={true}
+                        isSearchable={true}
+                        styles={styles}
+                        placeholder="Pilih..."
+                        menuPlacement="bottom"
+                        required={true}
+                        options={options}
+                      />
+
+                      <div className="flex items-center text-nowrap">
+                        <button
+                          type="button"
+                          className={clsx(
+                            // eslint-disable-next-line no-constant-condition
+                            true
+                              ? "text-white bg-blue-600 hover:bg-blue-500"
+                              : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
+                            "flex items-center px-3 py-1.5 border border-e-0 rounded-s-sm cursor-pointer border-blue-600"
+                          )}
+                        >
+                          SEHAT
+                        </button>
+                        <button
+                          type="button"
+                          className={clsx(
+                            // eslint-disable-next-line no-constant-condition
+                            false
+                              ? "text-white bg-blue-600 hover:bg-blue-500"
+                              : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
+                            "flex items-center px-3 py-1.5 border border-s-0 rounded-e-sm cursor-pointer border-blue-600"
+                          )}
+                        >
+                          SAKIT
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="mb-1" htmlFor="poliklinik-jaminan">
+                      Jaminan
+                    </label>
                     <Select
-                      inputId="poliklinik-klinik"
+                      inputId="poliklinik-jaminan"
                       className="w-full"
                       isClearable={true}
                       isSearchable={true}
@@ -74,24 +120,6 @@ const FormPasien: FC = () => {
                       required={true}
                       options={options}
                     />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="mb-1">Jaminan</span>
-                    <div className="flex gap-4">
-                      <button
-                        type="button"
-                        className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm"
-                      >
-                        JKN
-                      </button>
-                      <button
-                        type="button"
-                        className="flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm"
-                      >
-                        NON JKN
-                      </button>
-                    </div>
                   </div>
                 </div>
 
