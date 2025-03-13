@@ -76,6 +76,7 @@ type BPJSPCareTool = {
 };
 
 type BPJSPCareToolServiceName = {
+  id_base_url: number;
   service_name: string;
   userkey: string;
   username: string;

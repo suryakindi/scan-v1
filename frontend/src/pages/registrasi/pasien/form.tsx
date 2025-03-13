@@ -1,12 +1,190 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { FC } from "react";
+import { FC, FormEventHandler, useEffect, useState } from "react";
 import Select from "react-select";
-import { styles } from "../../../utils/react-select";
-import { options } from "../../../mock/react-select";
+import { mapOptions, styles } from "../../../utils/react-select";
 import clsx from "clsx";
-import { Link } from "react-router";
+import { Link, useLoaderData, useOutletContext, useParams } from "react-router";
+import { JaminanT, JenisKunjunganT, PasienT, RuanganT, TkpT } from "./types";
+import { LoaderT } from "../../../user";
+import { api, ResponseT, useXState } from "../../../utils/api";
+import { PaginateT } from "../../../utils/paginate";
+import { Toast } from "../../../utils/alert";
+import { LayoutContext } from "../../../layout/types";
 
 const FormPasien: FC = () => {
+  const param = useParams();
+  const { setIsProcess } = useOutletContext<LayoutContext>();
+  const { user } = useLoaderData<LoaderT>();
+
+  const [pasien, setPasien] = useState<PasienT | null>(null);
+
+  const getPasienById = async () => {
+    try {
+      const response = await api.get<ResponseT<PasienT>>(
+        `/pasien/get-pasien-id/${param.id}`
+      );
+      if (response.data.data) {
+        setPasien(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const [form, setForm, formFn] = useXState({}, {});
+
+  const [ruangans, setRuangans] = useState<PaginateT<RuanganT[]>>({
+    current_page: 1,
+    data: [],
+    first_page_url: "",
+    from: 1,
+    last_page: 1,
+    last_page_url: "",
+    links: [],
+    next_page_url: null,
+    path: "",
+    per_page: 100,
+    prev_page_url: null,
+    to: 12,
+    total: 12,
+  });
+
+  const getMasterRuangan = async () => {
+    try {
+      const response = await api.get<ResponseT<PaginateT<RuanganT[]>>>(
+        `/get-master-ruangan/${user.cdfix}`
+      );
+
+      if (response.data.data) {
+        setRuangans(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const [jenisKunjungans, setJenisKunjungans] = useState<
+    PaginateT<JenisKunjunganT[]>
+  >({
+    current_page: 1,
+    data: [],
+    first_page_url: "",
+    from: 1,
+    last_page: 1,
+    last_page_url: "",
+    links: [],
+    next_page_url: null,
+    path: "",
+    per_page: 100,
+    prev_page_url: null,
+    to: 12,
+    total: 12,
+  });
+
+  const getJenisKunjungan = async () => {
+    try {
+      const response = await api.get("/get-master-jeniskunjungan");
+      if (response.data.data) {
+        setJenisKunjungans(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const [jaminans, setJaminans] = useState<PaginateT<JaminanT[]>>({
+    current_page: 1,
+    data: [],
+    first_page_url: "",
+    from: 1,
+    last_page: 1,
+    last_page_url: "",
+    links: [],
+    next_page_url: null,
+    path: "",
+    per_page: 100,
+    prev_page_url: null,
+    to: 12,
+    total: 12,
+  });
+
+  const getJaminan = async () => {
+    try {
+      const response = await api.get<ResponseT<PaginateT<JaminanT[]>>>(
+        "/get-master-jaminan"
+      );
+      if (response.data.data) {
+        setJaminans(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const [tkps, setTkps] = useState<PaginateT<TkpT[]>>({
+    current_page: 1,
+    data: [],
+    first_page_url: "",
+    from: 1,
+    last_page: 1,
+    last_page_url: "",
+    links: [],
+    next_page_url: null,
+    path: "",
+    per_page: 100,
+    prev_page_url: null,
+    to: 12,
+    total: 12,
+  });
+
+  const getTkp = async () => {
+    try {
+      const response = await api.get<ResponseT<PaginateT<TkpT[]>>>(
+        "/master-data/get-master-tkp"
+      );
+      if (response.data.data) {
+        setTkps(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    try {
+      Toast.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Registrasi berhasil",
+      });
+    } catch (error) {
+      Toast.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Registrasi gagal",
+      });
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      const load = async () => {
+        setIsProcess(true);
+        await getPasienById();
+        await getMasterRuangan();
+        await getJenisKunjungan();
+        await getJaminan();
+        await getTkp();
+        setIsProcess(false);
+      };
+
+      load();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="grid gap-6">
       <div className="grid grid-cols-2 gap-6">
@@ -17,15 +195,25 @@ const FormPasien: FC = () => {
             </div>
             <div className="ml-3">
               <div className="flex flex-col mb-3">
-                <span className="font-medium">John Doe</span>
-                <span>0001880961221</span>
+                <span className="font-medium">{pasien?.nama}</span>
+                <span>{pasien?.nik}</span>
               </div>
-              <button
-                type="button"
-                className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm"
-              >
-                Aktif
-              </button>
+              {pasien &&
+                (pasien.is_active ? (
+                  <button
+                    type="button"
+                    className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm"
+                  >
+                    Aktif
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white cursor-pointer rounded-sm"
+                  >
+                    Aktif
+                  </button>
+                ))}
             </div>
           </div>
         </div>
@@ -40,7 +228,7 @@ const FormPasien: FC = () => {
             <TabPanel className="grid grid-cols-1 gap-6 auto-rows-min">
               <form
                 autoComplete="off"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={handleSubmit}
                 className="grid grid-cols-1 gap-6 auto-rows-min"
               >
                 <div className="bg-white shadow-lg p-6 rounded-md grid grid-cols-1 gap-4 auto-rows-min">
@@ -63,46 +251,43 @@ const FormPasien: FC = () => {
                     <label className="mb-1" htmlFor="poliklinik-klinik">
                       Klinik
                     </label>
-                    <div className="flex items-center gap-2">
-                      <Select
-                        inputId="poliklinik-klinik"
-                        className="w-full"
-                        isClearable={true}
-                        isSearchable={true}
-                        styles={styles}
-                        placeholder="Pilih..."
-                        menuPlacement="bottom"
-                        required={true}
-                        options={options}
-                      />
+                    <Select
+                      inputId="poliklinik-klinik"
+                      className="w-full"
+                      isClearable={true}
+                      isSearchable={true}
+                      styles={styles}
+                      placeholder="Pilih..."
+                      menuPlacement="bottom"
+                      required={true}
+                      options={mapOptions(ruangans.data, {
+                        l: "nama_ruangan",
+                        v: "id",
+                      })}
+                    />
+                  </div>
 
-                      <div className="flex items-center text-nowrap">
-                        <button
-                          type="button"
-                          className={clsx(
-                            // eslint-disable-next-line no-constant-condition
-                            true
-                              ? "text-white bg-blue-600 hover:bg-blue-500"
-                              : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
-                            "flex items-center px-3 py-1.5 border border-e-0 rounded-s-sm cursor-pointer border-blue-600"
-                          )}
-                        >
-                          SEHAT
-                        </button>
-                        <button
-                          type="button"
-                          className={clsx(
-                            // eslint-disable-next-line no-constant-condition
-                            false
-                              ? "text-white bg-blue-600 hover:bg-blue-500"
-                              : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
-                            "flex items-center px-3 py-1.5 border border-s-0 rounded-e-sm cursor-pointer border-blue-600"
-                          )}
-                        >
-                          SAKIT
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex flex-col">
+                    <label
+                      className="mb-1"
+                      htmlFor="poliklinik-jenis-kunjungan"
+                    >
+                      Jenis Kunjungan
+                    </label>
+                    <Select
+                      inputId="poliklinik-jenis-kunjungan"
+                      className="w-full"
+                      isClearable={true}
+                      isSearchable={true}
+                      styles={styles}
+                      placeholder="Pilih..."
+                      menuPlacement="bottom"
+                      required={true}
+                      options={mapOptions(jenisKunjungans.data, {
+                        l: "jenis_kunjungan",
+                        v: "id",
+                      })}
+                    />
                   </div>
 
                   <div className="flex flex-col">
@@ -118,7 +303,30 @@ const FormPasien: FC = () => {
                       placeholder="Pilih..."
                       menuPlacement="bottom"
                       required={true}
-                      options={options}
+                      options={mapOptions(jaminans.data, {
+                        l: "penjamin",
+                        v: "id",
+                      })}
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="mb-1" htmlFor="poliklinik-tkp">
+                      TKP
+                    </label>
+                    <Select
+                      inputId="poliklinik-tkp"
+                      className="w-full"
+                      isClearable={true}
+                      isSearchable={true}
+                      styles={styles}
+                      placeholder="Pilih..."
+                      menuPlacement="bottom"
+                      required={true}
+                      options={mapOptions(tkps.data, {
+                        l: "nama_tkp",
+                        v: "id",
+                      })}
                     />
                   </div>
                 </div>
