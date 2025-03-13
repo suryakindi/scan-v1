@@ -152,4 +152,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   // Route Viewer
 
-  Route::get('get-clients', [ManagementClientController::class, 'getAll']);
+  Route::get('/viewer/get-clients', [ManagementClientController::class, 'getAll']);
+  Route::get('/viewer/get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan']);
