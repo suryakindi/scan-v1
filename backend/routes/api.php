@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-user', [AuthController::class, 'getUser'])->middleware('permission:Registrasi,view');
         Route::put('update-user/{id}', [AuthController::class, 'updateUser']);
         Route::delete('delete-user/{id}', [AuthController::class, 'deleteUser']);
+        Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Registrasi,view');
         Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Registrasi,view');
     });
 
