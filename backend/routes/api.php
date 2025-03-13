@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('delete-user/{id}', [AuthController::class, 'deleteUser']);
         Route::get('get-master-jeniskunjungan', [MasterDataController::class, 'getMasterJenisKunjungan'])->middleware('permission:Registrasi,view');
         Route::get('get-master-jaminan', [MasterDataController::class, 'getMasterjaminan'])->middleware('permission:Registrasi,view');
+        Route::get('get-master-tkp', [MasterDataController::class, 'getMasterTkp'])->middleware('permission:Registrasi,view');
         Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Registrasi,view');
     });
 
