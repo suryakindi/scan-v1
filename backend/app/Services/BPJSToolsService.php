@@ -132,7 +132,7 @@ class BPJSToolsService
             $bpjstools = BPJSTools::where('id_client', $id_client)->first();
             $servicename = SettingServiceName::where('id_bpjs_tools', $bpjstools->id)
             ->leftjoin('base_urls', 'base_urls.id', '=', 'setting_service_names.id_base_url')
-            ->select('setting_service_names.service_name', 'setting_service_names.userkey', 'setting_service_names.username', 'setting_service_names.password', 'base_urls.base_url', 'base_urls.kdAplikasi')
+            ->select('setting_service_names.service_name', 'setting_service_names.userkey', 'setting_service_names.username', 'setting_service_names.password', 'base_urls.base_url', 'setting_service_names.id_base_url','base_urls.kdAplikasi')
             ->get();
             return [
                 'bpjs_tools'=>$bpjstools,
