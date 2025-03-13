@@ -72,6 +72,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-master-alergi', [MasterDataController::class, 'getMasterAlergi'])->middleware('permission:Management-Client,view');
         Route::put('edit-master-alergi/{id_alergi}', [MasterDataController::class, 'editMasterAlergi'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-alergi/{id_alergi}', [MasterDataController::class, 'deleteMasterAlergi'])->middleware('permission:Master-Data,delete');
+
         Route::post('create-master-jeniskunjungan', [MasterDataController::class, 'createMasterJenisKunjungan'])->middleware('permission:Master-Data,create');
         Route::put('edit-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'editMasterJenisKunjungan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-jeniskunjungan/{id_jeniskunjungan}', [MasterDataController::class, 'deleteMasterJenisKunjungan'])->middleware('permission:Master-Data,delete');
@@ -82,6 +83,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-master-departemen', [MasterDataController::class, 'getMasterDepartemen'])->middleware('permission:Management-Client,view');
         Route::put('edit-master-departemen/{id_departemen}', [MasterDataController::class, 'editMasterJenisDepartemen'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-departemen/{id_departemen}', [MasterDataController::class, 'deleteMasterDepartemen'])->middleware('permission:Master-Data,delete');
+
+        Route::post('create-master-tkp', [MasterDataController::class, 'createTkp'])->middleware('permission:Master-Data,create');
+        Route::get('get-master-tkp', [MasterDataController::class, 'getMasterTkp'])->middleware('permission:Management-Client,view');
+        Route::put('edit-master-tkp/{id_tkp}', [MasterDataController::class, 'editMasterTkp'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-tkp/{id_tkp}', [MasterDataController::class, 'deleteMasterTkp'])->middleware('permission:Master-Data,delete');
+
+        Route::post('create-master-jaminan', [MasterDataController::class, 'createjaminan'])->middleware('permission:Master-Data,create');
+        Route::get('get-master-jaminan', [MasterDataController::class, 'getMasterjaminan'])->middleware('permission:Management-Client,view');
+        Route::put('edit-master-jaminan/{id_jaminan}', [MasterDataController::class, 'editMasterjaminan'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-jaminan/{id_jaminan}', [MasterDataController::class, 'deleteMasterjaminan'])->middleware('permission:Master-Data,delete');
 
         Route::post('create-master-ruangan', [MasterDataController::class, 'createMasterRuangan'])->middleware('permission:Master-Data,create');
         Route::get('get-master-ruangan', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Management-Client,view');
