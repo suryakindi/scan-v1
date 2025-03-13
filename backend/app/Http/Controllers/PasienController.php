@@ -67,6 +67,17 @@ class PasienController extends Controller
              return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
+
+    public function getPasienById($id_pasien)
+    {
+        $cdfix = Auth()->user()->cdfix;
+        try {
+            $pasien = $this->PasienService->getPasienById($cdfix, $id_pasien);
+            return $this->baseResponse('Pasien berhasil didapatkan', null, $pasien, 200);
+        } catch (\Exception $e) {
+             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
     
     public function UpdateIHSNumber(Request $request, $id_pasien)
     {

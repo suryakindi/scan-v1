@@ -57,6 +57,19 @@ class PasienService
         }
     }
 
+    public function getPasienById($cdfix, $id_pasien)
+    {
+        try {
+            $pasien = Pasien::where('cdfix', $cdfix)->with('alamat')->where('id', $id_pasien)->where('is_active', TRUE)->first();
+            if($pasien == null){
+                throw new \Exception('Tidak Ada Data');
+            }
+            return $pasien;
+        } catch (\Exception $e) {
+            throw new \Exception('Gagal mendapatkan pasien: ' . $e->getMessage());
+        }
+    }
+
     public function updateIHSNumber($data, $id_pasien)
     {
         DB::beginTransaction();
