@@ -142,9 +142,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-    // Route Viewer
-
-    Route::get('get-clients', [ManagementClientController::class, 'getAll']);
+  
 
 
 });
+
+  // Route Viewer
+
+  Route::get('get-clients', [ManagementClientController::class, 'getAll']);
