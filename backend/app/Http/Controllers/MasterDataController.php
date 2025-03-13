@@ -203,10 +203,10 @@ class MasterDataController extends Controller
         }
     }
 
-    public function getMasterRuangan()
+    public function getMasterRuangan($id_client)
     {
         try {
-            $masterRuangan = $this->MasterDataService->getMasterRuangan();
+            $masterRuangan = $this->MasterDataService->getMasterRuangan($id_client);
             return $this->baseResponse('Master Ruangan berhasil didapatkan', null, $masterRuangan, 200);
         } catch (\Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat Master ruangan', $e->getMessage(), null, 500);

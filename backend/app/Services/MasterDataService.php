@@ -237,11 +237,12 @@ class MasterDataService
         }
     }
 
-    public function getMasterRuangan()
+    public function getMasterRuangan($id_client)
     {
         try {
             $getMasterRuangan = MasterRuangan::join('master_departemens', 'master_departemens.id', '=', 'master_ruangans.id_departemen')
             ->where('master_ruangans.is_active', true)
+            ->where('master_ruangans.cdfix', $id_client)
             ->select('master_ruangans.*', 'master_departemens.nama_departemen')
             ->paginate(100);
             return $getMasterRuangan;
