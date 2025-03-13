@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-user', [AuthController::class, 'getUser'])->middleware('permission:Registrasi,view');
         Route::put('update-user/{id}', [AuthController::class, 'updateUser']);
         Route::delete('delete-user/{id}', [AuthController::class, 'deleteUser']);
+        Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Registrasi,view');
     });
 
     Route::prefix('pasien')->middleware('permission:Registrasi,view')->group(function () {
@@ -95,7 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('delete-master-jaminan/{id_jaminan}', [MasterDataController::class, 'deleteMasterjaminan'])->middleware('permission:Master-Data,delete');
 
         Route::post('create-master-ruangan/', [MasterDataController::class, 'createMasterRuangan'])->middleware('permission:Master-Data,create');
-        Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Management-Client,view');
+    
         Route::put('edit-master-ruangan/{id_ruangan}', [MasterDataController::class, 'editMasterRuangan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-ruangan/{id_ruangan}', [MasterDataController::class, 'deleteMasterRuangan'])->middleware('permission:Master-Data,delete');
     });
@@ -140,7 +141,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
+    // Route Viewer
 
+    Route::get('get-clients', [ManagementClientController::class, 'getAll']);
 
 
 });
