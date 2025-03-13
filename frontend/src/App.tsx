@@ -27,7 +27,7 @@ const App: FC = () => {
         },
       ],
       HydrateFallback: LoadingOverlay,
-      loader: (args) => userLoader(args),
+      loader: () => ({}),
     },
     {
       path: "/login",

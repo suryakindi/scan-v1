@@ -199,7 +199,7 @@ const Details: FC = () => {
         });
 
         setSatuSehatConf({
-          url: `/integerasi-sistem/edit-satu-sehat/${user.cdfix}`,
+          url: `/integerasi-sistem/edit-satu-sehat/${response.data.data.id}`,
           method: "PUT",
         });
       }
@@ -253,7 +253,7 @@ const Details: FC = () => {
 
       if (response.data.data) {
         setBPJSPCareForm({
-          id_base_url: response.data.data.bpjs_tools.id,
+          id_base_url: response.data.data.service_name[0]?.id_base_url,
           cons_id: response.data.data.bpjs_tools.cons_id,
           secretkey: response.data.data.bpjs_tools.secretkey,
           provider_id: response.data.data.bpjs_tools.provider_id,
