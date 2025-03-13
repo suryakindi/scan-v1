@@ -60,6 +60,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('register-pasien', [PasienController::class, 'createPasien'])->middleware('permission:Registrasi,create');
         Route::put('/update-ihs/{id_pasien}', [PasienController::class, 'UpdateIHSNumber'])->middleware('permission:Registrasi,edit');
         Route::get('get-pasien', [PasienController::class, 'getPasien']);
+        Route::get('get-pasien-id/{id_pasien}', [PasienController::class, 'getPasienById']);
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {
