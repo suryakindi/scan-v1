@@ -96,7 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('delete-master-jaminan/{id_jaminan}', [MasterDataController::class, 'deleteMasterjaminan'])->middleware('permission:Master-Data,delete');
 
         Route::post('create-master-ruangan/', [MasterDataController::class, 'createMasterRuangan'])->middleware('permission:Master-Data,create');
-    
+        Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Master-Data,view');
         Route::put('edit-master-ruangan/{id_ruangan}', [MasterDataController::class, 'editMasterRuangan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-master-ruangan/{id_ruangan}', [MasterDataController::class, 'deleteMasterRuangan'])->middleware('permission:Master-Data,delete');
     });
