@@ -50,7 +50,7 @@ class PasienService
     public function getPasien($cdfix)
     {
         try {
-            $pasien = Pasien::where('cdfix', $cdfix)->paginate(100);
+            $pasien = Pasien::where('cdfix', $cdfix)->with('alamat')->paginate(100);
             return $pasien;
         } catch (\Exception $e) {
             throw new \Exception('Gagal mendapatkan pasien: ' . $e->getMessage());

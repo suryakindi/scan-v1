@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\MasterAlergi;
 use App\Models\MasterDepartemen;
+use App\Models\MasterJaminan;
 use Illuminate\Http\Request;
 use App\Services\MasterDataService;
+use App\Models\MasterTkp;
 use App\Models\MasterJenisKunjungan;
 use App\Models\MasterRuangan;
 use Exception;
@@ -169,6 +171,7 @@ class MasterDataController extends Controller
             $validatedData = $request->validate([
                 'nama_ruangan' => 'required|string',
                 'id_departemen'=>'required',
+                'kodeexternal'=>'nullable',
                 'cdfix'=>'required',
                 'is_active'=>'nullable',
             ]);
@@ -209,4 +212,99 @@ class MasterDataController extends Controller
             return $this->baseResponse('Terjadi kesalahan saat Master ruangan', $e->getMessage(), null, 500);
         }
     }
+
+    public function createTkp(Request $request)
+    {
+       
+        try {
+            $validatedData = $request->validate([
+                'nama_tkp' => 'required|string',
+                'kodeexternal'=>'nullable',
+                'cdfix'=>'required',
+                'is_active'=>'nullable',
+            ]);
+            $MasterDataService = $this->MasterDataService->createTkp($validatedData);
+            return $this->baseResponse('Master tkp berhasil dibuat', null, $MasterDataService, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat tkp', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getMasterTkp()
+    {
+        try {
+            $tkp = $this->MasterDataService->getMasterTkp();
+            return $this->baseResponse('Master Tkp berhasil didapatkan', null, $tkp, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Tkp', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function editMasterTkp(MasterTkp $id_tkp, Request $request)
+    {
+        try {
+            $tkp = $this->MasterDataService->editMasterTkp($id_tkp, $request->all());
+            return $this->baseResponse('Master Departemen berhasil update', null, $tkp, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master departemen', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteMasterTkp(MasterTkp $id_tkp)
+    {
+        try {
+            $tkp = $this->MasterDataService->deleteMasterTkp($id_tkp);
+            return $this->baseResponse('Delete berhasil', null, $tkp, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat memperbarui', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function createjaminan(Request $request)
+    {
+       
+        try {
+            $validatedData = $request->validate([
+                'penjamin' => 'required|string',
+                'kodeexternal'=>'nullable',
+                'cdfix'=>'required',
+                'is_active'=>'nullable',
+            ]);
+            $MasterDataService = $this->MasterDataService->createjaminan($validatedData);
+            return $this->baseResponse('Master createjaminan berhasil dibuat', null, $MasterDataService, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat createjaminan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getMasterjaminan()
+    {
+        try {
+            $jaminan = $this->MasterDataService->getMasterjaminan();
+            return $this->baseResponse('Master jaminan berhasil didapatkan', null, $jaminan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Tkp', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function editMasterjaminan(MasterJaminan $id_jaminan, Request $request)
+    {
+        try {
+            $jaminan = $this->MasterDataService->editMasterjaminan($id_jaminan, $request->all());
+            return $this->baseResponse('Master jaminan berhasil update', null, $jaminan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master jaminan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteMasterjaminan(MasterJaminan $id_jaminan)
+    {
+        try {
+            $jaminan = $this->MasterDataService->deleteMasterjaminan($id_jaminan);
+            return $this->baseResponse('Delete berhasil', null, $jaminan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat memperbarui', $e->getMessage(), null, 500);
+        }
+    }
+
 }

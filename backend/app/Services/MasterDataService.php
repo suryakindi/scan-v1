@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\MasterAlergi;
 use App\Models\MasterDepartemen;
 use App\Models\MasterDiagnosa;
+use App\Models\MasterJaminan;
 use App\Models\MasterJenisKunjungan;
 use App\Models\MasterRuangan;
+use App\Models\MasterTkp;
 use App\Models\Module;
 use App\Models\Permission;
 use App\Models\Role;
@@ -245,6 +247,110 @@ class MasterDataService
             return $getMasterRuangan;
         } catch (\Exception $e) {
             throw new Exception("Gagal Mendapatkan Ruangan: " . $e->getMessage());
+        }
+    }
+
+    public function createTkp(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $tkp = MasterTkp::create($data);
+            DB::commit();
+            return $tkp;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal membuat tkp: " . $e->getMessage());
+        }
+    }
+
+    public function getMasterTkp()
+    {
+        try {
+            $tkp = MasterTkp::where('is_active', TRUE)->paginate(100);
+            return $tkp;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function editMasterTkp(MasterTkp $id_tkp, array $data)
+    {
+        
+        DB::beginTransaction();
+        try {
+            $id_tkp->update($data);
+            DB::commit();
+            return $id_tkp;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteMasterTkp(MasterTkp $id_tkp)
+    {
+        DB::beginTransaction();
+        try {
+            $id_tkp->update([
+                'is_active'=>false
+            ]);
+            DB::commit();
+            return $id_tkp;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function createjaminan(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $jaminan = MasterJaminan::create($data);
+            DB::commit();
+            return $jaminan;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal membuat jaminan: " . $e->getMessage());
+        }
+    }
+
+    public function getMasterjaminan()
+    {
+        try {
+            $jaminan = MasterJaminan::where('is_active', TRUE)->paginate(100);
+            return $jaminan;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function editMasterjaminan(MasterJaminan $id_jaminan, array $data)
+    {
+        
+        DB::beginTransaction();
+        try {
+            $id_jaminan->update($data);
+            DB::commit();
+            return $id_jaminan;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteMasterjaminan(MasterJaminan $id_jaminan)
+    {
+        DB::beginTransaction();
+        try {
+            $id_jaminan->update([
+                'is_active'=>false
+            ]);
+            DB::commit();
+            return $id_jaminan;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
     }
 }

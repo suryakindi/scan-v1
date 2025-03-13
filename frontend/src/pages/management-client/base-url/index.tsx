@@ -155,13 +155,7 @@ const BaseURL: FC = () => {
                     >
                       <HOutline.PencilSquareIcon className="size-6" />
                     </button>
-                    <button
-                      type="button"
-                      className="p-1.5 bg-red-600 hover:bg-red-500 text-white aspect-square rounded-md flex items-center justify-center outline-none cursor-pointer"
-                      onClick={() => {}}
-                    >
-                      <HOutline.TrashIcon className="size-6" />
-                    </button>
+                  
                   </div>
                 </td>
               </tr>

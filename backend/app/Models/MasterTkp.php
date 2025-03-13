@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MasterRuangan extends Model
+class MasterTkp extends Model
 {
     use HasFactory;
-    protected $fillable = ['nama_tkp', 'id_departemen', 'is_active', 'cdfix', 'kodeexternal'];
+    protected $fillable = ['nama_tkp', 'is_active', 'cdfix', 'kodeexternal'];
 
 }

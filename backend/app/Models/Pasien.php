@@ -34,4 +34,9 @@ class Pasien extends Model
         'id_alamat_pasien',
         'cdfix',
     ];
+
+    public function alamat()
+    {
+        return $this->belongsTo(AlamatPasien::class, 'id_alamat_pasien');
+    }
 }
