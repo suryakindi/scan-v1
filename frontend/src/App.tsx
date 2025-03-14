@@ -25,6 +25,10 @@ const App: FC = () => {
           index: true,
           element: LazyLoad(() => import("./pages/viewer/index")),
         },
+        {
+          path: "/viewer/display",
+          element: LazyLoad(() => import("./pages/viewer/display")),
+        },
       ],
       HydrateFallback: LoadingOverlay,
       loader: () => ({}),

@@ -1,13 +1,18 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { FC, FormEventHandler, useEffect, useState } from "react";
 import Select from "react-select";
-import { mapOptions, styles } from "../../../utils/react-select";
+import {
+  cast,
+  findValue,
+  mapOptions,
+  styles,
+} from "../../../utils/react-select";
 import clsx from "clsx";
 import { Link, useLoaderData, useOutletContext, useParams } from "react-router";
 import { JaminanT, JenisKunjunganT, PasienT, RuanganT, TkpT } from "./types";
 import { LoaderT } from "../../../user";
 import { api, ResponseT, useXState } from "../../../utils/api";
-import { PaginateT } from "../../../utils/paginate";
+import { paginateInit, PaginateT } from "../../../utils/paginate";
 import { Toast } from "../../../utils/alert";
 import { LayoutContext } from "../../../layout/types";
 
@@ -31,23 +36,54 @@ const FormPasien: FC = () => {
     }
   };
 
-  const [form, setForm, formFn] = useXState({}, {});
+  type _Payload = {
+    id_pasien: number | null;
+    id_ruangan_asal: number | null;
+    id_jenis_kunjungan: number | null;
+    id_jaminan: number | null;
+    id_tkp: number | null;
+    id_dokter: number | null;
+    tanggal_registrasi: string;
+    is_active: boolean;
+    cdfix: number | string | null;
+  };
 
-  const [ruangans, setRuangans] = useState<PaginateT<RuanganT[]>>({
-    current_page: 1,
-    data: [],
-    first_page_url: "",
-    from: 1,
-    last_page: 1,
-    last_page_url: "",
-    links: [],
-    next_page_url: null,
-    path: "",
-    per_page: 100,
-    prev_page_url: null,
-    to: 12,
-    total: 12,
-  });
+  type _Response = {
+    id_pasien: number;
+    id_ruangan_asal: number;
+    id_jenis_kunjungan: number;
+    id_jaminan: number;
+    id_tkp: number;
+    id_dokter: number;
+    tanggal_registrasi: string;
+    is_active: boolean;
+    cdfix: number;
+    no_registrasi: string;
+    id_ruangan_terakhir: number;
+    created_by: number;
+    updated_at: string;
+    created_at: string;
+    id: number;
+  };
+
+  const [form, setForm, formFn] = useXState<_Payload, _Response>(
+    {
+      id_pasien: Number(param.id),
+      id_ruangan_asal: null,
+      id_jenis_kunjungan: null,
+      id_jaminan: null,
+      id_tkp: null,
+      id_dokter: null,
+      tanggal_registrasi: "",
+      is_active: true,
+      cdfix: user.cdfix,
+    },
+    { method: "POST", url: "/registrasi-pelayanan/create-registrasi-pelayanan" }
+  );
+
+  const [ruangans, setRuangans] = useState<PaginateT<RuanganT[]>>(
+    paginateInit()
+  );
 
   const getMasterRuangan = async () => {
     try {
@@ -63,23 +99,31 @@ const FormPasien: FC = () => {
     }
   };
 
+  type _T1 = {
+    id_user: number;
+    name: string;
+    nama_ruangan: string;
+  };
+
+  const [dokters, setDokters] = useState<PaginateT<_T1[]>>(paginateInit());
+
+  const getDoktersByRuanganId = async (id: number | string) => {
+    try {
+      const response = await api.get<ResponseT<PaginateT<_T1[]>>>(
+        `/master-data/get-mapping-dokter/${id}`
+      );
+
+      if (response.data.data) {
+        setDokters(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const [jenisKunjungans, setJenisKunjungans] = useState<
     PaginateT<JenisKunjunganT[]>
-  >({
-    current_page: 1,
-    data: [],
-    first_page_url: "",
-    from: 1,
-    last_page: 1,
-    last_page_url: "",
-    links: [],
-    next_page_url: null,
-    path: "",
-    per_page: 100,
-    prev_page_url: null,
-    to: 12,
-    total: 12,
-  });
+  >(paginateInit());
 
   const getJenisKunjungan = async () => {
     try {
@@ -92,21 +136,9 @@ const FormPasien: FC = () => {
     }
   };
 
-  const [jaminans, setJaminans] = useState<PaginateT<JaminanT[]>>({
-    current_page: 1,
-    data: [],
-    first_page_url: "",
-    from: 1,
-    last_page: 1,
-    last_page_url: "",
-    links: [],
-    next_page_url: null,
-    path: "",
-    per_page: 100,
-    prev_page_url: null,
-    to: 12,
-    total: 12,
-  });
+  const [jaminans, setJaminans] = useState<PaginateT<JaminanT[]>>(
+    paginateInit()
+  );
 
   const getJaminan = async () => {
     try {
@@ -121,21 +153,7 @@ const FormPasien: FC = () => {
     }
   };
 
-  const [tkps, setTkps] = useState<PaginateT<TkpT[]>>({
-    current_page: 1,
-    data: [],
-    first_page_url: "",
-    from: 1,
-    last_page: 1,
-    last_page_url: "",
-    links: [],
-    next_page_url: null,
-    path: "",
-    per_page: 100,
-    prev_page_url: null,
-    to: 12,
-    total: 12,
-  });
+  const [tkps, setTkps] = useState<PaginateT<TkpT[]>>(paginateInit());
 
   const getTkp = async () => {
     try {
@@ -153,6 +171,9 @@ const FormPasien: FC = () => {
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
+      const response = await formFn.submit();
+      console.log(response);
+
       Toast.fire({
         icon: "success",
         title: "Berhasil",
@@ -237,13 +258,17 @@ const FormPasien: FC = () => {
                       Tanggal
                     </label>
                     <input
-                      type="date"
+                      type="datetime-local"
                       id="poliklinik-tanggal"
                       required={true}
                       className={clsx(
                         "border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
                         "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300"
                       )}
+                      value={form.tanggal_registrasi}
+                      onChange={(e) =>
+                        setForm({ tanggal_registrasi: e.currentTarget.value })
+                      }
                     />
                   </div>
 
@@ -254,7 +279,6 @@ const FormPasien: FC = () => {
                     <Select
                       inputId="poliklinik-klinik"
                       className="w-full"
-                      isClearable={true}
                       isSearchable={true}
                       styles={styles}
                       placeholder="Pilih..."
@@ -264,6 +288,65 @@ const FormPasien: FC = () => {
                         l: "nama_ruangan",
                         v: "id",
                       })}
+                      value={findValue(
+                        ruangans.data,
+                        {
+                          id: Number(form.id_ruangan_asal),
+                        },
+                        { label: "nama_ruangan", value: "id" }
+                      )}
+                      onChange={(e) =>
+                        cast<{ label: string; value: number }>(
+                          e,
+                          async ({ value }) => {
+                            setIsProcess(true);
+                            setForm({
+                              id_ruangan_asal: value,
+                              id_dokter: null,
+                            });
+                            await getDoktersByRuanganId(value);
+                            setIsProcess(false);
+                          }
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="mb-1" htmlFor="poliklinik-dokter">
+                      Dokter
+                    </label>
+                    <Select
+                      inputId="poliklinik-dokter"
+                      className="w-full"
+                      isSearchable={true}
+                      styles={styles}
+                      placeholder="Pilih..."
+                      menuPlacement="bottom"
+                      required={true}
+                      options={
+                        ["", null, 0].includes(form.id_ruangan_asal)
+                          ? []
+                          : mapOptions(dokters.data, {
+                              l: "name",
+                              v: "id_user",
+                            })
+                      }
+                      value={findValue(
+                        dokters.data,
+                        {
+                          id_user: Number(form.id_dokter),
+                        },
+                        { label: "name", value: "id_user" }
+                      )}
+                      onChange={(e) =>
+                        cast<{ label: string; value: number }>(
+                          e,
+                          ({ value }) => {
+                            setForm({ id_dokter: value });
+                          }
+                        )
+                      }
                     />
                   </div>
 
@@ -277,7 +360,6 @@ const FormPasien: FC = () => {
                     <Select
                       inputId="poliklinik-jenis-kunjungan"
                       className="w-full"
-                      isClearable={true}
                       isSearchable={true}
                       styles={styles}
                       placeholder="Pilih..."
@@ -287,6 +369,19 @@ const FormPasien: FC = () => {
                         l: "jenis_kunjungan",
                         v: "id",
                       })}
+                      value={findValue(
+                        jenisKunjungans.data,
+                        { id: Number(form.id_jenis_kunjungan) },
+                        { label: "jenis_kunjungan", value: "id" }
+                      )}
+                      onChange={(e) =>
+                        cast<{ label: string; value: number }>(
+                          e,
+                          ({ value }) => {
+                            setForm({ id_jenis_kunjungan: value });
+                          }
+                        )
+                      }
                     />
                   </div>
 
@@ -297,7 +392,6 @@ const FormPasien: FC = () => {
                     <Select
                       inputId="poliklinik-jaminan"
                       className="w-full"
-                      isClearable={true}
                       isSearchable={true}
                       styles={styles}
                       placeholder="Pilih..."
@@ -307,6 +401,19 @@ const FormPasien: FC = () => {
                         l: "penjamin",
                         v: "id",
                       })}
+                      value={findValue(
+                        jaminans.data,
+                        { id: Number(form.id_jaminan) },
+                        { label: "penjamin", value: "id" }
+                      )}
+                      onChange={(e) =>
+                        cast<{ label: string; value: number }>(
+                          e,
+                          ({ value }) => {
+                            setForm({ id_jaminan: value });
+                          }
+                        )
+                      }
                     />
                   </div>
 
@@ -317,7 +424,6 @@ const FormPasien: FC = () => {
                     <Select
                       inputId="poliklinik-tkp"
                       className="w-full"
-                      isClearable={true}
                       isSearchable={true}
                       styles={styles}
                       placeholder="Pilih..."
@@ -327,6 +433,19 @@ const FormPasien: FC = () => {
                         l: "nama_tkp",
                         v: "id",
                       })}
+                      value={findValue(
+                        tkps.data,
+                        { id: Number(form.id_tkp) },
+                        { label: "nama_tkp", value: "id" }
+                      )}
+                      onChange={(e) =>
+                        cast<{ label: string; value: number }>(
+                          e,
+                          ({ value }) => {
+                            setForm({ id_tkp: value });
+                          }
+                        )
+                      }
                     />
                   </div>
                 </div>
