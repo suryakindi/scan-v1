@@ -8,6 +8,7 @@ use App\Http\Controllers\ManagementClientController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RegistrasiController;
 use App\Http\Controllers\SatuSehatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-master-jaminan', [MasterDataController::class, 'getMasterjaminan'])->middleware('permission:Registrasi,view');
         Route::get('get-master-tkp', [MasterDataController::class, 'getMasterTkp'])->middleware('permission:Registrasi,view');
         Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Registrasi,view');
+
+
+        Route::prefix('registrasi-pelayanan')->middleware('permission:Registrasi,view')->group(function () {
+            Route::post('create-registrasi-pelayanan', [RegistrasiController::class, 'saveRegistrasiPasien'])->middleware('permission:Registrasi,create');
+        });
     });
 
     Route::prefix('pasien')->middleware('permission:Registrasi,view')->group(function () {
