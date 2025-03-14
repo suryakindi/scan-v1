@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\MappingDokterRuangan;
 use App\Models\MasterAlergi;
 use App\Models\MasterDepartemen;
 use App\Models\MasterDiagnosa;
@@ -354,4 +355,60 @@ class MasterDataService
             throw $e;
         }
     }
+
+    public function mappingDokterRuangan(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $mappingDokterRuangan = MappingDokterRuangan::create($data);
+            DB::commit();
+            return $mappingDokterRuangan;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal membuat mappingDokterRuangan: " . $e->getMessage());
+        }
+    }
+
+    public function editMappingDokterRuangan(MappingDokterRuangan $id_mapping, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $id_mapping->update($data);
+            DB::commit();
+            return $id_mapping;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function deleteMappingDokterRuangan(MappingDokterRuangan $id_mapping)
+    {
+        DB::beginTransaction();
+        try {
+            $id_mapping->update([
+                'is_active'=>false
+            ]);
+            DB::commit();
+            return $id_mapping;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function getMappingDokterRuangan($id_ruangan)
+    {
+        try {
+            $mappingDokterRuangan = MappingDokterRuangan::where('mapping_dokter_ruangans.is_active', TRUE)
+                                    ->where('id_ruangan', $id_ruangan)
+                                    ->join('users', 'users.id', '=', 'mapping_dokter_ruangans.id_user')
+                                    ->join('master_ruangans', 'master_ruangans.id', '=', 'mapping_dokter_ruangans.id_ruangan')
+                                    ->select('mapping_dokter_ruangans.id_user', 'users.name', 'master_ruangans.nama_ruangan')
+                                    ->paginate(100);
+            return $mappingDokterRuangan;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }   
 }

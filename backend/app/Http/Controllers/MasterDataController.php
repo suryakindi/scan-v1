@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MappingDokterRuangan;
 use App\Models\MasterAlergi;
 use App\Models\MasterDepartemen;
 use App\Models\MasterJaminan;
@@ -306,5 +307,45 @@ class MasterDataController extends Controller
             return $this->baseResponse('Terjadi kesalahan saat memperbarui', $e->getMessage(), null, 500);
         }
     }
+
+    public function mappingDokterRuangan(Request $request)
+    {
+        try {
+            $mappingDokterRuangan = $this->MasterDataService->mappingDokterRuangan($request->all());
+            return $this->baseResponse('Mapping Dokter Ruangan berhasil dibuat', null, $mappingDokterRuangan, 201);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Mapping Dokter Ruangan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function editMappingDokterRuangan(MappingDokterRuangan $id_mapping, Request $request)
+    {
+        try {
+            $mappingDokterRuangan = $this->MasterDataService->editMappingDokterRuangan($id_mapping, $request->all());
+            return $this->baseResponse('Mapping Dokter Ruangan berhasil update', null, $mappingDokterRuangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Mapping Dokter Ruangan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteMappingDokterRuangan(MappingDokterRuangan $id_mapping)
+    {
+        try {
+            $mappingDokterRuangan = $this->MasterDataService->deleteMappingDokterRuangan($id_mapping);
+            return $this->baseResponse('Delete berhasil', null, $mappingDokterRuangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat memperbarui', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getMappingDokterRuangan($id_ruangan)
+    {
+        try {
+            $mappingDokterRuangan = $this->MasterDataService->getMappingDokterRuangan($id_ruangan);
+            return $this->baseResponse('Mapping Dokter Ruangan berhasil didapatkan', null, $mappingDokterRuangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Mapping Dokter Ruangan', $e->getMessage(), null, 500);
+        }
+    }   
 
 }
