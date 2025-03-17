@@ -108,7 +108,7 @@ class RegistrasiServices
             'dokter.name as dokter',
             'users.name as created_by'
         )
-        ->get();
+        ->paginate(100);
     
     
         return $registrasi;
