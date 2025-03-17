@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class RegistrasiServices
@@ -43,7 +44,6 @@ class RegistrasiServices
 
     public function saveRegistrasiDetailPasien($registrasi)
     {
-      
         
         DB::beginTransaction();
         try {
@@ -81,6 +81,37 @@ class RegistrasiServices
             DB::rollBack();
             throw new Exception("Gagal membuat registrasiDetail: " . $e->getMessage());
         }       
+    }
+
+    public function listRegistrasiPasien()
+    {
+        $cdFix = Auth()->user()->cdfix;
+        $registrasi = RegistrasiDetailLayananPasien::join('registrasi_pasiens', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien', '=', 'registrasi_pasiens.id')
+        ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
+        ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
+        ->join('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
+        ->join('users', 'registrasi_pasiens.created_by', '=', 'users.id')
+        ->where('registrasi_pasiens.cdfix', $cdFix)
+        ->where(function ($query) {
+            $query->whereNotNull('registrasi_detail_layanan_pasiens.noantriandokter')
+                  ->orWhereNotNull('registrasi_detail_layanan_pasiens.noantrian');
+        })
+        ->whereNull('registrasi_detail_layanan_pasiens.tanggal_keluar')
+        ->whereNull('registrasi_pasiens.tanggal_pulang')
+        ->select(
+            'pasiens.nama', 
+            'registrasi_pasiens.no_registrasi', 
+            'registrasi_detail_layanan_pasiens.tanggal_masuk', 
+            'registrasi_detail_layanan_pasiens.noantrian', 
+            'registrasi_detail_layanan_pasiens.noantriandokter', 
+            'master_ruangans.nama_ruangan',
+            'dokter.name as dokter',
+            'users.name as created_by'
+        )
+        ->get();
+    
+    
+        return $registrasi;
     }
     
 }
