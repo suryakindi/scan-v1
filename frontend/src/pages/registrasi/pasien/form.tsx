@@ -110,7 +110,7 @@ const FormPasien: FC = () => {
   const getDoktersByRuanganId = async (id: number | string) => {
     try {
       const response = await api.get<ResponseT<PaginateT<_T1[]>>>(
-        `/master-data/get-mapping-dokter/${id}`
+        `/get-mapping-dokter/${id}`
       );
 
       if (response.data.data) {

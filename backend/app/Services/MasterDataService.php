@@ -57,22 +57,22 @@ class MasterDataService
             $alergi->update($data);
             DB::commit();
         } catch (\Exception $e) {
-            DB::rollback(); 
+            DB::rollback();
             throw new \Exception("Gagal Update Alergi: " . $e->getMessage());
         }
     }
-    
+
     public function deleteAlergi(MasterAlergi $alergi)
     {
         DB::beginTransaction();
         try {
             $alergi->update([
-                'is_active'=>false,
+                'is_active' => false,
             ]);
             DB::commit();
             return $alergi;
         } catch (\Exception $e) {
-            DB::rollback(); 
+            DB::rollback();
             throw new \Exception("Gagal Update Alergi: " . $e->getMessage());
         }
     }
@@ -97,23 +97,23 @@ class MasterDataService
             $jeniskunjungan->update($data);
             DB::commit();
         } catch (\Exception $e) {
-            DB::rollback(); 
+            DB::rollback();
             throw new \Exception("Gagal Update jeniskunjungan: " . $e->getMessage());
         }
     }
 
-     
+
     public function deleteMasterJenisKunjungan(MasterJenisKunjungan $id_jeniskunjungan)
     {
         DB::beginTransaction();
         try {
             $id_jeniskunjungan->update([
-                'is_active'=>false,
+                'is_active' => false,
             ]);
             DB::commit();
             return $id_jeniskunjungan;
         } catch (\Exception $e) {
-            DB::rollback(); 
+            DB::rollback();
             throw new \Exception("Gagal Update jeniskunjungan: " . $e->getMessage());
         }
     }
@@ -136,7 +136,7 @@ class MasterDataService
             if (!empty($SearchQuery)) {
                 $diagnosa->where(function ($q) use ($SearchQuery) {
                     $q->where('nama_icd_indo', 'ilike', '%' . $SearchQuery . '%')
-                      ->orWhere('kode_icd', 'ilike', '%' . $SearchQuery . '%');
+                        ->orWhere('kode_icd', 'ilike', '%' . $SearchQuery . '%');
                 });
             }
 
@@ -187,7 +187,7 @@ class MasterDataService
         DB::beginTransaction();
         try {
             $id_departemen->update([
-                'is_active'=>false
+                'is_active' => false
             ]);
             DB::commit();
             return $id_departemen;
@@ -228,7 +228,7 @@ class MasterDataService
         DB::beginTransaction();
         try {
             $id_ruangan->update([
-                'is_active'=>false
+                'is_active' => false
             ]);
             DB::commit();
             return $id_ruangan;
@@ -242,10 +242,10 @@ class MasterDataService
     {
         try {
             $getMasterRuangan = MasterRuangan::join('master_departemens', 'master_departemens.id', '=', 'master_ruangans.id_departemen')
-            ->where('master_ruangans.is_active', true)
-            ->where('master_ruangans.cdfix', $id_client)
-            ->select('master_ruangans.*', 'master_departemens.nama_departemen')
-            ->paginate(100);
+                ->where('master_ruangans.is_active', true)
+                ->where('master_ruangans.cdfix', $id_client)
+                ->select('master_ruangans.*', 'master_departemens.nama_departemen')
+                ->paginate(100);
             return $getMasterRuangan;
         } catch (\Exception $e) {
             throw new Exception("Gagal Mendapatkan Ruangan: " . $e->getMessage());
@@ -277,7 +277,7 @@ class MasterDataService
 
     public function editMasterTkp(MasterTkp $id_tkp, array $data)
     {
-        
+
         DB::beginTransaction();
         try {
             $id_tkp->update($data);
@@ -294,7 +294,7 @@ class MasterDataService
         DB::beginTransaction();
         try {
             $id_tkp->update([
-                'is_active'=>false
+                'is_active' => false
             ]);
             DB::commit();
             return $id_tkp;
@@ -329,7 +329,7 @@ class MasterDataService
 
     public function editMasterjaminan(MasterJaminan $id_jaminan, array $data)
     {
-        
+
         DB::beginTransaction();
         try {
             $id_jaminan->update($data);
@@ -346,7 +346,7 @@ class MasterDataService
         DB::beginTransaction();
         try {
             $id_jaminan->update([
-                'is_active'=>false
+                'is_active' => false
             ]);
             DB::commit();
             return $id_jaminan;
@@ -387,7 +387,7 @@ class MasterDataService
         DB::beginTransaction();
         try {
             $id_mapping->update([
-                'is_active'=>false
+                'is_active' => false
             ]);
             DB::commit();
             return $id_mapping;
@@ -401,14 +401,29 @@ class MasterDataService
     {
         try {
             $mappingDokterRuangan = MappingDokterRuangan::where('mapping_dokter_ruangans.is_active', TRUE)
-                                    ->where('id_ruangan', $id_ruangan)
-                                    ->join('users', 'users.id', '=', 'mapping_dokter_ruangans.id_user')
-                                    ->join('master_ruangans', 'master_ruangans.id', '=', 'mapping_dokter_ruangans.id_ruangan')
-                                    ->select('mapping_dokter_ruangans.id_user', 'users.name', 'master_ruangans.nama_ruangan')
-                                    ->paginate(100);
+                ->where('id_ruangan', $id_ruangan)
+                ->join('users', 'users.id', '=', 'mapping_dokter_ruangans.id_user')
+                ->join('master_ruangans', 'master_ruangans.id', '=', 'mapping_dokter_ruangans.id_ruangan')
+                ->select('mapping_dokter_ruangans.id_user', 'users.name', 'master_ruangans.nama_ruangan')
+                ->paginate(100);
             return $mappingDokterRuangan;
         } catch (\Exception $e) {
             throw $e;
         }
-    }   
+    }
+
+    public function getMappingDokterRuanganArray(array $id_ruangan)
+    {
+        try {
+            $mappingDokterRuangan = MappingDokterRuangan::where('mapping_dokter_ruangans.is_active', TRUE)
+                ->whereIn('id_ruangan', $id_ruangan)
+                ->join('users', 'users.id', '=', 'mapping_dokter_ruangans.id_user')
+                ->join('master_ruangans', 'master_ruangans.id', '=', 'mapping_dokter_ruangans.id_ruangan')
+                ->select('mapping_dokter_ruangans.id_user', 'users.name', 'master_ruangans.nama_ruangan')
+                ->paginate(100);
+            return $mappingDokterRuangan;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 }
