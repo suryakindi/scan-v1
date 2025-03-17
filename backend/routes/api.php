@@ -60,6 +60,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('registrasi-pelayanan')->middleware('permission:Registrasi,view')->group(function () {
             Route::post('create-registrasi-pelayanan', [RegistrasiController::class, 'saveRegistrasiPasien'])->middleware('permission:Registrasi,create');
+            Route::get('list-registrasi-pelayanan', [RegistrasiController::class, 'listRegistrasiPasien'])->middleware('permission:Registrasi,view');
         });
     });
 

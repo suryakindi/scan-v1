@@ -46,6 +46,7 @@ const ListPasien: FC = () => {
       <div className="flex w-1/2 items-center gap-2">
         <input
           type="text"
+          placeholder="No RM, NIK, Nama Pasien"
           className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
         />
 

@@ -57,11 +57,11 @@ class PasienController extends Controller
         }
     }
 
-    public function getPasien()
+    public function getPasien(Request $request)
     {
         $cdfix = Auth()->user()->cdfix;
         try {
-            $pasien = $this->PasienService->getPasien($cdfix);
+            $pasien = $this->PasienService->getPasien($cdfix, $request->all());
             return $this->baseResponse('Pasien berhasil didapatkan', null, $pasien, 200);
         } catch (\Exception $e) {
              return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);

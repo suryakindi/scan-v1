@@ -47,15 +47,35 @@ class PasienService
     }
 
 
-    public function getPasien($cdfix)
+    public function getPasien($cdfix, array $data = [])
     {
         try {
-            $pasien = Pasien::where('cdfix', $cdfix)->with('alamat')->paginate(100);
-            return $pasien;
+            $query = Pasien::where('cdfix', $cdfix)->with('alamat');
+    
+            if (!empty($data['search'])) {
+                $search = $data['search'];
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw("norm ILIKE ?", ["%$search%"])
+                      ->orWhereRaw("nama ILIKE ?", ["%$search%"])
+                      ->orWhereRaw("nik ILIKE ?", ["%$search%"]);
+                });
+            }
+    
+            $pasien = $query->paginate(100);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Data pasien berhasil diambil',
+                'data' => $pasien
+            ], 200);
         } catch (\Exception $e) {
-            throw new \Exception('Gagal mendapatkan pasien: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mendapatkan pasien: ' . $e->getMessage()
+            ], 500);
         }
     }
+    
 
     public function getPasienById($cdfix, $id_pasien)
     {
