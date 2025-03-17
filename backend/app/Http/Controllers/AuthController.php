@@ -19,6 +19,7 @@ class AuthController extends Controller
     {
         $this->userService = $userService;
     }
+
     public function registerUser(RegisterUserRequest $request)
     {
         try {
@@ -29,7 +30,8 @@ class AuthController extends Controller
         }
     }
 
-    public function updateUser($id, Request $request){
+    public function updateUser($id, Request $request)
+    {
         try {
             $user = $this->userService->updateUser($id, $request->all());
             return $this->baseResponse('Update User Berhasil', null, $user, 201);
@@ -56,9 +58,26 @@ class AuthController extends Controller
         ]);
 
         $response = $this->userService->loginUser($request->username, $request->password);
-
+    
         return $this->baseResponse($response['message'], null, $response['data'], $response['code']);
     }
+
+    public function logoutUser(Request $request)
+    {
+        // Revoke (cabut) token yang sedang aktif
+        if (Auth::check()) {
+            // Cabut (hapus) token saat ini yang sedang digunakan
+            $user = Auth::user();
+            
+            // Jika menggunakan token berbasis Sanctum, kita bisa mencabut token aktif yang digunakan saat ini
+            $user->currentAccessToken()->delete(); // Menghapus token aktif milik pengguna saat ini
+        }
+
+        
+        // Mengembalikan response
+        return $this->baseResponse('Logout Berhasil', null, null , 200);
+    }
+    
 
     public function checkToken()
     {
@@ -69,9 +88,7 @@ class AuthController extends Controller
     public function getUser()
     {
         try {
-            // Kirim id_permission ke service bersama dengan data request
             $user = $this->userService->getUser();
-    
             return $this->baseResponse('User berhasil Didapatkan', null, $user, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat get user', $e->getMessage(), null, 500);

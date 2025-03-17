@@ -41,10 +41,12 @@ Route::prefix('auth')->group(function () {
 
 
     Route::post('login-user', [AuthController::class, 'LoginUser']);
+  
 });
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('logout-user', [AuthController::class, 'logoutUser']);
     Route::get('check-token', [AuthController::class, 'CheckToken']);
 
     Route::middleware('permission:Registrasi,view')->group(function () {
