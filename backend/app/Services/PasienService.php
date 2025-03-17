@@ -63,16 +63,9 @@ class PasienService
     
             $pasien = $query->paginate(100);
     
-            return response()->json([
-                'success' => true,
-                'message' => 'Data pasien berhasil diambil',
-                'data' => $pasien
-            ], 200);
+            return $pasien;
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mendapatkan pasien: ' . $e->getMessage()
-            ], 500);
+            throw new Exception("Gagal", 1);
         }
     }
     

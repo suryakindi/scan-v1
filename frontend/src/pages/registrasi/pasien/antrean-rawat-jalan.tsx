@@ -1,21 +1,33 @@
 import { FC, useEffect, useState } from "react";
-import { Link, useOutletContext } from "react-router";
+import { useOutletContext } from "react-router";
 import * as HOutline from "@heroicons/react/24/outline";
 import { api, ResponseT } from "../../../utils/api";
 import { paginateInit, PaginateT } from "../../../utils/paginate";
-import { PasienT } from "./types";
 import clsx from "clsx";
 import { LayoutContext } from "../../../layout/types";
 
+type _Get = {
+  nama: string;
+  no_registrasi: string;
+  tanggal_masuk: string;
+  noantrian: string;
+  noantriandokter: string;
+  nama_ruangan: string;
+  dokter: string;
+  created_by: string;
+};
+
 const ListPasien: FC = () => {
   const { setIsProcess } = useOutletContext<LayoutContext>();
-  const [pasiens, setPasiens] = useState<PaginateT<PasienT[]>>(paginateInit());
+  const [pasiens, setPasiens] = useState<PaginateT<_Get[]>>(paginateInit());
 
   const [search, setSearch] = useState<string>("");
-  const getPasiens = async (url: string = "/pasien/get-pasien") => {
+  const getPasiens = async (
+    url: string = "/registrasi-pelayanan/list-registrasi-pelayanan"
+  ) => {
     try {
       const query = search ? `?search=${encodeURIComponent(search)}` : "";
-      const response = await api.get<ResponseT<PaginateT<PasienT[]>>>(
+      const response = await api.get<ResponseT<PaginateT<_Get[]>>>(
         `${url}${query}`
       );
 
@@ -61,48 +73,43 @@ const ListPasien: FC = () => {
           <HOutline.MagnifyingGlassIcon className="size-6" />
           <span>Cari</span>
         </button>
-        <Link
-          to="/registrasi/pasien"
-          className="py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-md flex items-center justify-center outline-none text-nowrap h-full gap-2 cursor-pointer"
-        >
-          <HOutline.PlusIcon className="size-6" />
-          <span>Pasien Baru</span>
-        </Link>
       </div>
       <table className="me-table">
         <thead>
           <tr>
             <th>NO</th>
-            <th>Nama</th>
-            <th>NIK</th>
-            <th>Tgl Lahir</th>
-            <th>No RM</th>
-            <th>No BPJS</th>
             <th>&nbsp;</th>
+            <th>Nama</th>
+            <th>NO Registrasi</th>
+            <th>NO Antrian</th>
+            <th>NO Antrian Dokter</th>
+            <th>Nama Ruangan</th>
+            <th>Dokter</th>
           </tr>
         </thead>
         <tbody>
           {pasiens.data.map((item, key) => (
             <tr key={key}>
               <td>{key + 1}</td>
-              <td>{item.nama}</td>
-              <td>{item.nik}</td>
-              <td>{item.tanggal_lahir}</td>
-              <td>{item.norm}</td>
-              <td>{item.no_bpjs}</td>
               <td>
                 <div className="flex gap-2 w-full items-center justify-center">
-                  <Link
-                    to={`/registrasi/form/${item.id}`}
-                    className="p-1.5 bg-cyan-500 hover:bg-cyan-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group"
+                  <button
+                    type="button"
+                    className="p-1.5 bg-amber-500 hover:bg-amber-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group cursor-pointer"
                   >
-                    <HOutline.ArrowRightIcon className="size-6" />
+                    <HOutline.PhoneIcon className="size-6" />
                     <span className="absolute text-nowrap mb-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all group-hover:block bg-gray-800 text-white text-sm rounded-md px-2 py-1 shadow-lg top-full z-10">
-                      Registrasi
+                      Panggil Pasien
                     </span>
-                  </Link>
+                  </button>
                 </div>
               </td>
+              <td>{item.nama}</td>
+              <td>{item.no_registrasi}</td>
+              <td>{item.noantrian}</td>
+              <td>{item.noantriandokter}</td>
+              <td>{item.nama_ruangan}</td>
+              <td>{item.dokter}</td>
             </tr>
           ))}
         </tbody>

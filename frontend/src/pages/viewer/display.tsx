@@ -1,6 +1,30 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 const Display: FC = () => {
+  type _T1 = {
+    id_user: number;
+    name: string;
+    nama_ruangan: string;
+  };
+
+  type _T2 = {
+    client_id: number | null;
+    ruangan_ids: number[];
+    dokters: _T1[];
+  };
+
+  const [data, setData] = useState<_T2>();
+  const raw = localStorage.getItem("queue");
+
+  useEffect(() => {
+    return () => {
+      if (raw) {
+        setData(JSON.parse(raw));
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="grid grid-cols-1 gap-6 p-6">
       <div className="bg-blue-300 flex w-full p-6 rounded-md">
@@ -31,15 +55,14 @@ const Display: FC = () => {
         </div>
       </div>
       <div className="grid grid-cols-4 gap-6">
-        {Array.from({ length: 6 }, (_, k) => (
+        {data?.dokters.map((dokter, k) => (
           <div
             key={k}
             className="bg-white shadow-lg p-6 rounded-md gap-2 flex flex-col"
           >
             <div className="bg-gray-200 w-24 rounded-full aspect-square skeleton" />
-            <div className="bg-gray-200 h-6 rounded-sm skeleton" />
-            <div className="bg-gray-200 h-6 rounded-sm skeleton" />
-            <div className="bg-gray-200 h-6 rounded-sm skeleton" />
+            <span>{dokter.nama_ruangan}</span>
+            <span>{dokter.name}</span>
           </div>
         ))}
       </div>

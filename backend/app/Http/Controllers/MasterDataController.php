@@ -26,7 +26,7 @@ class MasterDataController extends Controller
         try {
             $validatedData = $request->validate([
                 'nama_alergi' => 'required|string',
-                'kode_bpjs'=>'nullable'
+                'kode_bpjs' => 'nullable'
             ]);
             $MasterDataService = $this->MasterDataService->createMasterAlergi($validatedData);
             return $this->baseResponse('Master Alergi berhasil dibuat', null, $MasterDataService, 201);
@@ -70,7 +70,7 @@ class MasterDataController extends Controller
         try {
             $validatedData = $request->validate([
                 'jenis_kunjungan' => 'required|string',
-                'kode_bpjs'=>'nullable'
+                'kode_bpjs' => 'nullable'
             ]);
             $MasterDataService = $this->MasterDataService->createMasterJenisKunjungan($validatedData);
             return $this->baseResponse('Master jenis_kunjungan berhasil dibuat', null, $MasterDataService, 201);
@@ -79,7 +79,7 @@ class MasterDataController extends Controller
         }
     }
 
-    public function editMasterJenisKunjungan(MasterJenisKunjungan $id_jeniskunjungan,Request $request)
+    public function editMasterJenisKunjungan(MasterJenisKunjungan $id_jeniskunjungan, Request $request)
     {
         try {
             $updateAlergi = $this->MasterDataService->updateMasterJenisKunjungan($id_jeniskunjungan, $request->all());
@@ -126,8 +126,8 @@ class MasterDataController extends Controller
         try {
             $validatedData = $request->validate([
                 'nama_departemen' => 'required|string',
-                'cdfix'=>'required',
-                'is_active'=>'nullable',
+                'cdfix' => 'required',
+                'is_active' => 'nullable',
             ]);
             $MasterDataService = $this->MasterDataService->createDepartemen($validatedData);
             return $this->baseResponse('Master Departemen berhasil dibuat', null, $MasterDataService, 201);
@@ -145,7 +145,7 @@ class MasterDataController extends Controller
             return $this->baseResponse('Terjadi kesalahan saat Master departemen', $e->getMessage(), null, 500);
         }
     }
-    
+
     public function editMasterJenisDepartemen(MasterDepartemen $id_departemen, Request $request)
     {
         try {
@@ -171,10 +171,10 @@ class MasterDataController extends Controller
         try {
             $validatedData = $request->validate([
                 'nama_ruangan' => 'required|string',
-                'id_departemen'=>'required',
-                'kodeexternal'=>'nullable',
-                'cdfix'=>'required',
-                'is_active'=>'nullable',
+                'id_departemen' => 'required',
+                'kodeexternal' => 'nullable',
+                'cdfix' => 'required',
+                'is_active' => 'nullable',
             ]);
             $MasterDataService = $this->MasterDataService->createMasterRuangan($validatedData);
             return $this->baseResponse('Master Ruangan berhasil dibuat', null, $MasterDataService, 201);
@@ -185,7 +185,7 @@ class MasterDataController extends Controller
 
     public function editMasterRuangan(MasterRuangan $id_ruangan, Request $request)
     {
-      
+
         try {
             $masterRuangan = $this->MasterDataService->editMasterRuangan($id_ruangan, $request->all());
             return $this->baseResponse('Master Ruangan berhasil update', null, $masterRuangan, 200);
@@ -216,13 +216,13 @@ class MasterDataController extends Controller
 
     public function createTkp(Request $request)
     {
-       
+
         try {
             $validatedData = $request->validate([
                 'nama_tkp' => 'required|string',
-                'kodeexternal'=>'nullable',
-                'cdfix'=>'required',
-                'is_active'=>'nullable',
+                'kodeexternal' => 'nullable',
+                'cdfix' => 'required',
+                'is_active' => 'nullable',
             ]);
             $MasterDataService = $this->MasterDataService->createTkp($validatedData);
             return $this->baseResponse('Master tkp berhasil dibuat', null, $MasterDataService, 201);
@@ -263,13 +263,13 @@ class MasterDataController extends Controller
 
     public function createjaminan(Request $request)
     {
-       
+
         try {
             $validatedData = $request->validate([
                 'penjamin' => 'required|string',
-                'kodeexternal'=>'nullable',
-                'cdfix'=>'required',
-                'is_active'=>'nullable',
+                'kodeexternal' => 'nullable',
+                'cdfix' => 'required',
+                'is_active' => 'nullable',
             ]);
             $MasterDataService = $this->MasterDataService->createjaminan($validatedData);
             return $this->baseResponse('Master createjaminan berhasil dibuat', null, $MasterDataService, 201);
@@ -346,6 +346,18 @@ class MasterDataController extends Controller
         } catch (\Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat Mapping Dokter Ruangan', $e->getMessage(), null, 500);
         }
-    }   
+    }
+
+    public function getMappingDokterRuanganArray(Request $request)
+    {
+        try {
+            $id_ruangan = ((array) $request->ids) ?? [];
+
+            $mappingDokterRuangan = $this->MasterDataService->getMappingDokterRuanganArray($id_ruangan);
+            return $this->baseResponse('Mapping Dokter Ruangan berhasil didapatkan', null, $mappingDokterRuangan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Mapping Dokter Ruangan', $e->getMessage(), null, 500);
+        }
+    }
 
 }

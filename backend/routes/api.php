@@ -41,7 +41,7 @@ Route::prefix('auth')->group(function () {
 
 
     Route::post('login-user', [AuthController::class, 'LoginUser']);
-  
+
 });
 
 
@@ -58,7 +58,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-master-jaminan', [MasterDataController::class, 'getMasterjaminan'])->middleware('permission:Registrasi,view');
         Route::get('get-master-tkp', [MasterDataController::class, 'getMasterTkp'])->middleware('permission:Registrasi,view');
         Route::get('get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan'])->middleware('permission:Registrasi,view');
-
+        Route::get('get-mapping-dokter/{id_ruangan}', [MasterDataController::class, 'getMappingDokterRuangan'])->middleware('permission:Registrasi,view');
 
         Route::prefix('registrasi-pelayanan')->middleware('permission:Registrasi,view')->group(function () {
             Route::post('create-registrasi-pelayanan', [RegistrasiController::class, 'saveRegistrasiPasien'])->middleware('permission:Registrasi,create');
@@ -160,12 +160,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-  
+
 
 
 });
 
-  // Route Viewer
+// Route Viewer
 
-  Route::get('/viewer/get-clients', [ManagementClientController::class, 'getAll']);
-  Route::get('/viewer/get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan']);
+Route::get('/viewer/get-clients', [ManagementClientController::class, 'getAll']);
+Route::get('/viewer/get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan']);
+Route::get('/viewer/get-mapping-dokter/{id_ruangan}', [MasterDataController::class, 'getMappingDokterRuangan']);
+Route::get('/viewer/get-mapping-dokter-array', [MasterDataController::class, 'getMappingDokterRuanganArray']);
