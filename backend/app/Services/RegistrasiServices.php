@@ -100,6 +100,10 @@ class RegistrasiServices
         ->whereNull('registrasi_pasiens.tanggal_pulang')
         ->select(
             'pasiens.nama', 
+            'pasiens.id as id_pasien', 
+            'registrasi_detail_layanan_pasiens.id as id_registrasi_detail_layanan',
+            'master_ruangans.id as id_ruangan',
+            'dokter.id as id_dokter',
             'registrasi_pasiens.no_registrasi', 
             'registrasi_detail_layanan_pasiens.tanggal_masuk', 
             'registrasi_detail_layanan_pasiens.noantrian', 
