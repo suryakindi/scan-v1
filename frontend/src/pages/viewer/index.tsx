@@ -226,6 +226,10 @@ const Viewer: FC = () => {
                   const selected = e as _T1;
                   return `${selected.name} - ${selected.nama_ruangan}`;
                 }}
+                getOptionValue={(e) => {
+                  const selected = e as _T1;
+                  return `${selected.id_user}`;
+                }}
                 value={form.dokters}
                 onChange={(e) => {
                   const selected = e as _T1[];
