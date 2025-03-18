@@ -1,23 +1,39 @@
 import { FC, useEffect, useState } from "react";
-import { useOutletContext } from "react-router";
+import { useLoaderData, useOutletContext } from "react-router";
 import * as HOutline from "@heroicons/react/24/outline";
 import { api, ResponseT } from "../../../utils/api";
 import { paginateInit, PaginateT } from "../../../utils/paginate";
 import clsx from "clsx";
 import { LayoutContext } from "../../../layout/types";
+import useWebSocket from "react-use-websocket";
+import { LoaderT } from "../../../user";
 
 type _Get = {
+  created_by: string;
+  dokter: string;
+  id_dokter: number;
+  id_pasien: number;
+  id_registrasi_detail_layanan: number;
+  id_ruangan: number;
   nama: string;
+  nama_ruangan: string;
   no_registrasi: string;
-  tanggal_masuk: string;
   noantrian: string;
   noantriandokter: string;
-  nama_ruangan: string;
-  dokter: string;
-  created_by: string;
+  tanggal_masuk: string;
 };
 
 const ListPasien: FC = () => {
+  const { sendMessage } = useWebSocket("ws://localhost:3000/socket/call", {
+    shouldReconnect: () => true,
+    onOpen: () => console.log("WebSocket connection opened!"),
+    onClose: () => console.log("WebSocket connection closed!"),
+    onError: (event: unknown) => console.error("WebSocket error:", event),
+    onMessage: (event: unknown) => console.log("Received message:", event),
+  });
+
+  const { user } = useLoaderData<LoaderT>();
+
   const { setIsProcess } = useOutletContext<LayoutContext>();
   const [pasiens, setPasiens] = useState<PaginateT<_Get[]>>(paginateInit());
 
@@ -94,6 +110,11 @@ const ListPasien: FC = () => {
               <td>
                 <div className="flex gap-2 w-full items-center justify-center">
                   <button
+                    onClick={() => {
+                      sendMessage(
+                        JSON.stringify({ cdfix: user.cdfix, data: item })
+                      );
+                    }}
                     type="button"
                     className="p-1.5 bg-amber-500 hover:bg-amber-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group cursor-pointer"
                   >
