@@ -27,12 +27,14 @@ const Display: FC = () => {
 
   return (
     <div className="grid grid-cols-1 gap-6 p-6">
-      <div className="bg-blue-300 flex w-full p-6 rounded-md">
-        <div className="max-w-24 mr-6 rounded-lg overflow-hidden">
+      <div className="bg-red-400 flex items-center justify-center w-full p-4 rounded-md">
+        <div className="max-w-16 mr-4 rounded-lg overflow-hidden">
           <img src="/images/logo_t.png" alt="logo..." />
         </div>
+        <span className="text-gray-800 font-semibold text-lg">
+          Scan Digital Nusantara Queue System
+        </span>
       </div>
-
       <div className="grid grid-cols-2 auto-rows-max gap-6">
         <div className="bg-white shadow-lg p-6 rounded-md flex items-center">
           <div className="w-full aspect-video">
@@ -46,26 +48,34 @@ const Display: FC = () => {
         </div>
         <div className="bg-white shadow-lg p-6 rounded-md items-center flex flex-col gap-6">
           <span className="text-5xl font-bold">Antrian Terakhir</span>
-          <div className="bg-blue-300 flex justify-center items-center w-full rounded-xl flex-2/3">
+          <div className="bg-green-300 flex justify-center items-center w-full rounded-xl flex-2/3">
             <span className="text-6xl font-bold">3</span>
           </div>
           <div className="flex flex-1/3">
             <span className="text-2xl">Silahkan Menuju</span>
           </div>
+          
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-6">
-        {data?.dokters.map((dokter, k) => (
-          <div
-            key={k}
-            className="bg-white shadow-lg p-6 rounded-md gap-2 flex flex-col"
-          >
-            <div className="bg-gray-200 w-24 rounded-full aspect-square skeleton" />
-            <span>{dokter.nama_ruangan}</span>
-            <span>{dokter.name}</span>
-          </div>
-        ))}
-      </div>
+        <div className="grid grid-cols-4 gap-6">
+          {data?.dokters.map((dokter, k) => (
+            <div
+              key={k}
+              className="bg-white shadow-lg p-6 rounded-md gap-2 flex flex-col items-center"
+            >
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                <img src="/images/doctor.svg" alt="Doctor..." className="w-10 h-10" />
+              </div>
+              <span className="bg-green-500 text-white px-3 py-1 rounded-md text-sm font-semibold">
+                1
+              </span>
+              <span>{dokter.nama_ruangan}</span>
+              <span>{dokter.name}</span>
+            </div>
+          ))}
+        </div>
+
+
     </div>
   );
 };
