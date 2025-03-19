@@ -95,7 +95,7 @@ const Display: FC = () => {
   }, [lastJsonMessage]);
 
   return (
-    <div className="grid grid-cols-1 gap-6 p-6">
+    <div className="grid grid-cols-1 gap-6 p-6 m-auto max-w-6xl">
       <div className="bg-red-400 flex items-center justify-center w-full p-4 rounded-md">
         <div className="max-w-16 mr-4 rounded-lg overflow-hidden">
           <img src="/images/logo_t.png" alt="logo..." />
@@ -104,35 +104,21 @@ const Display: FC = () => {
           Scan Digital Nusantara Queue System
         </span>
       </div>
-      <div className="grid grid-cols-2 auto-rows-max gap-6">
-        <div className="bg-white shadow-lg p-6 rounded-md flex items-center">
-          <div className="w-full aspect-video">
-            <iframe
-              className="w-full h-full"
-              src="https://www.youtube.com/embed/bxMsHP06SN8?start=241&end=282&autoplay=1&loop=1&playlist=bxMsHP06SN8&controls=0&modestbranding=1&rel=0&showinfo=0&fs=0&disablekb=1&iv_load_policy=3"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay"
-            ></iframe>
-          </div>
-        </div>
-        <div className="bg-white shadow-lg p-6 rounded-md items-center flex flex-col gap-6">
-          <span className="text-5xl font-bold">Antrian Terakhir</span>
-          <div className="bg-green-300 flex justify-center items-center w-full rounded-xl flex-2/3 flex-col gap-10">
-            {current ? (
-              <Fragment>
-                <span className="text-xl font-bold">
-                  {current.nama_ruangan}
-                </span>
-                <span className="text-6xl font-bold">{current.noantrian}</span>
-                <span className="text-xl font-bold">{current.nama}</span>
-              </Fragment>
-            ) : (
-              <span className="text-6xl font-bold">_</span>
-            )}
-          </div>
+      <div className="bg-white shadow-lg p-6 rounded-md items-center flex flex-col gap-6 pt-12">
+        <span className="text-5xl font-bold">Antrian Terakhir</span>
+        <div className="bg-green-300 flex justify-center items-center w-full rounded-xl flex-2/3 flex-col gap-10 py-6">
+          {current ? (
+            <Fragment>
+              <span className="text-xl font-bold">{current.nama_ruangan}</span>
+              <span className="text-6xl font-bold">{current.noantrian}</span>
+              <span className="text-xl font-bold">{current.nama}</span>
+            </Fragment>
+          ) : (
+            <span className="text-6xl font-bold">_</span>
+          )}
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data?.dokters.map((dokter, k) => (
           <div
             key={k}
