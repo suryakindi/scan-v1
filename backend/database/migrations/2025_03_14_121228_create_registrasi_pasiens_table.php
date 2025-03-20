@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_jenis_kunjungan');
             $table->unsignedBigInteger('id_jaminan');
             $table->unsignedBigInteger('id_tkp');
-            $table->unsignedBigInteger('id_dokter');
+            $table->unsignedBigInteger('id_dokter')->nullable();
             $table->string('no_registrasi');
             $table->datetime('tanggal_registrasi');
             $table->datetime('tanggal_pulang')->nullable();
