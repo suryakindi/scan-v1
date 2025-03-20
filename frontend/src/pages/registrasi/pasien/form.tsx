@@ -9,7 +9,7 @@ import {
 } from "../../../utils/react-select";
 import clsx from "clsx";
 import { Link, useLoaderData, useOutletContext, useParams } from "react-router";
-import { JaminanT, JenisKunjunganT, PasienT, RuanganT, TkpT } from "./types";
+import { JaminanT, JenisKunjunganT, PasienT, RuanganT } from "./types";
 import { LoaderT } from "../../../user";
 import { api, ResponseT, useXState } from "../../../utils/api";
 import { paginateInit, PaginateT } from "../../../utils/paginate";
@@ -20,6 +20,19 @@ const FormPasien: FC = () => {
   const param = useParams();
   const { setIsProcess } = useOutletContext<LayoutContext>();
   const { user } = useLoaderData<LoaderT>();
+  const [isBPJSAvailable, setIsBPJSAvailable] = useState<boolean>(false);
+  const [form, setForm, formFn] = useXState<_Payload, _Response>(
+    {
+      id_pasien: Number(param.id),
+      id_ruangan_asal: null,
+      id_jenis_kunjungan: null,
+      id_jaminan: null,
+      tanggal_registrasi: "",
+      is_active: true,
+      cdfix: user.cdfix,
+    },
+    { method: "POST", url: "/registrasi-pelayanan/create-registrasi-pelayanan" }
+  );
 
   const [pasien, setPasien] = useState<PasienT | null>(null);
 
@@ -30,6 +43,9 @@ const FormPasien: FC = () => {
       );
       if (response.data.data) {
         setPasien(response.data.data);
+        return response.data.data;
+      } else {
+        return null;
       }
     } catch (error) {
       console.error(error);
@@ -41,8 +57,6 @@ const FormPasien: FC = () => {
     id_ruangan_asal: number | null;
     id_jenis_kunjungan: number | null;
     id_jaminan: number | null;
-    id_tkp: number | null;
-    id_dokter: number | null;
     tanggal_registrasi: string;
     is_active: boolean;
     cdfix: number | string | null;
@@ -53,8 +67,6 @@ const FormPasien: FC = () => {
     id_ruangan_asal: number;
     id_jenis_kunjungan: number;
     id_jaminan: number;
-    id_tkp: number;
-    id_dokter: number;
     tanggal_registrasi: string;
     is_active: boolean;
     cdfix: number;
@@ -65,21 +77,6 @@ const FormPasien: FC = () => {
     created_at: string;
     id: number;
   };
-
-  const [form, setForm, formFn] = useXState<_Payload, _Response>(
-    {
-      id_pasien: Number(param.id),
-      id_ruangan_asal: null,
-      id_jenis_kunjungan: null,
-      id_jaminan: null,
-      id_tkp: null,
-      id_dokter: null,
-      tanggal_registrasi: "",
-      is_active: true,
-      cdfix: user.cdfix,
-    },
-    { method: "POST", url: "/registrasi-pelayanan/create-registrasi-pelayanan" }
-  );
 
   const [ruangans, setRuangans] = useState<PaginateT<RuanganT[]>>(
     paginateInit()
@@ -93,28 +90,6 @@ const FormPasien: FC = () => {
 
       if (response.data.data) {
         setRuangans(response.data.data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  type _T1 = {
-    id_user: number;
-    name: string;
-    nama_ruangan: string;
-  };
-
-  const [dokters, setDokters] = useState<PaginateT<_T1[]>>(paginateInit());
-
-  const getDoktersByRuanganId = async (id: number | string) => {
-    try {
-      const response = await api.get<ResponseT<PaginateT<_T1[]>>>(
-        `/get-mapping-dokter/${id}`
-      );
-
-      if (response.data.data) {
-        setDokters(response.data.data);
       }
     } catch (error) {
       console.error(error);
@@ -147,22 +122,31 @@ const FormPasien: FC = () => {
       );
       if (response.data.data) {
         setJaminans(response.data.data);
+        return response.data.data;
+      } else {
+        return null;
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  const [tkps, setTkps] = useState<PaginateT<TkpT[]>>(paginateInit());
-
-  const getTkp = async () => {
+  const getKeteranganBPJS = async (no_bpjs: number | string) => {
     try {
-      const response = await api.get<ResponseT<PaginateT<TkpT[]>>>(
-        "/master-data/get-master-tkp"
+      type _Response = {
+        original: { data: { ketAktif: "AKTIF" | string } };
+      };
+
+      const response = await api.get<ResponseT<_Response>>(
+        `/registrasi-pelayanan/keterangan-aktif-bpjs/id_client/${user.cdfix}?nokartu=${no_bpjs}`
       );
-      if (response.data.data) {
-        setTkps(response.data.data);
-      }
+
+      const isBPJSActive =
+        response?.data?.data?.original?.data?.ketAktif === "AKTIF";
+
+      setIsBPJSAvailable(isBPJSActive);
+
+      return isBPJSActive;
     } catch (error) {
       console.error(error);
     }
@@ -171,8 +155,7 @@ const FormPasien: FC = () => {
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     try {
-      const response = await formFn.submit();
-      console.log(response);
+      await formFn.submit();
 
       Toast.fire({
         icon: "success",
@@ -180,10 +163,17 @@ const FormPasien: FC = () => {
         text: "Registrasi berhasil",
       });
     } catch (error) {
+      const list: unknown[] = [
+        "Gagal membuat Registrasi: Pasien masih memiliki pendaftaran yang belum selesai.",
+      ];
+
+      const e = error as { response?: { data: { message: string } } };
+      const message = e.response?.data.message;
+
       Toast.fire({
         icon: "error",
         title: "Gagal",
-        text: "Registrasi gagal",
+        text: list.includes(message) ? message : "Registrasi gagal",
       });
       console.error(error);
     }
@@ -193,12 +183,30 @@ const FormPasien: FC = () => {
     return () => {
       const load = async () => {
         setIsProcess(true);
-        await getPasienById();
-        await getMasterRuangan();
-        await getJenisKunjungan();
-        await getJaminan();
-        await getTkp();
-        setIsProcess(false);
+
+        try {
+          const _pasien = await getPasienById();
+          await getMasterRuangan();
+          await getJenisKunjungan();
+          const _jaminans = await getJaminan();
+
+          if (_pasien) {
+            const bpjs = await getKeteranganBPJS(_pasien.no_bpjs);
+            if (bpjs && _jaminans) {
+              const finded = findValue(
+                _jaminans.data,
+                { penjamin: "JKN" },
+                { id_jaminan: "id" }
+              );
+
+              setForm({ id_jaminan: Number(finded?.id_jaminan) });
+            }
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsProcess(false);
+        }
       };
 
       load();
@@ -302,48 +310,8 @@ const FormPasien: FC = () => {
                             setIsProcess(true);
                             setForm({
                               id_ruangan_asal: value,
-                              id_dokter: null,
                             });
-                            await getDoktersByRuanganId(value);
                             setIsProcess(false);
-                          }
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <label className="mb-1" htmlFor="poliklinik-dokter">
-                      Dokter
-                    </label>
-                    <Select
-                      inputId="poliklinik-dokter"
-                      className="w-full"
-                      isSearchable={true}
-                      styles={styles}
-                      placeholder="Pilih..."
-                      menuPlacement="bottom"
-                      required={true}
-                      options={
-                        ["", null, 0].includes(form.id_ruangan_asal)
-                          ? []
-                          : mapOptions(dokters.data, {
-                              l: "name",
-                              v: "id_user",
-                            })
-                      }
-                      value={findValue(
-                        dokters.data,
-                        {
-                          id_user: Number(form.id_dokter),
-                        },
-                        { label: "name", value: "id_user" }
-                      )}
-                      onChange={(e) =>
-                        cast<{ label: string; value: number }>(
-                          e,
-                          ({ value }) => {
-                            setForm({ id_dokter: value });
                           }
                         )
                       }
@@ -397,10 +365,16 @@ const FormPasien: FC = () => {
                       placeholder="Pilih..."
                       menuPlacement="bottom"
                       required={true}
-                      options={mapOptions(jaminans.data, {
-                        l: "penjamin",
-                        v: "id",
-                      })}
+                      options={mapOptions(
+                        jaminans.data.filter(
+                          ({ penjamin }) =>
+                            isBPJSAvailable || penjamin !== "JKN"
+                        ),
+                        {
+                          l: "penjamin",
+                          v: "id",
+                        }
+                      )}
                       value={findValue(
                         jaminans.data,
                         { id: Number(form.id_jaminan) },
@@ -411,38 +385,6 @@ const FormPasien: FC = () => {
                           e,
                           ({ value }) => {
                             setForm({ id_jaminan: value });
-                          }
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <label className="mb-1" htmlFor="poliklinik-tkp">
-                      TKP
-                    </label>
-                    <Select
-                      inputId="poliklinik-tkp"
-                      className="w-full"
-                      isSearchable={true}
-                      styles={styles}
-                      placeholder="Pilih..."
-                      menuPlacement="bottom"
-                      required={true}
-                      options={mapOptions(tkps.data, {
-                        l: "nama_tkp",
-                        v: "id",
-                      })}
-                      value={findValue(
-                        tkps.data,
-                        { id: Number(form.id_tkp) },
-                        { label: "nama_tkp", value: "id" }
-                      )}
-                      onChange={(e) =>
-                        cast<{ label: string; value: number }>(
-                          e,
-                          ({ value }) => {
-                            setForm({ id_tkp: value });
                           }
                         )
                       }
