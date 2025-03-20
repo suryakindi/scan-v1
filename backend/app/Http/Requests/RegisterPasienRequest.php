@@ -23,7 +23,7 @@ class RegisterPasienRequest extends FormRequest
             'id_jenis_kunjungan' => 'required|exists:master_jenis_kunjungans,id',
             'id_jaminan' => 'required|exists:master_jaminans,id',
             'id_tkp' => 'required|exists:master_tkps,id',
-            'id_dokter' => 'required|exists:users,id',
+            // 'id_dokter' => 'required|exists:users,id',
             // 'no_registrasi' => 'required|string|unique:registrasi_pasiens,no_registrasi',
             'tanggal_registrasi' => 'required|date',
             'is_active' => 'boolean',

@@ -511,6 +511,48 @@ class BPJSToolsService
     }
 
 
+    public function GetKetPesertaAktifBPJS(array $data, $id_client, $service_name)
+    {
+        $set = $this->getBPJSToolsById($id_client);
+        $nokartubpjs = $data['nokartu'];
+        foreach ($set['service_name'] as $key => $item) {
+            if($item['service_name'] == $service_name){
+                $base_url = $item['base_url'] . '/peserta/'.$nokartubpjs;
+                break;
+            }
+        }
+        if (!$base_url) {
+            return response()->json(['error' => 'Base URL untuk PCare tidak ditemukan'], 400);
+        }
+        $headers = $this->SetUpHeader($id_client, $service_name);
+        $connect = new \GuzzleHttp\Client();
+        try {
+            $response = $connect->get($base_url, [
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=utf-8',
+                    'X-cons-id' => $this->cons_id,
+                    'X-signature' => $headers['X-signature'],
+                    'X-timestamp' => $headers['X-timestamp'],
+                    'X-authorization' => $headers['X-authorization'],
+                    'user_key' => $headers['user_key'],                
+                ],
+                'timeout' => 10, // Set timeout 10 detik
+            
+            ]);
+
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody();
+            $responseData = json_decode($body, true);
+            return $this->DecryptResponse($responseData);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 
     
 }

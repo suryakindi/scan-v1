@@ -137,4 +137,17 @@ class BPJSToolsController extends Controller
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
+
+    public function GetKetPesertaAktifBPJS(Request $request, $id_client)
+    {
+        $service_name = 'pcare-rest';
+        try {
+            $KetAktif = $this->BPJSToolsService->GetKetPesertaAktifBPJS($request->all(),$id_client, $service_name);
+            return $this->baseResponse('Keterangan BPJS Berhasil Didapatkan', null, $KetAktif, 200); 
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
+        }
+    }
+
+    
 }

@@ -18,22 +18,32 @@ class RegistrasiServices
     
     public function saveRegistrasiPasien(array $data)
     {
-
         DB::beginTransaction();
         try {
+            // Cek apakah pasien masih memiliki pendaftaran yang belum selesai
+            $existingRegistration = RegistrasiPasien::where('id_pasien', $data['id_pasien'])
+                ->whereNull('tanggal_pulang')
+                ->exists();
+
+            if ($existingRegistration) {
+                throw new Exception("Pasien masih memiliki pendaftaran yang belum selesai.");
+            }
+
             // Format tanggal: YYYYMMDD
             $tanggal = Carbon::now()->format('Ymd');
-    
+
             // Ambil jumlah registrasi pada hari ini untuk nomor urut
             $count = RegistrasiPasien::whereDate('tanggal_registrasi', Carbon::today())->count() + 1;
-    
+
             // Format nomor registrasi: YYYYMMDD-NNNN
-            $data['no_registrasi'] = $tanggal  . str_pad($count, 4, '0', STR_PAD_LEFT);
+            $data['no_registrasi'] = $tanggal . str_pad($count, 4, '0', STR_PAD_LEFT);
             $data['id_ruangan_terakhir'] = $data['id_ruangan_asal'];
+            $data['id_tkp'] = 1;
             $data['created_by'] = auth()->user()->id;
+
             // Simpan ke database
             $registrasi = RegistrasiPasien::create($data);
-    
+
             DB::commit();
             return $registrasi;
         } catch (Exception $e) {
@@ -41,6 +51,7 @@ class RegistrasiServices
             throw new Exception("Gagal membuat Registrasi: " . $e->getMessage());
         }
     }
+
 
     public function saveRegistrasiDetailPasien($registrasi)
     {
