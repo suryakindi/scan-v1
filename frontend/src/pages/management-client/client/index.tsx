@@ -37,9 +37,7 @@ const ManagementClient: FC = () => {
   };
 
   useEffect(() => {
-    return () => {
-      getAllClient();
-    };
+    getAllClient();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

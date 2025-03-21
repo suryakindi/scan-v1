@@ -184,37 +184,35 @@ const FormPasien: FC = () => {
   };
 
   useEffect(() => {
-    return () => {
-      const load = async () => {
-        setIsProcess(true);
+    const load = async () => {
+      setIsProcess(true);
 
-        try {
-          const _pasien = await getPasienById();
-          await getMasterRuangan();
-          await getJenisKunjungan();
-          const _jaminans = await getJaminan();
+      try {
+        const _pasien = await getPasienById();
+        await getMasterRuangan();
+        await getJenisKunjungan();
+        const _jaminans = await getJaminan();
 
-          if (_pasien) {
-            const bpjs = await getKeteranganBPJS(_pasien.no_bpjs);
-            if (bpjs && _jaminans) {
-              const finded = findValue(
-                _jaminans.data,
-                { penjamin: "JKN" },
-                { id_jaminan: "id" }
-              );
+        if (_pasien) {
+          const bpjs = await getKeteranganBPJS(_pasien.no_bpjs);
+          if (bpjs && _jaminans) {
+            const finded = findValue(
+              _jaminans.data,
+              { penjamin: "JKN" },
+              { id_jaminan: "id" }
+            );
 
-              setForm({ id_jaminan: Number(finded?.id_jaminan) });
-            }
+            setForm({ id_jaminan: Number(finded?.id_jaminan) });
           }
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsProcess(false);
         }
-      };
-
-      load();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsProcess(false);
+      }
     };
+
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -1,18 +1,11 @@
 import { FC, Fragment, useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
+import { RuanganT } from "../registrasi/pasien/types";
 
 const Display: FC = () => {
-  type _T1 = {
-    id_user: number;
-    name: string;
-    nama_ruangan: string;
-    current?: number;
-  };
-
   type _T2 = {
     client_id: number | null;
-    ruangan_ids: number[];
-    dokters: _T1[];
+    ruangans: (RuanganT & { current?: number })[];
   };
 
   type _Get = {
@@ -30,57 +23,96 @@ const Display: FC = () => {
     tanggal_masuk: string;
   };
 
-  const [data, setData] = useState<_T2>();
-  const [current, setCurrent] = useState<_Get | null>(null);
-  const raw = localStorage.getItem("queue");
-  const queue: _T2 | null = raw ? JSON.parse(raw) : null;
+  const now = new Date().getDate();
+  const _local = {
+    getStrict: <T,>(key: string): T | null => {
+      try {
+        const item = localStorage.getItem(key);
+        if (!item) return null;
+
+        type _R = { date?: number; data: T };
+
+        const _r: _R = JSON.parse(item);
+
+        if (_r.date !== now) {
+          localStorage.removeItem(key);
+          return null;
+        }
+
+        return _r.data;
+      } catch {
+        return null;
+      }
+    },
+    set: <T,>(key: string, data: T): void => {
+      localStorage.setItem(key, JSON.stringify({ date: now, data }));
+    },
+    get: <T,>(key: string): T | null => {
+      try {
+        return JSON.parse(localStorage.getItem(key) ?? "");
+      } catch {
+        return null;
+      }
+    },
+  };
+
+  const [data, setData] = useState<_T2 | null>(
+    _local.getStrict<_T2>("viewer-display-data") ?? _local.get("queue")
+  );
+  const [current, setCurrent] = useState<_Get | null>(
+    _local.getStrict<_Get>("viewer-display-current")
+  );
 
   const { lastJsonMessage } = useWebSocket<_Get | unknown>(
-    `ws://localhost:3000/socket/viewer/display/${queue?.client_id}`,
+    `ws://localhost:3000/socket/viewer/display/${data?.client_id}`,
     {
       shouldReconnect: () => true,
     }
   );
 
   const speak = (text: string) => {
+    if (!text) return;
+    console.log(text);
+
+    speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "id-ID";
-    speechSynthesis.speak(utterance);
-  };
 
-  useEffect(() => {
-    return () => {
-      if (queue) {
-        setData(queue);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = () => {
+        speechSynthesis.speak(utterance);
+      };
+    } else {
+      speechSynthesis.speak(utterance);
+    }
+  };
 
   useEffect(() => {
     if (lastJsonMessage && typeof lastJsonMessage === "object") {
       const message = lastJsonMessage as _Get;
 
-      if (
-        ["nama", "noantrian", "nama_ruangan"].every((key) => key in message)
-      ) {
+      if (["id_ruangan", "noantrian"].every((key) => key in message)) {
         if (
-          data?.dokters
-            .map(({ id_user }) => id_user)
-            .includes(message.id_dokter) &&
-          data.ruangan_ids.includes(message.id_ruangan)
+          data?.ruangans.some(
+            (ruangan) => Number(ruangan.id) === Number(message.id_ruangan)
+          )
         ) {
           setData((prevData) => {
             if (!prevData) return prevData;
-
-            return {
+            const nextData = {
               ...prevData,
-              dokters: prevData.dokters.map((dokter) =>
-                Number(dokter.id_user) === message.id_dokter
-                  ? { ...dokter, current: Number(message.noantrian) }
-                  : dokter
+              ruangans: prevData.ruangans.map((ruangan) =>
+                Number(ruangan.id) === message.id_ruangan
+                  ? { ...ruangan, current: Number(message.noantrian) }
+                  : ruangan
               ),
             };
+
+            _local.set("viewer-display-data", nextData);
+            _local.set("viewer-display-current", message);
+
+            return nextData;
           });
 
           setCurrent(message);
@@ -114,12 +146,16 @@ const Display: FC = () => {
               <span className="text-xl font-bold">{current.nama}</span>
             </Fragment>
           ) : (
-            <span className="text-6xl font-bold">_</span>
+            <Fragment>
+              <span className="text-xl font-bold">_</span>
+              <span className="text-6xl font-bold">_</span>
+              <span className="text-xl font-bold">_</span>
+            </Fragment>
           )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data?.dokters.map((dokter, k) => (
+        {data?.ruangans.map((ruangan, k) => (
           <div
             key={k}
             className="bg-white shadow-lg p-6 rounded-md gap-2 flex flex-col items-center"
@@ -132,10 +168,9 @@ const Display: FC = () => {
               />
             </div>
             <span className="bg-green-500 text-white px-3 py-1 rounded-md text-sm font-semibold">
-              {dokter.current ?? 0}
+              {ruangan.current ?? 0}
             </span>
-            <span>{dokter.nama_ruangan}</span>
-            <span>{dokter.name}</span>
+            <span>{ruangan.nama_ruangan}</span>
           </div>
         ))}
       </div>

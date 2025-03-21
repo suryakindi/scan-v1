@@ -29,9 +29,7 @@ const BaseURL: FC = () => {
   };
 
   useEffect(() => {
-    return () => {
-      getDataUrls();
-    };
+    getDataUrls();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -155,7 +153,6 @@ const BaseURL: FC = () => {
                     >
                       <HOutline.PencilSquareIcon className="size-6" />
                     </button>
-                  
                   </div>
                 </td>
               </tr>
