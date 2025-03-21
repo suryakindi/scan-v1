@@ -18,14 +18,6 @@ const Viewer: FC = () => {
 
   const [clients, setClients] = useState<PaginateT<ClientT[]>>(paginateInit());
 
-  type _T1 = {
-    id_user: number;
-    name: string;
-    nama_ruangan: string;
-  };
-
-  const [dokters, setDokters] = useState<PaginateT<_T1[]>>(paginateInit());
-
   const getAllClients = async () => {
     try {
       const response = await api.get<ResponseT<PaginateT<ClientT[]>>>(
@@ -57,40 +49,26 @@ const Viewer: FC = () => {
     }
   };
 
-  const getMappingDokterArray = async (ids: number[]) => {
-    try {
-      const response = await api.get("/viewer/get-mapping-dokter-array", {
-        params: { ids },
-      });
-      if (response.data.data) {
-        setDokters(response.data.data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const [form, setForm] = useXState<{
     client_id: number | null;
-    ruangan_ids: number[];
-    dokters: _T1[];
-  }>({ client_id: null, ruangan_ids: [], dokters: [] }, {});
+    ruangans: RuanganT[];
+  }>({ client_id: null, ruangans: [] }, {});
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+
     localStorage.setItem("queue", JSON.stringify(form));
     navigate("/viewer/display");
   };
 
   useEffect(() => {
-    return () => {
-      const load = async () => {
-        setIsLoading(true);
-        await getAllClients();
-        setIsLoading(false);
-      };
-      load();
+    const load = async () => {
+      setIsLoading(true);
+      await getAllClients();
+      setIsLoading(false);
     };
+
+    load();
   }, []);
   return (
     <Fragment>
@@ -156,7 +134,7 @@ const Viewer: FC = () => {
                     e,
                     async ({ value }) => {
                       setIsLoading(true);
-                      setForm({ client_id: value, ruangan_ids: [] });
+                      setForm({ client_id: value, ruangans: [] });
                       await getMasterRuanganByClientId(value);
                       setIsLoading(false);
                     }
@@ -180,60 +158,19 @@ const Viewer: FC = () => {
                 menuPlacement="bottom"
                 required={true}
                 isMulti={true}
-                options={
-                  form.client_id
-                    ? mapOptions(ruangans.data, {
-                        l: "nama_ruangan",
-                        v: "id",
-                      })
-                    : []
-                }
-                value={mapOptions(
-                  ruangans.data.filter(({ id }) =>
-                    form.ruangan_ids.includes(id)
-                  ),
-                  { l: "nama_ruangan", v: "id" }
-                )}
-                onChange={(e) =>
-                  cast<{ label: string; value: number }[]>(e, async (items) => {
-                    setIsLoading(true);
-                    const ids = items.map(({ value }) => value);
-                    setForm({ ruangan_ids: ids });
-                    await getMappingDokterArray(ids);
-                    setIsLoading(false);
-                  })
-                }
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label className="mb-1" htmlFor="dokter">
-                Dokter
-              </label>
-              <Select
-                inputId="dokter"
-                className="w-full"
-                isClearable={true}
-                closeMenuOnSelect={false}
-                isSearchable={true}
-                styles={styles}
-                placeholder="Pilih..."
-                menuPlacement="bottom"
-                required={true}
-                isMulti={true}
-                options={dokters.data}
+                options={form.client_id ? ruangans.data : []}
                 getOptionLabel={(e) => {
-                  const selected = e as _T1;
-                  return `${selected.name} - ${selected.nama_ruangan}`;
+                  const selected = e as RuanganT;
+                  return selected.nama_ruangan;
                 }}
                 getOptionValue={(e) => {
-                  const selected = e as _T1;
-                  return `${selected.id_user}`;
+                  const selected = e as RuanganT;
+                  return String(selected.id);
                 }}
-                value={form.dokters}
+                value={form.ruangans}
                 onChange={(e) => {
-                  const selected = e as _T1[];
-                  setForm({ dokters: selected });
+                  const selected = e as RuanganT[];
+                  setForm({ ruangans: selected });
                 }}
               />
             </div>

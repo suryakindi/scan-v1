@@ -106,9 +106,7 @@ const Pasien: FC = () => {
   };
 
   useEffect(() => {
-    return () => {
-      getProvinces();
-    };
+    getProvinces();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

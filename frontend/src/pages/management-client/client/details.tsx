@@ -82,9 +82,7 @@ const Details: FC = () => {
 
   useEffect(() => {
     if (param.id) {
-      return () => {
-        getClientById(param.id ?? "");
-      };
+      getClientById(param.id ?? "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -293,17 +291,15 @@ const Details: FC = () => {
   );
 
   useEffect(() => {
-    return () => {
-      (async () => {
-        setIsProcess(true);
-        await getSatuSehat();
-        await getBPJSPCareById();
-        await getDataUrls();
-        await ConnectionBPJSGetDokter();
-        await connectionSatuSehat();
-        setIsProcess(false);
-      })();
-    };
+    (async () => {
+      setIsProcess(true);
+      await getSatuSehat();
+      await getBPJSPCareById();
+      await getDataUrls();
+      await ConnectionBPJSGetDokter();
+      await connectionSatuSehat();
+      setIsProcess(false);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (

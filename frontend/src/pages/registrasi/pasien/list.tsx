@@ -28,15 +28,13 @@ const ListPasien: FC = () => {
   };
 
   useEffect(() => {
-    return () => {
-      const load = async () => {
-        setIsProcess(true);
-        await getPasiens();
-        setIsProcess(false);
-      };
-
-      load();
+    const load = async () => {
+      setIsProcess(true);
+      await getPasiens();
+      setIsProcess(false);
     };
+
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
