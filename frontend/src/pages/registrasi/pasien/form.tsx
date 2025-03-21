@@ -140,7 +140,11 @@ const FormPasien: FC = () => {
       const response = await api.get<ResponseT<_Response>>(
         `/registrasi-pelayanan/keterangan-aktif-bpjs/id_client/${user.cdfix}?nokartu=${no_bpjs}`
       );
-
+      Toast.fire({
+        icon: "success",
+        title: "Aktif",
+        text: "Status BPJS Pasien Aktif",
+      });
       const isBPJSActive =
         response?.data?.data?.original?.data?.ketAktif === "AKTIF";
 
