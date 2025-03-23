@@ -515,6 +515,7 @@ class BPJSToolsService
     {
         $set = $this->getBPJSToolsById($id_client);
         $nokartubpjs = $data['nokartu'];
+      
         foreach ($set['service_name'] as $key => $item) {
             if($item['service_name'] == $service_name){
                 $base_url = $item['base_url'] . '/peserta/'.$nokartubpjs;
@@ -544,11 +545,8 @@ class BPJSToolsService
             $body = $response->getBody();
             $responseData = json_decode($body, true);
             return $this->DecryptResponse($responseData);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 500);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
     }
 

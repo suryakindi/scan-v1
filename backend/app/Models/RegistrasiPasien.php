@@ -24,6 +24,7 @@ class RegistrasiPasien extends Model
         'tanggal_registrasi',
         'is_active',
         'cdfix',
+        'status_pasien',
         'created_by',
         'updated_by',
         'deleted_by'
