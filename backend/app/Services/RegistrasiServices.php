@@ -113,6 +113,8 @@ class RegistrasiServices
         })
         ->whereNull('registrasi_detail_layanan_pasiens.tanggal_keluar')
         ->whereNull('registrasi_pasiens.tanggal_pulang')
+        ->where('registrasi_pasiens.is_active', '=', true)
+        ->where('registrasi_detail_layanan_pasiens.is_active', '=', true)
         ->select(
             'pasiens.nama', 
             'pasiens.id as id_pasien', 
@@ -132,6 +134,32 @@ class RegistrasiServices
     
     
         return $registrasi;
+    }
+
+    public function BatalRegistrasi($id_registrasi)
+    {
+        DB::beginTransaction();
+        try {
+            $registrasi = RegistrasiPasien::find($id_registrasi);
+            $registrasiDetail = RegistrasiDetailLayananPasien::where('id_registrasi_pasien', $registrasi->id)->first();
+            $registrasi->is_active = false;
+            $registrasi->tanggal_pulang = Carbon::now();
+            $registrasi->status_pasien = 10;
+            $registrasi->updated_at = Carbon::now();
+            $registrasi->updated_by = auth()->user()->id;
+            $registrasi->save();
+            $registrasiDetail->is_active = false;
+            $registrasiDetail->updated_by = auth()->user()->id;
+            $registrasiDetail->tanggal_keluar = Carbon::now();
+            $registrasiDetail->updated_at = Carbon::now();
+            $registrasiDetail->save();
+            DB::commit();
+            return $registrasi;
+        } catch (\Exception $e) {
+           throw new Exception($e->getMessage());
+           
+        }
+       
     }
     
 }

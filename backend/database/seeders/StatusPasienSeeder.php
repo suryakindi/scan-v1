@@ -23,6 +23,7 @@ class StatusPasienSeeder extends Seeder
             'Berobat Berjalan',
             'Meninggal',
             'Rujukan',
+            'Batal Registrasi',
         ];
 
         foreach ($statuspasien as $status) {

@@ -64,6 +64,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('keterangan-aktif-bpjs/id_client/{id_client}', [BPJSToolsController::class, 'GetKetPesertaAktifBPJS'])->middleware('permission:Registrasi,view');
             Route::post('create-registrasi-pelayanan', [RegistrasiController::class, 'saveRegistrasiPasien'])->middleware('permission:Registrasi,create');
             Route::get('list-registrasi-pelayanan', [RegistrasiController::class, 'listRegistrasiPasien'])->middleware('permission:Registrasi,view');
+
+
+
+
+            Route::put('batal-registrasi/{id_registrasi}', [RegistrasiController::class, 'BatalRegistrasi'])->middleware('permission:Registrasi,edit');
         });
     });
 

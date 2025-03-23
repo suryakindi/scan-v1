@@ -37,4 +37,15 @@ public function listRegistrasiPasien()
             return $this->baseResponse('Terjadi kesalahan saat Registrasi Pasien', $e->getMessage(), null, 500);
         }
     }
+    public function BatalRegistrasi($id_registrasi)
+    {
+        try {
+            $registrasi = $this->RegistrasiServices->BatalRegistrasi($id_registrasi);
+            return $this->baseResponse('Registrasi Pasien berhasil dibatal', null, $registrasi, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Registrasi Pasien', $e->getMessage(), null, 500);
+        }
+    }
 }
+
+
