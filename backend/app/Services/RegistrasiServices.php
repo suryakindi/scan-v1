@@ -39,6 +39,7 @@ class RegistrasiServices
             $data['no_registrasi'] = $tanggal . str_pad($count, 4, '0', STR_PAD_LEFT);
             $data['id_ruangan_terakhir'] = $data['id_ruangan_asal'];
             $data['id_tkp'] = 1;
+            $data['status_pasien'] = 3;
             $data['created_by'] = auth()->user()->id;
 
             // Simpan ke database
@@ -55,23 +56,26 @@ class RegistrasiServices
 
     public function saveRegistrasiDetailPasien($registrasi)
     {
-        
         DB::beginTransaction();
         try {
-            // Simpan ke database
-           // Cek jumlah pasien di ruangan yang sama untuk menentukan noantrian
+            // Ambil tanggal registrasi pasien
+            $tanggalRegistrasi = $registrasi->tanggal_registrasi;
+    
+            // Cek jumlah pasien di ruangan yang sama pada hari yang sama untuk menentukan noantrian
             $lastAntrian = RegistrasiDetailLayananPasien::where('id_ruangan', $registrasi->id_ruangan_asal)
-            ->max('noantrian');
-
+                ->whereDate('tanggal_masuk', $tanggalRegistrasi) // Tambahkan filter tanggal
+                ->max('noantrian');
+    
             $noantrian = $lastAntrian ? $lastAntrian + 1 : 1;
-
-            // Cek jumlah pasien dengan dokter dan ruangan yang sama untuk menentukan noantriandokter
+    
+            // Cek jumlah pasien dengan dokter dan ruangan yang sama pada hari yang sama untuk menentukan noantriandokter
             $lastAntrianDokter = RegistrasiDetailLayananPasien::where('id_ruangan', $registrasi->id_ruangan_asal)
-            ->where('id_dokter', $registrasi->id_dokter)
-            ->max('noantriandokter');
-
+                ->where('id_dokter', $registrasi->id_dokter)
+                ->whereDate('tanggal_masuk', $tanggalRegistrasi) // Tambahkan filter tanggal
+                ->max('noantriandokter');
+    
             $noantriandokter = $lastAntrianDokter ? $lastAntrianDokter + 1 : 1;
-
+    
             // Simpan data registrasi detail
             $registrasiDetail = new RegistrasiDetailLayananPasien;
             $registrasiDetail->id_registrasi_pasien = $registrasi->id;
@@ -79,11 +83,9 @@ class RegistrasiServices
             $registrasiDetail->id_dokter = $registrasi->id_dokter;
             $registrasiDetail->noantrian = $noantrian;
             $registrasiDetail->noantriandokter = $noantriandokter;
-            $registrasiDetail->tanggal_masuk = $registrasi->tanggal_registrasi;
+            $registrasiDetail->tanggal_masuk = $tanggalRegistrasi;
             $registrasiDetail->cdfix = $registrasi->cdfix;
             $registrasiDetail->created_by = auth()->user()->id;
-            $registrasiDetail->save();
-
             $registrasiDetail->save();
     
             DB::commit();
@@ -91,8 +93,9 @@ class RegistrasiServices
         } catch (Exception $e) {
             DB::rollBack();
             throw new Exception("Gagal membuat registrasiDetail: " . $e->getMessage());
-        }       
+        }
     }
+    
 
     public function listRegistrasiPasien()
     {
@@ -102,6 +105,7 @@ class RegistrasiServices
         ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
         ->leftJoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
         ->join('users', 'registrasi_pasiens.created_by', '=', 'users.id')
+        ->join('status_pasiens', 'registrasi_pasiens.status_pasien', '=', 'status_pasiens.id')
         ->where('registrasi_pasiens.cdfix', $cdFix)
         ->where(function ($query) {
             $query->whereNotNull('registrasi_detail_layanan_pasiens.noantriandokter')
@@ -121,6 +125,7 @@ class RegistrasiServices
             'registrasi_detail_layanan_pasiens.noantriandokter', 
             'master_ruangans.nama_ruangan',
             'dokter.name as dokter',
+            'status_pasiens.status',
             'users.name as created_by'
         )
         ->paginate(100);
