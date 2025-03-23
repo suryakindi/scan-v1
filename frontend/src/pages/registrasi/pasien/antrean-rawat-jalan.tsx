@@ -7,12 +7,14 @@ import clsx from "clsx";
 import { LayoutContext } from "../../../layout/types";
 import useWebSocket from "react-use-websocket";
 import { LoaderT } from "../../../user";
+import { Confirm, Toast } from "../../../utils/alert";
 
 type _Get = {
   created_by: string;
   dokter: string;
   id_dokter: number;
   id_pasien: number;
+  id_registrasi: number;
   id_registrasi_detail_layanan: number;
   id_ruangan: number;
   nama: string;
@@ -21,6 +23,16 @@ type _Get = {
   noantrian: string;
   noantriandokter: string;
   tanggal_masuk: string;
+  status:
+    | "Belum Checkin"
+    | "Checkin"
+    | "Belum Dilayani"
+    | "Dilayani"
+    | "Selesai"
+    | "Pulang"
+    | "Berobat Berjalan"
+    | "Meninggal"
+    | "Rujukan";
 };
 
 const ListPasien: FC = () => {
@@ -53,6 +65,37 @@ const ListPasien: FC = () => {
     } catch (error) {
       console.error("Error fetching patients:", error);
     }
+  };
+
+  const batalRegistrasi = (id_registrasi: number | string) => {
+    Confirm.fire({
+      title: "Batal Registrasi",
+      text: "Batal Registrasi ?",
+    }).then(async ({ isConfirmed }) => {
+      if (isConfirmed) {
+        try {
+          setIsProcess(true);
+          await api.put(
+            `/registrasi-pelayanan/batal-registrasi/${id_registrasi}`
+          );
+          Toast.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Berhasil membatalkan registrasi pelayanan",
+          });
+        } catch (error) {
+          console.error(error);
+          Toast.fire({
+            icon: "error",
+            title: "Gagal",
+            text: "Gagal membatalkan registrasi pelayanan",
+          });
+        } finally {
+          await getPasiens();
+          setIsProcess(false);
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -99,6 +142,7 @@ const ListPasien: FC = () => {
             <th>NO Antrian Dokter</th>
             <th>Nama Ruangan</th>
             <th>Dokter</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +165,16 @@ const ListPasien: FC = () => {
                       Panggil Pasien
                     </span>
                   </button>
+                  <button
+                    onClick={() => batalRegistrasi(item.id_registrasi)}
+                    type="button"
+                    className="p-1.5 bg-red-500 hover:bg-red-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group cursor-pointer"
+                  >
+                    <HOutline.XMarkIcon className="size-6" />
+                    <span className="absolute text-nowrap mb-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all group-hover:block bg-gray-800 text-white text-sm rounded-md px-2 py-1 shadow-lg top-full z-10">
+                      Batal Registrasi
+                    </span>
+                  </button>
                 </div>
               </td>
               <td>{item.nama}</td>
@@ -129,6 +183,19 @@ const ListPasien: FC = () => {
               <td>{item.noantriandokter}</td>
               <td>{item.nama_ruangan}</td>
               <td>{item.dokter}</td>
+              <td>
+                <div className="flex bg-slate-500 text-white mx-auto rounded-full px-1.5 py-0.5 justify-between items-center max-w-36">
+                  <span className="text-sm">{item.status}</span>
+                  <span
+                    className={clsx("w-4 h-4 block rounded-full", {
+                      "bg-red-600": item.status === "Belum Dilayani",
+                      "bg-yellow-600": item.status === "Dilayani",
+                      "bg-green-600": item.status === "Selesai",
+                      "bg-black": item.status === "Pulang",
+                    })}
+                  ></span>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

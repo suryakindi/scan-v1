@@ -62,6 +62,12 @@ const raw: WrapRoute[] = [
           () => import("./pages/registrasi/pasien/antrean-rawat-jalan")
         ),
       },
+      {
+        path: "/registrasi/soap",
+        name: "SOAP",
+        module: "Registrasi",
+        element: LazyLoad(() => import("./pages/registrasi/pasien/soap")),
+      },
     ],
   },
   {

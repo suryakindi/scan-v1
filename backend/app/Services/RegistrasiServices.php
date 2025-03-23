@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 
 class RegistrasiServices
 {
-    
+
     public function saveRegistrasiPasien(array $data)
     {
         DB::beginTransaction();
@@ -60,22 +60,22 @@ class RegistrasiServices
         try {
             // Ambil tanggal registrasi pasien
             $tanggalRegistrasi = $registrasi->tanggal_registrasi;
-    
+
             // Cek jumlah pasien di ruangan yang sama pada hari yang sama untuk menentukan noantrian
             $lastAntrian = RegistrasiDetailLayananPasien::where('id_ruangan', $registrasi->id_ruangan_asal)
                 ->whereDate('tanggal_masuk', $tanggalRegistrasi) // Tambahkan filter tanggal
                 ->max('noantrian');
-    
+
             $noantrian = $lastAntrian ? $lastAntrian + 1 : 1;
-    
+
             // Cek jumlah pasien dengan dokter dan ruangan yang sama pada hari yang sama untuk menentukan noantriandokter
             $lastAntrianDokter = RegistrasiDetailLayananPasien::where('id_ruangan', $registrasi->id_ruangan_asal)
                 ->where('id_dokter', $registrasi->id_dokter)
                 ->whereDate('tanggal_masuk', $tanggalRegistrasi) // Tambahkan filter tanggal
                 ->max('noantriandokter');
-    
+
             $noantriandokter = $lastAntrianDokter ? $lastAntrianDokter + 1 : 1;
-    
+
             // Simpan data registrasi detail
             $registrasiDetail = new RegistrasiDetailLayananPasien;
             $registrasiDetail->id_registrasi_pasien = $registrasi->id;
@@ -87,7 +87,7 @@ class RegistrasiServices
             $registrasiDetail->cdfix = $registrasi->cdfix;
             $registrasiDetail->created_by = auth()->user()->id;
             $registrasiDetail->save();
-    
+
             DB::commit();
             return $registrasiDetail;
         } catch (Exception $e) {
@@ -95,7 +95,7 @@ class RegistrasiServices
             throw new Exception("Gagal membuat registrasiDetail: " . $e->getMessage());
         }
     }
-    
+
 
     public function listRegistrasiPasien()
     {
@@ -116,23 +116,24 @@ class RegistrasiServices
         ->where('registrasi_pasiens.is_active', '=', true)
         ->where('registrasi_detail_layanan_pasiens.is_active', '=', true)
         ->select(
-            'pasiens.nama', 
-            'pasiens.id as id_pasien', 
+            'pasiens.nama',
+            'pasiens.id as id_pasien',
             'registrasi_detail_layanan_pasiens.id as id_registrasi_detail_layanan',
             'master_ruangans.id as id_ruangan',
             'dokter.id as id_dokter',
-            'registrasi_pasiens.no_registrasi', 
-            'registrasi_detail_layanan_pasiens.tanggal_masuk', 
-            'registrasi_detail_layanan_pasiens.noantrian', 
-            'registrasi_detail_layanan_pasiens.noantriandokter', 
+            'registrasi_pasiens.no_registrasi',
+            'registrasi_pasiens.id as id_registrasi',
+            'registrasi_detail_layanan_pasiens.tanggal_masuk',
+            'registrasi_detail_layanan_pasiens.noantrian',
+            'registrasi_detail_layanan_pasiens.noantriandokter',
             'master_ruangans.nama_ruangan',
             'dokter.name as dokter',
             'status_pasiens.status',
             'users.name as created_by'
         )
         ->paginate(100);
-    
-    
+
+
         return $registrasi;
     }
 
@@ -157,9 +158,9 @@ class RegistrasiServices
             return $registrasi;
         } catch (\Exception $e) {
            throw new Exception($e->getMessage());
-           
+
         }
-       
+
     }
-    
+
 }
