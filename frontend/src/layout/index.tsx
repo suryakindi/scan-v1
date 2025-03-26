@@ -42,7 +42,7 @@ const Layout: FC = () => {
     <Fragment>
       <nav
         className={clsx(
-          "fixed bg-white w-1/8 top-0 bottom-0 left-0 shadow-2xl overflow-auto font-light transition-all ease-in-out duration-150 text-sm",
+          "fixed bg-white w-1/8 top-0 bottom-0 left-0 shadow-xl overflow-auto font-light transition-all ease-in-out duration-150 text-sm",
           show ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -146,7 +146,7 @@ const Layout: FC = () => {
               show ? "w-7/8" : "w-full"
             )}
           >
-            <div className="flex bg-white w-full h-14 items-center justify-between px-4 rounded-md shadow-2xl">
+            <div className="flex bg-white w-full h-14 items-center justify-between px-4 rounded-md shadow-xl">
               <button
                 type="button"
                 className="rounded-full aspect-square hover:bg-slate-200 p-1 cursor-pointer"
