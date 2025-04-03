@@ -435,7 +435,7 @@ class MasterDataService
             $id_ruangan = explode(',', $id_ruangan); // Ubah string jadi array jika dipisahkan koma
         }
         try {
-            
+
             $antrianViewer = RegistrasiDetailLayananPasien::where('registrasi_detail_layanan_pasiens.is_active', TRUE)
                 ->where('registrasi_detail_layanan_pasiens.cdfix', $cdfix)
                 ->whereIn('registrasi_detail_layanan_pasiens.id_ruangan', $id_ruangan)
@@ -443,7 +443,7 @@ class MasterDataService
                 ->join('master_ruangans', 'master_ruangans.id', '=', 'registrasi_detail_layanan_pasiens.id_ruangan')
                 ->join('registrasi_pasiens', 'registrasi_pasiens.id', '=', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien')
                 ->join('pasiens', 'pasiens.id', '=', 'registrasi_pasiens.id_pasien')
-                ->select('registrasi_detail_layanan_pasiens.noantrian', 'pasiens.nama', 'master_ruangans.nama_ruangan')
+                ->select('registrasi_detail_layanan_pasiens.noantrian', 'pasiens.nama', 'pasiens.id as id_pasien', 'master_ruangans.id as id_ruangan', 'master_ruangans.nama_ruangan')
                 ->get();
             return $antrianViewer;
         } catch (\Exception $e) {
