@@ -1,6 +1,7 @@
-import { FC, Fragment, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { RuanganT } from "../registrasi/pasien/types";
+import { api, ResponseT } from "../../utils/api";
 
 const Display: FC = () => {
   type _T2 = {
@@ -56,15 +57,21 @@ const Display: FC = () => {
     },
   };
 
-  const [data, setData] = useState<_T2 | null>(
-    _local.getStrict<_T2>("viewer-display-data") ?? _local.get("queue")
-  );
-  const [current, setCurrent] = useState<_Get | null>(
-    _local.getStrict<_Get>("viewer-display-current")
-  );
+  type QueueData = {
+    noantrian: string;
+    nama: string;
+    id_pasien: number;
+    id_ruangan: number;
+    nama_ruangan: string;
+  };
+
+  const _data: _T2 | null =
+    _local.getStrict<_T2>("viewer-display-data") ?? _local.get("queue");
+
+  const [queueData, setQueueData] = useState<QueueData[]>([]);
 
   const { lastJsonMessage } = useWebSocket<_Get | unknown>(
-    `ws://localhost:3000/socket/viewer/display/${data?.client_id}`,
+    `ws://localhost:3000/socket/viewer/display/${_data?.client_id}`,
     {
       shouldReconnect: () => true,
     }
@@ -88,34 +95,41 @@ const Display: FC = () => {
     }
   };
 
+  const getAntreanPasienViewer = async () => {
+    try {
+      const response = await api.get<ResponseT<QueueData[]>>(
+        `/viewer/get-antrian/${_data?.client_id}/${_data?.ruangans
+          .map(({ id }) => id)
+          .join(",")}`
+      );
+
+      console.log(response);
+
+      if (response.data.data) {
+        setQueueData(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getAntreanPasienViewer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (lastJsonMessage && typeof lastJsonMessage === "object") {
       const message = lastJsonMessage as _Get;
+      console.log(message);
 
       if (["id_ruangan", "noantrian"].every((key) => key in message)) {
         if (
-          data?.ruangans.some(
-            (ruangan) => Number(ruangan.id) === Number(message.id_ruangan)
+          queueData.some(
+            (item) => Number(item.id_ruangan) === Number(message.id_ruangan)
           )
         ) {
-          setData((prevData) => {
-            if (!prevData) return prevData;
-            const nextData = {
-              ...prevData,
-              ruangans: prevData.ruangans.map((ruangan) =>
-                Number(ruangan.id) === message.id_ruangan
-                  ? { ...ruangan, current: Number(message.noantrian) }
-                  : ruangan
-              ),
-            };
-
-            _local.set("viewer-display-data", nextData);
-            _local.set("viewer-display-current", message);
-
-            return nextData;
-          });
-
-          setCurrent(message);
+          getAntreanPasienViewer();
 
           speak(
             `Nomor antrean ${message.noantrian}, silahkan menuju ke ${message.nama_ruangan}`
@@ -136,7 +150,7 @@ const Display: FC = () => {
           Scan Digital Nusantara Queue System
         </span>
       </div>
-      <div className="bg-white shadow-lg p-6 rounded-md items-center flex flex-col gap-6 pt-12">
+      {/* <div className="bg-white shadow-lg p-6 rounded-md items-center flex flex-col gap-6 pt-12">
         <span className="text-5xl font-bold">Antrian Terakhir</span>
         <div className="bg-green-300 flex justify-center items-center w-full rounded-xl flex-2/3 flex-col gap-10 py-6">
           {current ? (
@@ -153,8 +167,8 @@ const Display: FC = () => {
             </Fragment>
           )}
         </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      </div> */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data?.ruangans.map((ruangan, k) => (
           <div
             key={k}
@@ -173,46 +187,26 @@ const Display: FC = () => {
             <span>{ruangan.nama_ruangan}</span>
           </div>
         ))}
-      </div>
+      </div> */}
 
       <div className="flex flex-col gap-2">
-        {Array.from({ length: 10 }, (_, k) => (
+        {queueData.map((item, k) => (
           <div
             key={k}
             className="grid grid-cols-5 bg-green-400 rounded-md font-bold text-white"
           >
             <div className="flex items-center justify-center p-6">
-              <span>{k + 1}</span>
+              <span>{item.noantrian}</span>
             </div>
             <div className="flex items-center justify-center p-6 col-span-2">
-              <span>Pasien {k + 1}</span>
+              <span>{item.nama}</span>
             </div>
             <div className="flex items-center justify-center p-6 col-span-2">
-              <span>Ruangan {k + 1}</span>
+              <span>{item.nama_ruangan}</span>
             </div>
           </div>
         ))}
       </div>
-      {/* <div className="flex pt-10 bg-gradient-to-b from-green-700 to-transparent rounded-md overflow-hidden border border-green-900">
-        <table className="tabel-antrean w-full font-bold">
-          <thead>
-            <tr>
-              <th>Nomer Antrean</th>
-              <th>Nama Pasien</th>
-              <th>Ruangan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: 10 }, (_, k) => (
-              <tr key={k}>
-                <td>{k + 1}</td>
-                <td>Pasien {k + 1}</td>
-                <td>Ruangan {k + 1}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div> */}
     </div>
   );
 };
