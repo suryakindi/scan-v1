@@ -177,3 +177,4 @@ Route::get('/viewer/get-clients', [ManagementClientController::class, 'getAll'])
 Route::get('/viewer/get-master-ruangan/{id_client}', [MasterDataController::class, 'getMasterruangan']);
 Route::get('/viewer/get-mapping-dokter/{id_ruangan}', [MasterDataController::class, 'getMappingDokterRuangan']);
 Route::get('/viewer/get-mapping-dokter-array', [MasterDataController::class, 'getMappingDokterRuanganArray']);
+Route::get('/viewer/get-antrian/{cdfix}/{id_ruangan}', [MasterDataController::class, 'getAntrianViewer']);

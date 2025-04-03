@@ -12,6 +12,7 @@ use App\Models\MasterRuangan;
 use App\Models\MasterTkp;
 use App\Models\Module;
 use App\Models\Permission;
+use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\Role;
 use App\Models\UserPermission;
 use Illuminate\Support\Facades\DB;
@@ -422,6 +423,29 @@ class MasterDataService
                 ->select('mapping_dokter_ruangans.id_user', 'users.name', 'master_ruangans.nama_ruangan')
                 ->paginate(100);
             return $mappingDokterRuangan;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+
+    public function getAntrianViewer($cdfix, $id_ruangan)
+    {
+        if (!is_array($id_ruangan)) {
+            $id_ruangan = explode(',', $id_ruangan); // Ubah string jadi array jika dipisahkan koma
+        }
+        try {
+            
+            $antrianViewer = RegistrasiDetailLayananPasien::where('registrasi_detail_layanan_pasiens.is_active', TRUE)
+                ->where('registrasi_detail_layanan_pasiens.cdfix', $cdfix)
+                ->whereIn('registrasi_detail_layanan_pasiens.id_ruangan', $id_ruangan)
+                ->where('registrasi_detail_layanan_pasiens.tanggal_keluar', null)
+                ->join('master_ruangans', 'master_ruangans.id', '=', 'registrasi_detail_layanan_pasiens.id_ruangan')
+                ->join('registrasi_pasiens', 'registrasi_pasiens.id', '=', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien')
+                ->join('pasiens', 'pasiens.id', '=', 'registrasi_pasiens.id_pasien')
+                ->select('registrasi_detail_layanan_pasiens.noantrian', 'pasiens.nama', 'master_ruangans.nama_ruangan')
+                ->get();
+            return $antrianViewer;
         } catch (\Exception $e) {
             throw $e;
         }

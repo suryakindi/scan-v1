@@ -360,4 +360,14 @@ class MasterDataController extends Controller
         }
     }
 
+    public function getAntrianViewer($cdfix, $id_ruangan)
+    {
+        try {
+            $getAntrianViewer = $this->MasterDataService->getAntrianViewer($cdfix,$id_ruangan);
+            return $this->baseResponse('List berhasil didapatkan', null, $getAntrianViewer, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Mendapatka list', $e->getMessage(), null, 500);
+        }
+    }
+
 }
