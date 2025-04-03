@@ -174,6 +174,45 @@ const Display: FC = () => {
           </div>
         ))}
       </div>
+
+      <div className="flex flex-col gap-2">
+        {Array.from({ length: 10 }, (_, k) => (
+          <div
+            key={k}
+            className="grid grid-cols-5 bg-green-400 rounded-md font-bold text-white"
+          >
+            <div className="flex items-center justify-center p-6">
+              <span>{k + 1}</span>
+            </div>
+            <div className="flex items-center justify-center p-6 col-span-2">
+              <span>Pasien {k + 1}</span>
+            </div>
+            <div className="flex items-center justify-center p-6 col-span-2">
+              <span>Ruangan {k + 1}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* <div className="flex pt-10 bg-gradient-to-b from-green-700 to-transparent rounded-md overflow-hidden border border-green-900">
+        <table className="tabel-antrean w-full font-bold">
+          <thead>
+            <tr>
+              <th>Nomer Antrean</th>
+              <th>Nama Pasien</th>
+              <th>Ruangan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 10 }, (_, k) => (
+              <tr key={k}>
+                <td>{k + 1}</td>
+                <td>Pasien {k + 1}</td>
+                <td>Ruangan {k + 1}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div> */}
     </div>
   );
 };
