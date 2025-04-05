@@ -9,15 +9,17 @@ use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
 
 class PasienService
-{   
+{
 
- 
+
     public function createPasien(array $pasienData, array $alamatData)
     {
         DB::beginTransaction();
-        
+
         try {
             // Cek jika norm adalah "is_auto", maka generate otomatis
             if ($pasienData['norm'] === "is_auto") {
@@ -51,30 +53,30 @@ class PasienService
     {
         try {
             $query = Pasien::where('cdfix', $cdfix)->with('alamat');
-    
+
             if (!empty($data['search'])) {
                 $search = $data['search'];
                 $query->where(function ($q) use ($search) {
                     $q->whereRaw("norm ILIKE ?", ["%$search%"])
-                      ->orWhereRaw("nama ILIKE ?", ["%$search%"])
-                      ->orWhereRaw("nik ILIKE ?", ["%$search%"]);
+                        ->orWhereRaw("nama ILIKE ?", ["%$search%"])
+                        ->orWhereRaw("nik ILIKE ?", ["%$search%"]);
                 });
             }
-    
+
             $pasien = $query->paginate(100);
-    
+
             return $pasien;
         } catch (\Exception $e) {
             throw new Exception("Gagal", 1);
         }
     }
-    
+
 
     public function getPasienById($cdfix, $id_pasien)
     {
         try {
             $pasien = Pasien::where('cdfix', $cdfix)->with('alamat')->where('id', $id_pasien)->where('is_active', TRUE)->first();
-            if($pasien == null){
+            if ($pasien == null) {
                 throw new \Exception('Tidak Ada Data');
             }
             return $pasien;
@@ -96,5 +98,70 @@ class PasienService
             throw $e;
         }
     }
-    
+
+
+    public function riwayatPasienById($id_pasien, $cdfix)
+    {
+        try {
+            $data = DB::table('pasiens')
+                ->join('registrasi_pasiens', 'pasiens.id', '=', 'registrasi_pasiens.id_pasien')
+                ->join('registrasi_detail_layanan_pasiens as rdgp', 'registrasi_pasiens.id', '=', 'rdgp.id_registrasi_pasien')
+                ->join('master_ruangans as ruangan_asal', 'registrasi_pasiens.id_ruangan_asal', '=', 'ruangan_asal.id')
+                ->join('master_ruangans as ruangan_terakhir', 'registrasi_pasiens.id_ruangan_terakhir', '=', 'ruangan_terakhir.id')
+                ->where('pasiens.id', $id_pasien)
+                ->where('registrasi_pasiens.is_active', '=', true)
+                ->where('pasiens.cdfix', $cdfix)
+                ->select(
+                    'pasiens.id as id_pasien',
+                    'pasiens.nama',
+                    'registrasi_pasiens.id as id_registrasi',
+                    'registrasi_pasiens.no_registrasi',
+                    'registrasi_pasiens.tanggal_registrasi',
+                    'ruangan_asal.nama_ruangan as nama_ruangan_asal',
+                    'ruangan_terakhir.nama_ruangan as nama_ruangan_terakhir',
+                    'registrasi_pasiens.id_jaminan',
+                    'rdgp.tanggal_masuk',
+                    'rdgp.tanggal_keluar'
+                )
+                ->get();
+
+            if ($data->isEmpty()) {
+                throw new \Exception('Tidak Ada mendapatkan data riwayat pasien: ');
+            }
+            return $data;
+        } catch (\Exception $e) {
+            throw new \Exception('Gagal mendapatkan data riwayat pasien: ' . $e->getMessage());
+        }
+
+    }
+
+    public function editPasienById(Pasien $id_pasien, array $data)
+    {
+        DB::beginTransaction();
+        try {
+
+            $id_pasien->update($data);
+
+            if (isset($data['alamat_pasien'])) {
+                $alamat = AlamatPasien::find($id_pasien->id_alamat_pasien);
+                if ($alamat) {
+                    $alamat->update($data['alamat_pasien']);
+                }
+            }
+
+            DB::commit();
+
+            return $id_pasien->load([
+                'alamatPasien.provinsi',
+                'alamatPasien.kabupaten',
+                'alamatPasien.kecamatan',
+                'alamatPasien.kelurahan'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw new \Exception("Gagal Update Pasien & Alamat: " . $e->getMessage());
+        }
+    }
+
 }

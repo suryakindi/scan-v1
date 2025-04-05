@@ -77,6 +77,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/update-ihs/{id_pasien}', [PasienController::class, 'UpdateIHSNumber'])->middleware('permission:Registrasi,edit');
         Route::get('get-pasien', [PasienController::class, 'getPasien']);
         Route::get('get-pasien-id/{id_pasien}', [PasienController::class, 'getPasienById']);
+        Route::get('riwayat-pasien-id/{id_pasien}', [PasienController::class, 'riwayatPasienById']);
+        Route::put('edit-pasien-id/{id_pasien}', [PasienController::class, 'editPasienById']);
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {
@@ -85,6 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('update-client/{client}', [ManagementClientController::class, 'update'])->middleware('permission:Management-Client,edit');
         Route::get('get-clients', [ManagementClientController::class, 'getAll'])->middleware('permission:Management-Client,view');
         Route::get('get-client/id/{client}', [ManagementClientController::class, 'GetById'])->middleware('permission:Management-Client,view');
+        Route::put('edit-master-alergi/{id_alergi}', [MasterDataController::class, 'editMasterAlergi'])->middleware('permission:Master-Data,edit');
     });
 
     Route::prefix('master-data')->middleware('permission:Master-Data,view')->group(function () {
