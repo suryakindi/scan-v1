@@ -75,7 +75,7 @@ class PasienService
     public function getPasienById($cdfix, $id_pasien)
     {
         try {
-            $pasien = Pasien::where('cdfix', $cdfix)->with('alamat')->where('id', $id_pasien)->where('is_active', TRUE)->first();
+            $pasien = Pasien::where('cdfix', $cdfix)->with('alamatPasien')->where('id', $id_pasien)->where('is_active', TRUE)->first();
             if ($pasien == null) {
                 throw new \Exception('Tidak Ada Data');
             }
