@@ -165,7 +165,7 @@ const ListPasien: FC = () => {
                       Panggil Pasien
                     </span>
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => batalRegistrasi(item.id_registrasi)}
                     type="button"
                     className="p-1.5 bg-red-500 hover:bg-red-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group cursor-pointer"
@@ -175,6 +175,11 @@ const ListPasien: FC = () => {
                       Batal Registrasi
                     </span>
                   </button>
+                  
+                  Dibuat Dengan CronJob
+                  
+                  */}
+
                 </div>
               </td>
               <td>{item.nama}</td>
