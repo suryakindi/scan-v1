@@ -52,7 +52,7 @@ class PasienService
     public function getPasien($cdfix, array $data = [])
     {
         try {
-            $query = Pasien::where('cdfix', $cdfix)->with('alamat');
+            $query = Pasien::where('cdfix', $cdfix)->with('alamatPasien');
 
             if (!empty($data['search'])) {
                 $search = $data['search'];
@@ -67,7 +67,7 @@ class PasienService
 
             return $pasien;
         } catch (\Exception $e) {
-            throw new Exception("Gagal", 1);
+            throw new Exception($e->getMessage(), 1);
         }
     }
 

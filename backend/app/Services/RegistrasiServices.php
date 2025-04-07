@@ -103,10 +103,10 @@ class RegistrasiServices
         $registrasi = RegistrasiDetailLayananPasien::join('registrasi_pasiens', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien', '=', 'registrasi_pasiens.id')
             ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
             ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
-            ->join('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
+            ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
             ->join('users', 'registrasi_pasiens.created_by', '=', 'users.id')
             ->join('status_pasiens', 'registrasi_pasiens.status_pasien', '=', 'status_pasiens.id')
-            ->where('registrasi_pasiens.cdfix', $cdFix)
+            // ->where('registrasi_pasiens.cdfix', $cdFix)
             ->where(function ($query) {
                 $query->whereNotNull('registrasi_detail_layanan_pasiens.noantriandokter')
                     ->orWhereNotNull('registrasi_detail_layanan_pasiens.noantrian');
