@@ -78,7 +78,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-pasien', [PasienController::class, 'getPasien']);
         Route::get('get-pasien-id/{id_pasien}', [PasienController::class, 'getPasienById']);
         Route::get('riwayat-pasien-id/{id_pasien}', [PasienController::class, 'riwayatPasienById']);
-        Route::put('edit-pasien-id/{id_pasien}', [PasienController::class, 'editPasienById']);
+        Route::put('edit-pasien-id/{id_pasien}', [PasienController::class, 'editPasienById'])->middleware('permission:Registrasi,edit');
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {
