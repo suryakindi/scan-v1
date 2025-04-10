@@ -23,7 +23,7 @@ interface BasePasienPayload {
   nama_pasangan: string;
   golongan_darah: GolonganDarah;
   cdfix: string;
-  alamat: {
+  alamat_pasien: {
     alamat: string;
     rt: string;
     rw: string;
@@ -59,7 +59,7 @@ type PasienT = {
   cdfix: string;
   created_at: string;
   updated_at: string;
-  alamat: {
+  alamat_pasien: {
     id: number;
     is_active: boolean;
     id_pasien: number;

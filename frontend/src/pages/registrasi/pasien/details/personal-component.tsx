@@ -1,9 +1,9 @@
 import { FC, FormEventHandler, useEffect } from "react";
-import { CreatePasienPayload } from "../types";
-import { useLoaderData, useOutletContext } from "react-router";
+import { CreatePasienPayload, PasienT } from "../types";
+import { useLoaderData, useOutletContext, useParams } from "react-router";
 import Select from "react-select";
 import { LoaderT } from "../../../../user";
-import { useXState } from "../../../../utils/api";
+import { api, ResponseT, useXState } from "../../../../utils/api";
 import {
   Agama,
   GolonganDarah,
@@ -25,6 +25,7 @@ import {
 const Personal: FC = () => {
   const { setIsProcess } = useOutletContext<LayoutContext>();
   const { user } = useLoaderData<LoaderT>();
+  const param = useParams();
 
   const [form, setForm, formFn] = useXState<
     CreatePasienPayload,
@@ -48,7 +49,7 @@ const Personal: FC = () => {
       nama_pasangan: "",
       golongan_darah: "" as GolonganDarah,
       cdfix: String(user.cdfix),
-      alamat: {
+      alamat_pasien: {
         alamat: "",
         rt: "",
         rw: "",
@@ -59,7 +60,7 @@ const Personal: FC = () => {
         cdfix: String(user.cdfix),
       },
     },
-    { url: "/pasien/register-pasien", method: "POST" }
+    { url: `/pasien/edit-pasien-id/${param.id}`, method: "PUT" }
   );
 
   const agama = Object.values(Agama).map((i) => ({ value: i, label: i }));
@@ -79,6 +80,45 @@ const Personal: FC = () => {
     value: i,
     label: i,
   }));
+
+  const getPasienById = async () => {
+    try {
+      const response = await api.get<ResponseT<PasienT>>(
+        `/pasien/get-pasien-id/${param.id}`
+      );
+      if (response.data.data) {
+        const data = response.data.data;
+
+        setForm({
+          norm: data.norm,
+          no_bpjs: data.no_bpjs,
+          nama: data.nama,
+          nik: data.nik,
+          tanggal_lahir: data.tanggal_lahir,
+          tempatlahir: data.tempatlahir,
+          agama: data.agama as Agama,
+          pendidikan_terakhir: data.pendidikan_terakhir as Pendidikan,
+          pekerjaan: data.pekerjaan as Pekerjaan,
+          notelp: data.notelp,
+          nama_bapak: data.nama_bapak,
+          nama_ibu: data.nama_ibu,
+          status_perkawinan: data.status_perkawinan as Perkawinan,
+          nama_pasangan: data.nama_pasangan,
+          golongan_darah: data.golongan_darah as GolonganDarah,
+          alamat_pasien: {
+            ...data.alamat_pasien,
+            cdfix: String(data.alamat_pasien.cdfix),
+          },
+        });
+
+        return data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // type EnumType = Record<string, string | number>;
   // type _Key = string | number;
@@ -134,12 +174,14 @@ const Personal: FC = () => {
     e.preventDefault();
     try {
       await formFn.submit();
+      await getPasienById();
+
       Toast.fire({
         icon: "success",
         title: "Berhasil !",
         text: "Data pasien berhasil disimpan",
       });
-      formFn.reset();
+      // formFn.reset();
     } catch (error) {
       console.error(error);
       Toast.fire({
@@ -151,7 +193,17 @@ const Personal: FC = () => {
   };
 
   useEffect(() => {
-    getProvinces();
+    const load = async () => {
+      const data = await getPasienById();
+      if (data) {
+        await getProvinces();
+        await getRegencies(data.alamat_pasien.id_provinsi);
+        await getDistricts(data.alamat_pasien.id_kabupaten);
+        await getVillages(data.alamat_pasien.id_kecamatan);
+      }
+    };
+
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -176,11 +228,12 @@ const Personal: FC = () => {
                     "border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 flex-1",
                     "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300"
                   )}
-                  disabled={form.norm === "is_auto"}
+                  // disabled={form.norm === "is_auto"}
+                  disabled={true}
                   value={form.norm === "is_auto" ? "" : form.norm}
                   onChange={(e) => setForm({ norm: e.currentTarget.value })}
                 />
-                <button
+                {/* <button
                   type="button"
                   className={clsx(
                     "px-4 py-2 cursor-pointer rounded-sm",
@@ -193,7 +246,7 @@ const Personal: FC = () => {
                   }
                 >
                   Auto
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
@@ -480,10 +533,13 @@ const Personal: FC = () => {
                 id="alamat-ktp"
                 className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
                 required={true}
-                value={form.alamat.alamat}
+                value={form.alamat_pasien.alamat}
                 onChange={(e) =>
                   setForm({
-                    alamat: { ...form.alamat, alamat: e.currentTarget.value },
+                    alamat_pasien: {
+                      ...form.alamat_pasien,
+                      alamat: e.currentTarget.value,
+                    },
                   })
                 }
               />
@@ -496,10 +552,13 @@ const Personal: FC = () => {
                   type="text"
                   className="py-1.5 px-2 outline-none border-none flex-1"
                   required={true}
-                  value={form.alamat.rt}
+                  value={form.alamat_pasien.rt}
                   onChange={(e) =>
                     setForm({
-                      alamat: { ...form.alamat, rt: e.currentTarget.value },
+                      alamat_pasien: {
+                        ...form.alamat_pasien,
+                        rt: e.currentTarget.value,
+                      },
                     })
                   }
                 />
@@ -508,10 +567,13 @@ const Personal: FC = () => {
                   type="text"
                   className="py-1.5 px-2 outline-none border-none flex-1"
                   required={true}
-                  value={form.alamat.rw}
+                  value={form.alamat_pasien.rw}
                   onChange={(e) =>
                     setForm({
-                      alamat: { ...form.alamat, rw: e.currentTarget.value },
+                      alamat_pasien: {
+                        ...form.alamat_pasien,
+                        rw: e.currentTarget.value,
+                      },
                     })
                   }
                 />
@@ -537,7 +599,7 @@ const Personal: FC = () => {
                 value={findValue(
                   provinces,
                   {
-                    id: Number(form.alamat.id_provinsi),
+                    id: Number(form.alamat_pasien.id_provinsi),
                   },
                   { label: "name", value: "id" }
                 )}
@@ -547,8 +609,8 @@ const Personal: FC = () => {
                     async ({ value }) => {
                       setIsProcess(true);
                       setForm({
-                        alamat: {
-                          ...form.alamat,
+                        alamat_pasien: {
+                          ...form.alamat_pasien,
                           id_provinsi: String(value),
                           id_kabupaten: "",
                           id_kecamatan: "",
@@ -577,14 +639,14 @@ const Personal: FC = () => {
                 menuPlacement="top"
                 required={true}
                 options={
-                  [form.alamat.id_provinsi].includes("")
+                  [form.alamat_pasien.id_provinsi].includes("")
                     ? []
                     : mapOptions(regencies, { l: "name", v: "id" })
                 }
                 value={findValue(
                   regencies,
                   {
-                    id: Number(form.alamat.id_kabupaten),
+                    id: Number(form.alamat_pasien.id_kabupaten),
                   },
                   { label: "name", value: "id" }
                 )}
@@ -594,8 +656,8 @@ const Personal: FC = () => {
                     async ({ value }) => {
                       setIsProcess(true);
                       setForm({
-                        alamat: {
-                          ...form.alamat,
+                        alamat_pasien: {
+                          ...form.alamat_pasien,
                           id_kabupaten: String(value),
                           id_kecamatan: "",
                           id_kelurahan: "",
@@ -623,16 +685,17 @@ const Personal: FC = () => {
                 menuPlacement="top"
                 required={true}
                 options={
-                  [form.alamat.id_provinsi, form.alamat.id_kabupaten].includes(
-                    ""
-                  )
+                  [
+                    form.alamat_pasien.id_provinsi,
+                    form.alamat_pasien.id_kabupaten,
+                  ].includes("")
                     ? []
                     : mapOptions(districts, { l: "name", v: "id" })
                 }
                 value={findValue(
                   districts,
                   {
-                    id: Number(form.alamat.id_kecamatan),
+                    id: Number(form.alamat_pasien.id_kecamatan),
                   },
                   { label: "name", value: "id" }
                 )}
@@ -642,8 +705,8 @@ const Personal: FC = () => {
                     async ({ value }) => {
                       setIsProcess(true);
                       setForm({
-                        alamat: {
-                          ...form.alamat,
+                        alamat_pasien: {
+                          ...form.alamat_pasien,
                           id_kecamatan: String(value),
                           id_kelurahan: "",
                         },
@@ -671,9 +734,9 @@ const Personal: FC = () => {
                 required={true}
                 options={
                   [
-                    form.alamat.id_provinsi,
-                    form.alamat.id_kabupaten,
-                    form.alamat.id_kecamatan,
+                    form.alamat_pasien.id_provinsi,
+                    form.alamat_pasien.id_kabupaten,
+                    form.alamat_pasien.id_kecamatan,
                   ].includes("")
                     ? []
                     : mapOptions(villages, { l: "name", v: "id" })
@@ -681,15 +744,15 @@ const Personal: FC = () => {
                 value={findValue(
                   villages,
                   {
-                    id: Number(form.alamat.id_kelurahan),
+                    id: Number(form.alamat_pasien.id_kelurahan),
                   },
                   { label: "name", value: "id" }
                 )}
                 onChange={(e) =>
                   cast<{ label: string; value: number }>(e, ({ value }) => {
                     setForm({
-                      alamat: {
-                        ...form.alamat,
+                      alamat_pasien: {
+                        ...form.alamat_pasien,
                         id_kelurahan: String(value),
                       },
                     });
