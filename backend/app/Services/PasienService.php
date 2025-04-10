@@ -108,6 +108,7 @@ class PasienService
                 ->join('registrasi_detail_layanan_pasiens as rdgp', 'registrasi_pasiens.id', '=', 'rdgp.id_registrasi_pasien')
                 ->join('master_ruangans as ruangan_asal', 'registrasi_pasiens.id_ruangan_asal', '=', 'ruangan_asal.id')
                 ->join('master_ruangans as ruangan_terakhir', 'registrasi_pasiens.id_ruangan_terakhir', '=', 'ruangan_terakhir.id')
+                ->join('master_jaminans.id', 'registrasi_pasiens.id_jaminan', '=', 'master_jaminans.id')
                 ->where('pasiens.id', $id_pasien)
                 ->where('registrasi_pasiens.is_active', '=', true)
                 ->where('pasiens.cdfix', $cdfix)
@@ -120,6 +121,7 @@ class PasienService
                     'ruangan_asal.nama_ruangan as nama_ruangan_asal',
                     'ruangan_terakhir.nama_ruangan as nama_ruangan_terakhir',
                     'registrasi_pasiens.id_jaminan',
+                    'master_jaminans.nama_jaminan',
                     'rdgp.tanggal_masuk',
                     'rdgp.tanggal_keluar'
                 )
