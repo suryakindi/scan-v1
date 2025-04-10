@@ -98,7 +98,7 @@ class RegistrasiServices
     }
 
 
-    public function listRegistrasiPasien($tglAwal = null, $tglAkhir = null, $search = null)
+    public function listRegistrasiPasien($tglAwal = null, $tglAkhir = null, $search = null, $ruangan = null)
     {
         $cdFix = Auth()->user()->cdfix;
     
@@ -134,9 +134,11 @@ class RegistrasiServices
         if ($search) {
             $registrasi->where(function ($query) use ($search) {
                 $query->where('pasiens.nama', 'ilike', '%' . $search . '%')
-                      ->orWhere('registrasi_pasiens.no_registrasi', 'ilike', '%' . $search . '%')
-                      ->orWhere('master_ruangans.nama_ruangan', 'ilike', '%' . $search . '%');
+                      ->orWhere('registrasi_pasiens.no_registrasi', 'ilike', '%' . $search . '%');
             });
+        }
+        if($ruangan){
+            $registrasi->where('master_ruangans.id', 'ilike', '%'.$ruangan.'%');
         }
         
         $registrasi = $registrasi->select(
