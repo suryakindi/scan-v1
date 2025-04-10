@@ -121,7 +121,7 @@ class PasienService
                     'ruangan_asal.nama_ruangan as nama_ruangan_asal',
                     'ruangan_terakhir.nama_ruangan as nama_ruangan_terakhir',
                     'registrasi_pasiens.id_jaminan',
-                    'master_jaminans.nama_jaminan',
+                    'master_jaminans.penjamin',
                     'rdgp.tanggal_masuk',
                     'rdgp.tanggal_keluar'
                 )
