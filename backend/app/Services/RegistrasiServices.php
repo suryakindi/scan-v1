@@ -138,7 +138,7 @@ class RegistrasiServices
             });
         }
         if($ruangan){
-            $registrasi->where('master_ruangans.id', 'ilike', '%'.$ruangan.'%');
+            $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%'.$ruangan.'%');
         }
         
         $registrasi = $registrasi->select(
