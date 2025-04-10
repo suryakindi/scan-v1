@@ -7,6 +7,7 @@ use App\Models\RegistrasiPasien;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use DateTime;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Exception;
@@ -97,16 +98,17 @@ class RegistrasiServices
     }
 
 
-    public function listRegistrasiPasien()
+    public function listRegistrasiPasien($tglAwal = null, $tglAkhir = null, $search = null)
     {
         $cdFix = Auth()->user()->cdfix;
+    
         $registrasi = RegistrasiDetailLayananPasien::join('registrasi_pasiens', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien', '=', 'registrasi_pasiens.id')
             ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
             ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
-            ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
+            ->leftJoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
             ->join('users', 'registrasi_pasiens.created_by', '=', 'users.id')
             ->join('status_pasiens', 'registrasi_pasiens.status_pasien', '=', 'status_pasiens.id')
-            // ->where('registrasi_pasiens.cdfix', $cdFix)
+            ->where('registrasi_pasiens.cdfix', $cdFix)
             ->where(function ($query) {
                 $query->whereNotNull('registrasi_detail_layanan_pasiens.noantriandokter')
                     ->orWhereNotNull('registrasi_detail_layanan_pasiens.noantrian');
@@ -114,8 +116,29 @@ class RegistrasiServices
             ->whereNull('registrasi_detail_layanan_pasiens.tanggal_keluar')
             ->whereNull('registrasi_pasiens.tanggal_pulang')
             ->where('registrasi_pasiens.is_active', '=', true)
-            ->where('registrasi_detail_layanan_pasiens.is_active', '=', true)
-            ->select(
+            ->where('registrasi_detail_layanan_pasiens.is_active', '=', true);
+    
+        
+        if ($tglAwal && $tglAkhir) {
+            if ($tglAwal) {
+                $tglAwal = DateTime::createFromFormat('d-m-Y', $tglAwal)->format('Y-m-d 00:00:00');
+            }
+        
+            if ($tglAkhir) {
+                $tglAkhir = DateTime::createFromFormat('d-m-Y', $tglAkhir)->format('Y-m-d 23:59:59');
+            }
+        
+            $registrasi->whereBetween('registrasi_pasiens.tanggal_registrasi', [$tglAwal, $tglAkhir]);
+        }
+        
+        if ($search) {
+            $registrasi->where(function ($query) use ($search) {
+                $query->where('pasiens.nama', 'ilike', '%' . $search . '%')
+                      ->orWhere('registrasi_pasiens.no_registrasi', 'ilike', '%' . $search . '%');
+            });
+        }
+        
+        $registrasi = $registrasi->select(
                 'pasiens.nama',
                 'pasiens.id as id_pasien',
                 'registrasi_detail_layanan_pasiens.id as id_registrasi_detail_layanan',
@@ -132,10 +155,10 @@ class RegistrasiServices
                 'users.name as created_by'
             )
             ->paginate(100);
-
-
+    
         return $registrasi;
     }
+    
 
     public function BatalRegistrasi($id_registrasi)
     {

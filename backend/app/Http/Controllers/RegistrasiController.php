@@ -28,10 +28,10 @@ class RegistrasiController extends Controller
     }  
     
     
-public function listRegistrasiPasien()
+public function listRegistrasiPasien(Request $request)
     {
         try {
-            $registrasi = $this->RegistrasiServices->listRegistrasiPasien();
+            $registrasi = $this->RegistrasiServices->listRegistrasiPasien($request->tglAwal, $request->tglAkhir, $request->search);
             return $this->baseResponse('Registrasi Pasien berhasil didapatkan', null, $registrasi, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat Registrasi Pasien', $e->getMessage(), null, 500);
