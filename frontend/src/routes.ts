@@ -54,13 +54,11 @@ const raw: WrapRoute[] = [
         element: LazyLoad(() => import("./pages/registrasi/pasien/form")),
       },
       {
-        path: "/registrasi/antrean-rawat-jalan",
-        name: "Antrean Rawat Jalan",
+        path: "/registrasi/kunjungan",
+        name: "Kunjungan",
         nav: true,
         module: "Registrasi",
-        element: LazyLoad(
-          () => import("./pages/registrasi/pasien/antrean-rawat-jalan")
-        ),
+        element: LazyLoad(() => import("./pages/registrasi/pasien/kunjungan")),
       },
       {
         path: "/registrasi/soap",

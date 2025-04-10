@@ -91,7 +91,7 @@ const DetailIndex: FC = () => {
       </TabList>
       <TabPanels className="flex flex-1">
         {tabs.map(({ Component }, k) => (
-          <TabPanel key={k}>
+          <TabPanel key={k} className="flex-1">
             <Component />
           </TabPanel>
         ))}

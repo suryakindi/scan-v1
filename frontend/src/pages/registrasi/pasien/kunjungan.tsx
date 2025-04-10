@@ -7,7 +7,15 @@ import clsx from "clsx";
 import { LayoutContext } from "../../../layout/types";
 import useWebSocket from "react-use-websocket";
 import { LoaderT } from "../../../user";
-import { Confirm, Toast } from "../../../utils/alert";
+import Select from "react-select";
+import {
+  cast,
+  findValue,
+  mapOptions,
+  styles,
+} from "../../../utils/react-select";
+import { RuanganT } from "./types";
+import moment from "moment";
 
 type _Get = {
   created_by: string;
@@ -49,15 +57,37 @@ const ListPasien: FC = () => {
   const { setIsProcess } = useOutletContext<LayoutContext>();
   const [pasiens, setPasiens] = useState<PaginateT<_Get[]>>(paginateInit());
 
+  const [filters, setFilters] = useState<{
+    tglAwal: string;
+    tglAkhir: string;
+    ruangan: string;
+    search: string;
+  }>({
+    ruangan: "",
+    search: "",
+    tglAkhir: moment().format("YYYY-MM-DD"),
+    tglAwal: moment().format("YYYY-MM-DD"),
+  });
+
   const [search, setSearch] = useState<string>("");
   const getPasiens = async (
     url: string = "/registrasi-pelayanan/list-registrasi-pelayanan"
   ) => {
     try {
-      const query = search ? `?search=${encodeURIComponent(search)}` : "";
-      const response = await api.get<ResponseT<PaginateT<_Get[]>>>(
-        `${url}${query}`
-      );
+      // cuma dummy
+      const base = url.startsWith("http") ? undefined : "http://localhost";
+      const parsedUrl = new URL(url, base);
+
+      const queryObject = Object.fromEntries(parsedUrl.searchParams.entries());
+
+      const response = await api.get<ResponseT<PaginateT<_Get[]>>>(url, {
+        params: {
+          ...filters,
+          tglAwal: filters.tglAwal.split("-").reverse().join("-"),
+          tglAkhir: filters.tglAkhir.split("-").reverse().join("-"),
+          ...queryObject,
+        },
+      });
 
       if (response.data.data) {
         setPasiens(response.data.data);
@@ -67,41 +97,29 @@ const ListPasien: FC = () => {
     }
   };
 
-  const batalRegistrasi = (id_registrasi: number | string) => {
-    Confirm.fire({
-      title: "Batal Registrasi",
-      text: "Batal Registrasi ?",
-    }).then(async ({ isConfirmed }) => {
-      if (isConfirmed) {
-        try {
-          setIsProcess(true);
-          await api.put(
-            `/registrasi-pelayanan/batal-registrasi/${id_registrasi}`
-          );
-          Toast.fire({
-            icon: "success",
-            title: "Berhasil",
-            text: "Berhasil membatalkan registrasi pelayanan",
-          });
-        } catch (error) {
-          console.error(error);
-          Toast.fire({
-            icon: "error",
-            title: "Gagal",
-            text: "Gagal membatalkan registrasi pelayanan",
-          });
-        } finally {
-          await getPasiens();
-          setIsProcess(false);
-        }
+  const [ruangans, setRuangans] = useState<PaginateT<RuanganT[]>>(
+    paginateInit()
+  );
+
+  const getMasterRuangan = async () => {
+    try {
+      const response = await api.get<ResponseT<PaginateT<RuanganT[]>>>(
+        `/get-master-ruangan/${user.cdfix}`
+      );
+
+      if (response.data.data) {
+        setRuangans(response.data.data);
       }
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
     const load = async () => {
       setIsProcess(true);
       await getPasiens();
+      await getMasterRuangan();
       setIsProcess(false);
     };
 
@@ -110,26 +128,84 @@ const ListPasien: FC = () => {
   }, []);
   return (
     <div className="bg-white shadow-lg p-6 rounded-md mb-6 grid gap-4 auto-rows-min">
-      <div className="flex w-1/2 items-center gap-2">
-        <input
-          type="text"
-          placeholder="No RM, NIK, Nama Pasien"
-          className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
+      <div className="grid grid-cols-4 gap-3">
+        <div className="h-full flex items-center">
+          <span className="font-medium">Kunjungan</span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <input
+            type="date"
+            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+            value={filters.tglAwal}
+            onChange={({ currentTarget: { value } }) =>
+              setFilters((prev) => ({
+                ...prev,
+                tglAwal: value,
+              }))
+            }
+          />
+          <span>s/d</span>
+          <input
+            type="date"
+            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+            value={filters.tglAkhir}
+            onChange={({ currentTarget: { value } }) =>
+              setFilters((prev) => ({
+                ...prev,
+                tglAkhir: value,
+              }))
+            }
+          />
+        </div>
+
+        <Select
+          inputId="poliklinik-klinik"
+          className="w-full"
+          isSearchable={true}
+          styles={styles}
+          placeholder="Pilih..."
+          menuPlacement="bottom"
+          required={true}
+          options={mapOptions(ruangans.data, {
+            l: "nama_ruangan",
+            v: "nama_ruangan",
+          })}
+          value={findValue(
+            ruangans.data,
+            {
+              nama_ruangan: filters.ruangan,
+            },
+            { label: "nama_ruangan", value: "nama_ruangan" }
+          )}
+          onChange={(e) =>
+            cast<{ label: string; value: string }>(e, async ({ value }) => {
+              setFilters((prev) => ({ ...prev, ruangan: value }));
+            })
+          }
         />
 
-        <button
-          onClick={async () => {
-            setIsProcess(true);
-            await getPasiens();
-            setIsProcess(false);
-          }}
-          className="py-1.5 px-3 bg-cyan-500 hover:bg-cyan-400 text-white rounded-md flex items-center justify-center outline-none text-nowrap h-full gap-2 cursor-pointer"
-        >
-          <HOutline.MagnifyingGlassIcon className="size-6" />
-          <span>Cari</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="No RM, NIK, Nama Pasien"
+            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+          />
+
+          <button
+            onClick={async () => {
+              setIsProcess(true);
+              await getPasiens();
+              setIsProcess(false);
+            }}
+            className="py-1.5 px-3 bg-cyan-500 hover:bg-cyan-400 text-white rounded-md flex items-center justify-center outline-none text-nowrap h-full gap-2 cursor-pointer"
+          >
+            <HOutline.MagnifyingGlassIcon className="size-6" />
+            <span>Cari</span>
+          </button>
+        </div>
       </div>
       <table className="me-table">
         <thead>
@@ -139,9 +215,7 @@ const ListPasien: FC = () => {
             <th>Nama</th>
             <th>NO Registrasi</th>
             <th>NO Antrian</th>
-            <th>NO Antrian Dokter</th>
             <th>Nama Ruangan</th>
-            <th>Dokter</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -179,15 +253,12 @@ const ListPasien: FC = () => {
                   Dibuat Dengan CronJob
                   
                   */}
-
                 </div>
               </td>
               <td>{item.nama}</td>
               <td>{item.no_registrasi}</td>
               <td>{item.noantrian}</td>
-              <td>{item.noantriandokter}</td>
               <td>{item.nama_ruangan}</td>
-              <td>{item.dokter}</td>
               <td>
                 <div className="flex bg-slate-500 text-white mx-auto rounded-full px-1.5 py-0.5 justify-between items-center max-w-36">
                   <span className="text-sm">{item.status}</span>

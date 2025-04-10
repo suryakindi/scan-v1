@@ -48,7 +48,7 @@ const Pasien: FC = () => {
       nama_pasangan: "",
       golongan_darah: "" as GolonganDarah,
       cdfix: String(user.cdfix),
-      alamat: {
+      alamat_pasien: {
         alamat: "",
         rt: "",
         rw: "",
@@ -419,10 +419,13 @@ const Pasien: FC = () => {
               id="alamat-ktp"
               className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
               required={true}
-              value={form.alamat.alamat}
+              value={form.alamat_pasien.alamat}
               onChange={(e) =>
                 setForm({
-                  alamat: { ...form.alamat, alamat: e.currentTarget.value },
+                  alamat: {
+                    ...form.alamat_pasien,
+                    alamat: e.currentTarget.value,
+                  },
                 })
               }
             />
@@ -435,10 +438,13 @@ const Pasien: FC = () => {
                 type="text"
                 className="py-1.5 px-2 outline-none border-none flex-1"
                 required={true}
-                value={form.alamat.rt}
+                value={form.alamat_pasien.rt}
                 onChange={(e) =>
                   setForm({
-                    alamat: { ...form.alamat, rt: e.currentTarget.value },
+                    alamat: {
+                      ...form.alamat_pasien,
+                      rt: e.currentTarget.value,
+                    },
                   })
                 }
               />
@@ -447,10 +453,13 @@ const Pasien: FC = () => {
                 type="text"
                 className="py-1.5 px-2 outline-none border-none flex-1"
                 required={true}
-                value={form.alamat.rw}
+                value={form.alamat_pasien.rw}
                 onChange={(e) =>
                   setForm({
-                    alamat: { ...form.alamat, rw: e.currentTarget.value },
+                    alamat: {
+                      ...form.alamat_pasien,
+                      rw: e.currentTarget.value,
+                    },
                   })
                 }
               />
@@ -476,7 +485,7 @@ const Pasien: FC = () => {
               value={findValue(
                 provinces,
                 {
-                  id: Number(form.alamat.id_provinsi),
+                  id: Number(form.alamat_pasien.id_provinsi),
                 },
                 { label: "name", value: "id" }
               )}
@@ -485,7 +494,7 @@ const Pasien: FC = () => {
                   setIsProcess(true);
                   setForm({
                     alamat: {
-                      ...form.alamat,
+                      ...form.alamat_pasien,
                       id_provinsi: String(value),
                       id_kabupaten: "",
                       id_kecamatan: "",
@@ -513,14 +522,14 @@ const Pasien: FC = () => {
               menuPlacement="top"
               required={true}
               options={
-                [form.alamat.id_provinsi].includes("")
+                [form.alamat_pasien.id_provinsi].includes("")
                   ? []
                   : mapOptions(regencies, { l: "name", v: "id" })
               }
               value={findValue(
                 regencies,
                 {
-                  id: Number(form.alamat.id_kabupaten),
+                  id: Number(form.alamat_pasien.id_kabupaten),
                 },
                 { label: "name", value: "id" }
               )}
@@ -529,7 +538,7 @@ const Pasien: FC = () => {
                   setIsProcess(true);
                   setForm({
                     alamat: {
-                      ...form.alamat,
+                      ...form.alamat_pasien,
                       id_kabupaten: String(value),
                       id_kecamatan: "",
                       id_kelurahan: "",
@@ -556,14 +565,17 @@ const Pasien: FC = () => {
               menuPlacement="top"
               required={true}
               options={
-                [form.alamat.id_provinsi, form.alamat.id_kabupaten].includes("")
+                [
+                  form.alamat_pasien.id_provinsi,
+                  form.alamat_pasien.id_kabupaten,
+                ].includes("")
                   ? []
                   : mapOptions(districts, { l: "name", v: "id" })
               }
               value={findValue(
                 districts,
                 {
-                  id: Number(form.alamat.id_kecamatan),
+                  id: Number(form.alamat_pasien.id_kecamatan),
                 },
                 { label: "name", value: "id" }
               )}
@@ -572,7 +584,7 @@ const Pasien: FC = () => {
                   setIsProcess(true);
                   setForm({
                     alamat: {
-                      ...form.alamat,
+                      ...form.alamat_pasien,
                       id_kecamatan: String(value),
                       id_kelurahan: "",
                     },
@@ -599,9 +611,9 @@ const Pasien: FC = () => {
               required={true}
               options={
                 [
-                  form.alamat.id_provinsi,
-                  form.alamat.id_kabupaten,
-                  form.alamat.id_kecamatan,
+                  form.alamat_pasien.id_provinsi,
+                  form.alamat_pasien.id_kabupaten,
+                  form.alamat_pasien.id_kecamatan,
                 ].includes("")
                   ? []
                   : mapOptions(villages, { l: "name", v: "id" })
@@ -609,7 +621,7 @@ const Pasien: FC = () => {
               value={findValue(
                 villages,
                 {
-                  id: Number(form.alamat.id_kelurahan),
+                  id: Number(form.alamat_pasien.id_kelurahan),
                 },
                 { label: "name", value: "id" }
               )}
@@ -617,7 +629,7 @@ const Pasien: FC = () => {
                 cast<{ label: string; value: number }>(e, ({ value }) => {
                   setForm({
                     alamat: {
-                      ...form.alamat,
+                      ...form.alamat_pasien,
                       id_kelurahan: String(value),
                     },
                   });
