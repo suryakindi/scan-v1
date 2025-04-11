@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AlamatPasien;
 use App\Models\Pasien;
+use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -165,5 +166,6 @@ class PasienService
             throw new \Exception("Gagal Update Pasien & Alamat: " . $e->getMessage());
         }
     }
+
 
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\ManagementClientController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PasienController;
+use App\Http\Controllers\LayananController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RegistrasiController;
 use App\Http\Controllers\SatuSehatController;
@@ -81,6 +82,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-pasien-id/{id_pasien}', [PasienController::class, 'getPasienById']);
         Route::get('riwayat-pasien-id/{id_pasien}', [PasienController::class, 'riwayatPasienById']);
         Route::put('edit-pasien-id/{id_pasien}', [PasienController::class, 'editPasienById'])->middleware('permission:Registrasi,edit');
+    });
+
+    Route::prefix('layanan')->group(function () {
+        Route::get('daftar-pasien/teregistrasi', [LayananController::class, 'daftarTeregistrasi']);
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {

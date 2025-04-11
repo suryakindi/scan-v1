@@ -101,7 +101,7 @@ class RegistrasiServices
     public function listRegistrasiPasien($tglAwal = null, $tglAkhir = null, $search = null, $ruangan = null)
     {
         $cdFix = Auth()->user()->cdfix;
-    
+
         $registrasi = RegistrasiDetailLayananPasien::join('registrasi_pasiens', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien', '=', 'registrasi_pasiens.id')
             ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
             ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
@@ -118,51 +118,51 @@ class RegistrasiServices
             ->whereNull('registrasi_pasiens.tanggal_pulang')
             ->where('registrasi_pasiens.is_active', '=', true)
             ->where('registrasi_detail_layanan_pasiens.is_active', '=', true);
-    
-        
+
+
         if ($tglAwal && $tglAkhir) {
             if ($tglAwal) {
                 $tglAwal = DateTime::createFromFormat('d-m-Y', $tglAwal)->format('Y-m-d 00:00:00');
             }
-        
+
             if ($tglAkhir) {
                 $tglAkhir = DateTime::createFromFormat('d-m-Y', $tglAkhir)->format('Y-m-d 23:59:59');
             }
-        
+
             $registrasi->whereBetween('registrasi_pasiens.tanggal_registrasi', [$tglAwal, $tglAkhir]);
         }
-        
+
         if ($search) {
             $registrasi->where(function ($query) use ($search) {
                 $query->where('pasiens.nama', 'ilike', '%' . $search . '%')
-                      ->orWhere('registrasi_pasiens.no_registrasi', 'ilike', '%' . $search . '%');
+                    ->orWhere('registrasi_pasiens.no_registrasi', 'ilike', '%' . $search . '%');
             });
         }
-        if($ruangan){
-            $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%'.$ruangan.'%');
+        if ($ruangan) {
+            $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%' . $ruangan . '%');
         }
-        
+
         $registrasi = $registrasi->select(
-                'pasiens.nama',
-                'pasiens.id as id_pasien',
-                'registrasi_detail_layanan_pasiens.id as id_registrasi_detail_layanan',
-                'master_ruangans.id as id_ruangan',
-                'dokter.id as id_dokter',
-                'registrasi_pasiens.no_registrasi',
-                'registrasi_pasiens.id as id_registrasi',
-                'registrasi_detail_layanan_pasiens.tanggal_masuk',
-                'registrasi_detail_layanan_pasiens.noantrian',
-                'master_jaminans.penjamin',
-                'master_ruangans.nama_ruangan',
-                'dokter.name as dokter',
-                'status_pasiens.status',
-                'users.name as created_by'
-            )
+            'pasiens.nama',
+            'pasiens.id as id_pasien',
+            'registrasi_detail_layanan_pasiens.id as id_registrasi_detail_layanan',
+            'master_ruangans.id as id_ruangan',
+            'dokter.id as id_dokter',
+            'registrasi_pasiens.no_registrasi',
+            'registrasi_pasiens.id as id_registrasi',
+            'registrasi_detail_layanan_pasiens.tanggal_masuk',
+            'registrasi_detail_layanan_pasiens.noantrian',
+            'master_jaminans.penjamin',
+            'master_ruangans.nama_ruangan',
+            'dokter.name as dokter',
+            'status_pasiens.status',
+            'users.name as created_by'
+        )
             ->paginate(100);
-    
+
         return $registrasi;
     }
-    
+
 
     public function BatalRegistrasi($id_registrasi)
     {
@@ -192,11 +192,11 @@ class RegistrasiServices
 
     public function editRegistrasiLayananPasien($id_registrasi, $data)
     {
-        
+
         DB::beginTransaction();
         try {
             $layananRegistrasi = RegistrasiPasien::find($id_registrasi);
-            if($layananRegistrasi->status_pasien != 3){
+            if ($layananRegistrasi->status_pasien != 3) {
                 throw new Exception("Pasien Sudah Di Layani");
             }
             $layananRegistrasi->id_ruangan_asal = $data['id_ruangan_asal'];
@@ -207,7 +207,7 @@ class RegistrasiServices
             $layananRegistrasi->updated_by = auth()->user()->id;
             $detailLayananRegistrasi = RegistrasiDetailLayananPasien::where('id_registrasi_pasien', $layananRegistrasi->id)->first();
             $detailLayananRegistrasi->id_ruangan = $data['id_ruangan_asal'];
-            $detailLayananRegistrasi->updated_at  = Carbon::now();
+            $detailLayananRegistrasi->updated_at = Carbon::now();
             $detailLayananRegistrasi->updated_by = auth()->user()->id;
             $detailLayananRegistrasi->save();
             $layananRegistrasi->save();
@@ -218,15 +218,16 @@ class RegistrasiServices
         }
     }
 
-    public function getRegistrasiLayananPasien($id_registrasi){
-       try {
-           $registrasi = RegistrasiPasien::where('registrasi_pasiens.id', $id_registrasi)
-           ->join('pasiens as pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
-           ->select('registrasi_pasiens.id as id_registrasi_pasien','registrasi_pasiens.id_pasien', 'registrasi_pasiens.id_ruangan_asal', 'registrasi_pasiens.id_jaminan', 'registrasi_pasiens.id_jenis_kunjungan', 'registrasi_pasiens.no_registrasi', 'registrasi_pasiens.tanggal_registrasi', 'pasiens.nama', 'pasiens.nik')->first();
-           
-           return $registrasi;
-       } catch (\Exception $e) {
-           throw new Exception($e->getMessage());
-       }
+    public function getRegistrasiLayananPasien($id_registrasi)
+    {
+        try {
+            $registrasi = RegistrasiPasien::where('registrasi_pasiens.id', $id_registrasi)
+                ->join('pasiens as pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
+                ->select('registrasi_pasiens.id as id_registrasi_pasien', 'registrasi_pasiens.id_pasien', 'registrasi_pasiens.id_ruangan_asal', 'registrasi_pasiens.id_jaminan', 'registrasi_pasiens.id_jenis_kunjungan', 'registrasi_pasiens.no_registrasi', 'registrasi_pasiens.tanggal_registrasi', 'pasiens.nama', 'pasiens.nik')->first();
+
+            return $registrasi;
+        } catch (\Exception $e) {
+            throw new Exception($e->getMessage());
+        }
     }
 }
