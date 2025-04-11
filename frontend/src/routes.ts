@@ -54,6 +54,12 @@ const raw: WrapRoute[] = [
         element: LazyLoad(() => import("./pages/registrasi/pasien/form")),
       },
       {
+        path: "/registrasi/form/:id/edit",
+        name: "Edit Registration Form",
+        module: "Registrasi",
+        element: LazyLoad(() => import("./pages/registrasi/pasien/form-edit")),
+      },
+      {
         path: "/registrasi/kunjungan",
         name: "Kunjungan",
         nav: true,
@@ -73,6 +79,25 @@ const raw: WrapRoute[] = [
         element: LazyLoad(
           () => import("./pages/registrasi/pasien/details/index")
         ),
+      },
+    ],
+  },
+  {
+    path: "/layanan",
+    name: "Layanan",
+    nav: true,
+    children: [
+      {
+        path: "/layanan/rawat-jalan",
+        name: "Rawat Jalan",
+        nav: true,
+        element: LazyLoad(() => import("./pages/layanan/rawat-jalan")),
+      },
+      {
+        path: "/layanan/rawat-inap",
+        name: "Rawat Inap",
+        nav: true,
+        element: LazyLoad(() => import("./pages/layanan/rawat-inap")),
       },
     ],
   },

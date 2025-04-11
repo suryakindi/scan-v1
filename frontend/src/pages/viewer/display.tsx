@@ -193,7 +193,7 @@ const Display: FC = () => {
         {queueData.map((item, k) => (
           <div
             key={k}
-            className="grid grid-cols-5 bg-green-400 rounded-md font-bold text-white"
+            className="grid grid-cols-5 bg-black rounded-md font-bold text-white"
           >
             <div className="flex items-center justify-center p-6">
               <span>{item.noantrian}</span>
