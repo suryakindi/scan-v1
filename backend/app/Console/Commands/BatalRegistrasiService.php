@@ -31,23 +31,31 @@ class BatalRegistrasiService extends Command
     public function handle()
     {
         try {
-            DB::beginTransaction(); // Mulai transaksi DB
+            DB::beginTransaction(); 
     
-            $RegistrasiPasien = RegistrasiPasien::where('status_pasien', 3)->whereNull('tanggal_pulang')->get();
+            $yesterdayEnd = Carbon::yesterday()->setTime(23, 59, 0); 
+            $todayStart = Carbon::today(); 
+    
+            $RegistrasiPasien = RegistrasiPasien::where('status_pasien', 3)
+                ->whereNull('tanggal_pulang')
+                ->where('tanggal_registrasi', '<', $todayStart)
+                ->get();
     
             foreach ($RegistrasiPasien as $item) {
                 $item->is_active = false;
-                $item->tanggal_pulang = Carbon::now();
+                $item->tanggal_pulang = $yesterdayEnd;
                 $item->status_pasien = 10;
-                $item->updated_at = Carbon::now();
+                $item->updated_at = now();
                 $item->save();
     
-                $RegistrasiDetail = RegistrasiDetailLayananPasien::where('id_registrasi_pasien', $item->id)->whereNull('tanggal_keluar')->first();
+                $RegistrasiDetail = RegistrasiDetailLayananPasien::where('id_registrasi_pasien', $item->id)
+                    ->whereNull('tanggal_keluar')
+                    ->first();
     
                 if ($RegistrasiDetail) {
                     $RegistrasiDetail->is_active = false;
-                    $RegistrasiDetail->tanggal_keluar = Carbon::now();
-                    $RegistrasiDetail->updated_at = Carbon::now();
+                    $RegistrasiDetail->tanggal_keluar = $yesterdayEnd;
+                    $RegistrasiDetail->updated_at = now();
                     $RegistrasiDetail->save();
                 }
     
@@ -58,8 +66,8 @@ class BatalRegistrasiService extends Command
     
         } catch (\Exception $e) {
             DB::rollBack(); // Rollback kalau ada error
-    
             Log::error('❌ Gagal membatalkan registrasi pasien: ' . $e->getMessage());
         }
     }
+    
 }

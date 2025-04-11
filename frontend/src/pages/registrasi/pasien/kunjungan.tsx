@@ -29,7 +29,7 @@ type _Get = {
   nama_ruangan: string;
   no_registrasi: string;
   noantrian: string;
-  noantriandokter: string;
+  penjamin: string;
   tanggal_masuk: string;
   status:
     | "Belum Checkin"
@@ -130,7 +130,7 @@ const ListPasien: FC = () => {
     <div className="bg-white shadow-lg p-6 rounded-md mb-6 grid gap-4 auto-rows-min">
       <div className="grid grid-cols-4 gap-3">
         <div className="h-full flex items-center">
-          <span className="font-medium">Kunjungan</span>
+          <span className="font-medium">List Kunjungan</span>
         </div>
 
         <div className="flex items-center gap-1">
@@ -210,11 +210,12 @@ const ListPasien: FC = () => {
       <table className="me-table">
         <thead>
           <tr>
-            <th>NO</th>
+            <th>#</th>
             <th>&nbsp;</th>
+            <th>Nomor Antrian</th>
             <th>Nama</th>
-            <th>NO Registrasi</th>
-            <th>NO Antrian</th>
+            <th>No Registrasi</th>
+            <th>Penjamin</th>
             <th>Nama Ruangan</th>
             <th>Status</th>
           </tr>
@@ -255,9 +256,10 @@ const ListPasien: FC = () => {
                   */}
                 </div>
               </td>
+              <td>{item.noantrian}</td>
               <td>{item.nama}</td>
               <td>{item.no_registrasi}</td>
-              <td>{item.noantrian}</td>
+              <td>{item.penjamin}</td>
               <td>{item.nama_ruangan}</td>
               <td>
                 <div className="flex bg-slate-500 text-white mx-auto rounded-full px-1.5 py-0.5 justify-between items-center max-w-36">

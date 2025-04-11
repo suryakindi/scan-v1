@@ -46,6 +46,16 @@ public function listRegistrasiPasien(Request $request)
             return $this->baseResponse('Terjadi kesalahan saat Registrasi Pasien', $e->getMessage(), null, 500);
         }
     }
+
+    public function editRegistrasiLayananPasien($id_registrasi, Request $request)
+    {
+        try {
+            $registrasi = $this->RegistrasiServices->editRegistrasiLayananPasien($id_registrasi, $request->all());
+            return $this->baseResponse('Registrasi Pasien berhasil diperbarui', null, $registrasi, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Registrasi Pasien', $e->getMessage(), null, 500);
+        }
+    }
 }
 
 

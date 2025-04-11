@@ -108,6 +108,7 @@ class RegistrasiServices
             ->leftJoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
             ->join('users', 'registrasi_pasiens.created_by', '=', 'users.id')
             ->join('status_pasiens', 'registrasi_pasiens.status_pasien', '=', 'status_pasiens.id')
+            ->join('master_jaminans', 'registrasi_pasiens.id_jaminan', '=', 'master_jaminans.id')
             ->where('registrasi_pasiens.cdfix', $cdFix)
             ->where(function ($query) {
                 $query->whereNotNull('registrasi_detail_layanan_pasiens.noantriandokter')
@@ -151,7 +152,7 @@ class RegistrasiServices
                 'registrasi_pasiens.id as id_registrasi',
                 'registrasi_detail_layanan_pasiens.tanggal_masuk',
                 'registrasi_detail_layanan_pasiens.noantrian',
-                'registrasi_detail_layanan_pasiens.noantriandokter',
+                'master_jaminans.penjamin',
                 'master_ruangans.nama_ruangan',
                 'dokter.name as dokter',
                 'status_pasiens.status',
@@ -189,4 +190,31 @@ class RegistrasiServices
 
     }
 
+    public function editRegistrasiLayananPasien($id_registrasi, $data)
+    {
+        
+        DB::beginTransaction();
+        try {
+            $layananRegistrasi = RegistrasiPasien::find($id_registrasi);
+            if($layananRegistrasi->status_pasien != 3){
+                throw new Exception("Pasien Sudah Di Layani");
+            }
+            $layananRegistrasi->id_ruangan_asal = $data['id_ruangan_asal'];
+            $layananRegistrasi->id_ruangan_terakhir = $data['id_ruangan_asal'];
+            $layananRegistrasi->id_jenis_kunjungan = $data['id_jenis_kunjungan'];
+            $layananRegistrasi->id_jaminan = $data['id_jaminan'];
+            $layananRegistrasi->updated_at = Carbon::now();
+            $layananRegistrasi->updated_by = auth()->user()->id;
+            $detailLayananRegistrasi = RegistrasiDetailLayananPasien::where('id_registrasi_pasien', $layananRegistrasi->id)->first();
+            $detailLayananRegistrasi->id_ruangan = $data['id_ruangan_asal'];
+            $detailLayananRegistrasi->updated_at  = Carbon::now();
+            $detailLayananRegistrasi->updated_by = auth()->user()->id;
+            $detailLayananRegistrasi->save();
+            $layananRegistrasi->save();
+            DB::commit();
+            return $layananRegistrasi;
+        } catch (\Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
 }
