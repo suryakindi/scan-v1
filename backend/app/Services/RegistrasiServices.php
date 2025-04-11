@@ -220,7 +220,9 @@ class RegistrasiServices
 
     public function getRegistrasiLayananPasien($id_registrasi){
        try {
-           $registrasi = RegistrasiPasien::where('id', $id_registrasi)->select('id as id_registrasi_pasien','id_pasien', 'id_ruangan_asal', 'id_jaminan', 'id_jenis_kunjungan', 'no_registrasi', 'tanggal_registrasi')->first();
+           $registrasi = RegistrasiPasien::where('registrasi_pasiens.id', $id_registrasi)
+           ->join('pasiens as pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
+           ->select('registrasi_pasiens.id as id_registrasi_pasien','registrasi_pasiens.id_pasien', 'registrasi_pasiens.id_ruangan_asal', 'registrasi_pasiens.id_jaminan', 'registrasi_pasiens.id_jenis_kunjungan', 'registrasi_pasiens.no_registrasi', 'registrasi_pasiens.tanggal_registrasi', 'pasiens.nama', 'pasiens.nik')->first();
            
            return $registrasi;
        } catch (\Exception $e) {
