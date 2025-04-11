@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { useLoaderData, useOutletContext } from "react-router";
+import { Link, useLoaderData, useOutletContext } from "react-router";
 import * as HOutline from "@heroicons/react/24/outline";
 import { api, ResponseT } from "../../../utils/api";
 import { paginateInit, PaginateT } from "../../../utils/paginate";
@@ -16,6 +16,7 @@ import {
 } from "../../../utils/react-select";
 import { RuanganT } from "./types";
 import moment from "moment";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 type _Get = {
   created_by: string;
@@ -167,6 +168,7 @@ const ListPasien: FC = () => {
           placeholder="Pilih..."
           menuPlacement="bottom"
           required={true}
+          isClearable={true}
           options={mapOptions(ruangans.data, {
             l: "nama_ruangan",
             v: "nama_ruangan",
@@ -183,6 +185,32 @@ const ListPasien: FC = () => {
               setFilters((prev) => ({ ...prev, ruangan: value }));
             })
           }
+          components={{
+            ClearIndicator: () => {
+              return (
+                <button
+                  type="button"
+                  className="size-5 flex items-center justify-center cursor-pointer rounded-full"
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, ruangan: "" }))
+                  }
+                >
+                  <HOutline.XMarkIcon className="size-4 text-gray-300" />
+                </button>
+              );
+            },
+            Option: ({ innerProps, children, isSelected }) => {
+              return (
+                <div
+                  {...innerProps}
+                  className="px-3 py-1 hover:bg-blue-600 hover:text-white flex items-center justify-between"
+                >
+                  {children}
+                  {isSelected && <HOutline.CheckIcon className="size-4" />}
+                </div>
+              );
+            },
+          }}
         />
 
         <div className="flex items-center gap-2">
@@ -218,6 +246,7 @@ const ListPasien: FC = () => {
             <th>Penjamin</th>
             <th>Nama Ruangan</th>
             <th>Status</th>
+            <th>&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -273,6 +302,47 @@ const ListPasien: FC = () => {
                     })}
                   ></span>
                 </div>
+              </td>
+              <td>
+                <Menu>
+                  <MenuButton className="size-8 rounded-full flex items-center justify-center m-auto cursor-pointer bg-transparent data-[hover]:bg-slate-200 data-[open]:bg-slate-200">
+                    <HOutline.EllipsisVerticalIcon className="size-6 fill-black" />
+                  </MenuButton>
+
+                  <MenuItems
+                    transition
+                    anchor="bottom end"
+                    className="w-52 origin-top-right bg-white outline-0 rounded-md border border-slate-200 transition duration-100 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+                  >
+                    <MenuItem>
+                      <Link
+                        to={`/registrasi/details/${item.id_pasien}`}
+                        className="py-2 px-3 flex items-center hover:bg-blue-600 hover:text-white gap-2"
+                      >
+                        <HOutline.DocumentIcon className="size-4" />
+                        <span>Details</span>
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link
+                        to={`/registrasi/form/${item.id_registrasi_detail_layanan}/edit`}
+                        className="py-2 px-3 flex items-center hover:bg-blue-600 hover:text-white gap-2"
+                      >
+                        <HOutline.PencilIcon className="size-4" />
+                        <span>Edit</span>
+                      </Link>
+                    </MenuItem>
+                    <MenuItem>
+                      <Link
+                        to="/"
+                        className="py-2 px-3 flex items-center hover:bg-blue-600 hover:text-white gap-2"
+                      >
+                        <HOutline.TrashIcon className="size-4" />
+                        <span>Delete</span>
+                      </Link>
+                    </MenuItem>
+                  </MenuItems>
+                </Menu>
               </td>
             </tr>
           ))}

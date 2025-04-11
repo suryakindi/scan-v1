@@ -1,5 +1,6 @@
 import { redirect, type LoaderFunctionArgs } from "react-router";
 import { api, ResponseT } from "./utils/api";
+import { ClientT } from "./pages/management-client/client/types";
 
 type ModuleT =
   | "Registrasi"
@@ -59,6 +60,7 @@ interface UserT {
 
 interface LoaderT {
   permission: PermissionT | (Omit<PermissionT, "module"> & { module: null });
+  client: ClientT;
   user: UserT;
   token: string;
 }
@@ -71,6 +73,7 @@ export const userLoader = async (_: LoaderFunctionArgs, module?: ModuleT) => {
         user: UserT;
         role_permissions: PermissionT;
         user_permissions: PermissionT;
+        client: ClientT;
       }>
     >("/check-token", {
       headers: { Authorization: `Bearer ${token}` },
@@ -103,7 +106,12 @@ export const userLoader = async (_: LoaderFunctionArgs, module?: ModuleT) => {
       can_delete: true,
     };
 
-    return { permission, token, user: user.data.data.user } as LoaderT;
+    return {
+      permission,
+      token,
+      user: user.data.data.user,
+      client: user.data.data.client,
+    } as LoaderT;
   } catch (error) {
     console.error(error);
     return redirect("/login");

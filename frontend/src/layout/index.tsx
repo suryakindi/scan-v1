@@ -3,6 +3,7 @@ import {
   Link,
   NavLink,
   Outlet,
+  useLoaderData,
   useLocation,
   useNavigation,
 } from "react-router";
@@ -14,6 +15,7 @@ import { BarLoader } from "react-spinners";
 import { routes, WrapRoute } from "../routes";
 import LoadingOverlay from "./loading-ovarelay";
 import { LayoutContext } from "./types";
+import { LoaderT } from "../user";
 
 const Layout: FC = () => {
   const [show, setShow] = useState<boolean>(true);
@@ -22,6 +24,8 @@ const Layout: FC = () => {
 
   const { state } = useNavigation();
   const { pathname } = useLocation();
+
+  const { client } = useLoaderData<LoaderT>();
 
   const navRoutes = routes
     .map((route) => {
@@ -154,6 +158,8 @@ const Layout: FC = () => {
               >
                 <HOutline.Bars3Icon className="size-6" />
               </button>
+
+              <span className="text-lg font-bold">{client.nama_client}</span>
 
               <div className="flex ml-4 items-center">
                 <div className="flex flex-col text-nowrap mr-2">
