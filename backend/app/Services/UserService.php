@@ -63,11 +63,15 @@ class UserService
                 ->select('modules.name as module', 'user_permissions.can_view', 'user_permissions.can_edit', 'user_permissions.can_create', 'user_permissions.can_delete')
                 ->get();
 
+            $client = DB::table('management_clients')
+                ->where('id', $user->cdfix)    
+                ->first();
             return [
                 'status' => true,
                 'message' => 'Token Valid',
                 'data' => [
                     'user' => $user,
+                    'client' => $client,
                     'role_permissions' => $rolePermissions,
                     'user_permissions' => $userPermissions
                 ],
