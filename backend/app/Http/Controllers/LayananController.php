@@ -16,10 +16,10 @@ class LayananController extends Controller
         $this->LayananService = $LayananService;
     }
 
-    public function daftarTeregistrasi()
+    public function daftarTeregistrasi(Request $request)
     {
         try {
-            $daftarTeregistrasi = $this->LayananService->daftarTeregistrasi();
+            $daftarTeregistrasi = $this->LayananService->daftarTeregistrasi($request->tglAwal, $request->tglAkhir, $request->search, $request->ruangan);
             return $this->baseResponse('Daftar Layanan Pasien Teregistrasi berhasil didapatkan', null, $daftarTeregistrasi, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat melihat Daftar Layanan Pasien Teregistrasi', $e->getMessage(), null, 500);
