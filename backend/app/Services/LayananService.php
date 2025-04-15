@@ -18,6 +18,7 @@ class LayananService
                 ->leftJoin('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
                 ->join('status_pasiens', 'registrasi_pasiens.status_pasien', '=', 'status_pasiens.id')
                 ->leftjoin('status_pasiens as status_pulang', 'registrasi_pasiens.status_pulang', '=', 'status_pasiens.id')
+                ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
                 ->where('registrasi_pasiens.cdfix', $cdFix)
                 ->whereNull('registrasi_pasiens.tanggal_pulang')
                 ->whereNull('registrasi_pasiens.deleted_by')
@@ -25,6 +26,7 @@ class LayananService
                 ->select(
                     'registrasi_pasiens.id as id_registrasi',
                     'pasiens.nama',
+                    'pasiens.no_bpjs',
                     'registrasi_detail_layanan_pasiens.id_ruangan',
                     'registrasi_pasiens.waktu_pemanggilan',
                     'registrasi_pasiens.status_pulang as id_status_pulang',
@@ -35,6 +37,7 @@ class LayananService
                     'registrasi_pasiens.no_registrasi',
                     'registrasi_pasiens.tanggal_registrasi',
                     'master_ruangans.nama_ruangan',
+                    'dokter.name as dokter',
                     DB::raw('(registrasi_pasiens.waktu_pemanggilan - registrasi_pasiens.tanggal_registrasi) as selisih_waktu')
                     
                 )
@@ -43,7 +46,7 @@ class LayananService
             return $registrasi;
 
         } catch (\Exception $e) {
-            throw new \Exception("Gagal", 1);
+            throw new \Exception("Gagal", $e->getMessage());
         }
     }
 
