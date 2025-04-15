@@ -46,4 +46,14 @@ class LayananController extends Controller
             return $this->baseResponse('Terjadi kesalahan saat get user', $e->getMessage(), null, 500);
         }
     }
+
+    public function daftarTeregistrasiById($id_registrasi)
+    {
+        try {
+            $daftarTeregistrasi = $this->LayananService->daftarTeregistrasiById($id_registrasi);
+            return $this->baseResponse('Daftar Layanan Pasien Teregistrasi berhasil didapatkan', null, $daftarTeregistrasi, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat melihat Daftar Layanan Pasien Teregistrasi', $e->getMessage(), null, 500);
+        }
+    }
 }
