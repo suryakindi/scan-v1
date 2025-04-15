@@ -2,14 +2,16 @@ import clsx from "clsx";
 import { FC, useEffect, useState } from "react";
 import * as HOutline from "@heroicons/react/24/outline";
 import Select from "react-select";
-import { styles } from "../../utils/react-select";
-import { options } from "../../mock/react-select";
+import { cast, findValue, mapOptions, styles } from "../../utils/react-select";
 import { api, ResponseT } from "../../utils/api";
 import { paginateInit, PaginateT } from "../../utils/paginate";
 import useWebSocket from "react-use-websocket";
-import { Link, useLoaderData } from "react-router";
+import { Link, useLoaderData, useOutletContext } from "react-router";
 import { LoaderT } from "../../user";
 import { Toast } from "../../utils/alert";
+import moment from "moment";
+import { RuanganT } from "../registrasi/pasien/types";
+import { LayoutContext } from "../../layout/types";
 
 type Data = {
   id_registrasi: number;
@@ -29,6 +31,7 @@ type Data = {
 
 const RawatJalan: FC = () => {
   const { user } = useLoaderData<LoaderT>();
+  const { setIsProcess } = useOutletContext<LayoutContext>();
 
   const { sendMessage } = useWebSocket("ws://localhost:3000/socket/call", {
     shouldReconnect: () => true,
@@ -40,22 +43,66 @@ const RawatJalan: FC = () => {
 
   const [data, setData] = useState<PaginateT<Data[]>>(paginateInit([]));
 
-  const getData = async () => {
+  const [ruangans, setRuangans] = useState<PaginateT<RuanganT[]>>(
+    paginateInit()
+  );
+
+  const getMasterRuangan = async () => {
     try {
-      const response = await api.get<ResponseT<PaginateT<Data[]>>>(
-        "/layanan/daftar-pasien/teregistrasi"
+      const response = await api.get<ResponseT<PaginateT<RuanganT[]>>>(
+        `/get-master-ruangan/${user.cdfix}`
       );
 
       if (response.data.data) {
-        setData(response.data.data);
+        setRuangans(response.data.data);
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const [filters, setFilters] = useState<{
+    tglAwal: string;
+    tglAkhir: string;
+    ruangan: string;
+    search: string;
+  }>({
+    ruangan: "",
+    search: "",
+    tglAkhir: moment().format("YYYY-MM-DD"),
+    tglAwal: moment().format("YYYY-MM-DD"),
+  });
+
+  const getData = async (
+    url: string = "/layanan/daftar-pasien/teregistrasi"
+  ) => {
+    try {
+      // cuma dummy
+      const base = url.startsWith("http") ? undefined : "http://localhost";
+      const parsedUrl = new URL(url, base);
+
+      const queryObject = Object.fromEntries(parsedUrl.searchParams.entries());
+
+      const response = await api.get<ResponseT<PaginateT<Data[]>>>(url, {
+        params: {
+          ...filters,
+          tglAwal: filters.tglAwal.split("-").reverse().join("-"),
+          tglAkhir: filters.tglAkhir.split("-").reverse().join("-"),
+          ...queryObject,
+        },
+      });
+
+      if (response.data.data) {
+        setData(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
+
   useEffect(() => {
     getData();
+    getMasterRuangan();
   }, []);
 
   const call = async (antrean: Data) => {
@@ -91,11 +138,25 @@ const RawatJalan: FC = () => {
           <input
             type="date"
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+            value={filters.tglAwal}
+            onChange={({ currentTarget: { value } }) =>
+              setFilters((prev) => ({
+                ...prev,
+                tglAwal: value,
+              }))
+            }
           />
           <span>s/d</span>
           <input
             type="date"
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+            value={filters.tglAkhir}
+            onChange={({ currentTarget: { value } }) =>
+              setFilters((prev) => ({
+                ...prev,
+                tglAkhir: value,
+              }))
+            }
           />
         </div>
 
@@ -108,7 +169,51 @@ const RawatJalan: FC = () => {
           menuPlacement="bottom"
           required={true}
           isClearable={true}
-          options={options}
+          options={mapOptions(ruangans.data, {
+            l: "nama_ruangan",
+            v: "nama_ruangan",
+          })}
+          value={findValue(
+            ruangans.data,
+            {
+              nama_ruangan: filters.ruangan,
+            },
+            { label: "nama_ruangan", value: "nama_ruangan" }
+          )}
+          onChange={(e) =>
+            cast<{ label: string; value: string }>(e, async ({ value }) => {
+              setFilters((prev) => ({ ...prev, ruangan: value }));
+            })
+          }
+          components={{
+            ClearIndicator: () => {
+              return (
+                <button
+                  type="button"
+                  className="size-5 flex items-center justify-center cursor-pointer rounded-full"
+                  onClick={() =>
+                    setFilters((prev) => ({ ...prev, ruangan: "" }))
+                  }
+                >
+                  <HOutline.XMarkIcon className="size-4 text-gray-300" />
+                </button>
+              );
+            },
+            Option: ({ innerProps, children, isSelected }) => {
+              return (
+                <div
+                  {...innerProps}
+                  className={clsx(
+                    "px-3 py-1 hover:bg-blue-600 hover:text-white flex items-center justify-between",
+                    isSelected && "bg-slate-200"
+                  )}
+                >
+                  {children}
+                  {isSelected && <HOutline.CheckIcon className="size-4" />}
+                </div>
+              );
+            },
+          }}
         />
 
         <div className="flex items-center gap-2">
@@ -116,10 +221,21 @@ const RawatJalan: FC = () => {
             type="text"
             placeholder="No RM, NIK, Nama Pasien"
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+            value={filters.search}
+            onChange={({ currentTarget: { value } }) => {
+              setFilters((prev) => ({
+                ...prev,
+                search: value,
+              }));
+            }}
           />
 
           <button
-            onClick={async () => {}}
+            onClick={async () => {
+              setIsProcess(true);
+              await getData();
+              setIsProcess(false);
+            }}
             className="py-1.5 px-3 bg-cyan-500 hover:bg-cyan-400 text-white rounded-md flex items-center justify-center outline-none text-nowrap h-full gap-2 cursor-pointer"
           >
             <HOutline.MagnifyingGlassIcon className="size-6" />
@@ -133,6 +249,7 @@ const RawatJalan: FC = () => {
           <tr>
             <th>Ticket</th>
             <th>Nama</th>
+            <th>Ruangan</th>
             <th>Statu Pulang</th>
             <th>Waiting</th>
             <th>Status</th>
@@ -155,6 +272,7 @@ const RawatJalan: FC = () => {
                   <span>{item.nama}</span>
                 </div>
               </td>
+              <td>{item.nama_ruangan}</td>
               <td>{item.status_pulang}</td>
               <td>
                 {item.selisih_waktu && (
