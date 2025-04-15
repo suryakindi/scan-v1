@@ -85,8 +85,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::prefix('layanan')->group(function () {
-        Route::get('daftar-pasien/teregistrasi', [LayananController::class, 'daftarTeregistrasi'])->middleware('permission:Layanan,view');;
-        Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Registrasi,update');;
+        Route::get('daftar-pasien/teregistrasi', [LayananController::class, 'daftarTeregistrasi'])->middleware('permission:Layanan,view');
+        Route::get('get-user/{cdfix}', [LayananController::class, 'getUser'])->middleware('permission:Layanan,view');
+        Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Registrasi,update');
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {

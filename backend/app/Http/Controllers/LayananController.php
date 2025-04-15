@@ -36,4 +36,14 @@ class LayananController extends Controller
             return $this->baseResponse('Terjadi kesalahan saat memperbarui waktu pemanggilan', $e->getMessage(), null, 500);
         }
     }
+
+    public function getUser($cdfix)
+    {
+        try {
+            $user = $this->LayananService->getUser($cdfix);
+            return $this->baseResponse('User berhasil Didapatkan', null, $user, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat get user', $e->getMessage(), null, 500);
+        }
+    }
 }

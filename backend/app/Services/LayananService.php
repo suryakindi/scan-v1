@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
+use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
@@ -88,4 +89,13 @@ class LayananService
         }
     }
 
+    public function getUser($cdfix)
+    {
+        try {
+            $user = User::where('cdfix', $cdfix)->where('is_active', true)->limit(100);
+            return $user;
+        } catch (\Exception $e) {
+            throw new \Exception("Gagal", $e->getMessage());
+        }   
+    }
 }
