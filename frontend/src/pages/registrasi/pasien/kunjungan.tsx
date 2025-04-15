@@ -61,7 +61,6 @@ const ListPasien: FC = () => {
     tglAwal: moment().format("YYYY-MM-DD"),
   });
 
-  const [search, setSearch] = useState<string>("");
   const getPasiens = async (
     url: string = "/registrasi-pelayanan/list-registrasi-pelayanan"
   ) => {
@@ -209,8 +208,13 @@ const ListPasien: FC = () => {
             type="text"
             placeholder="No RM, NIK, Nama Pasien"
             className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
+            value={filters.search}
+            onChange={({ currentTarget: { value } }) => {
+              setFilters((prev) => ({
+                ...prev,
+                search: value,
+              }));
+            }}
           />
 
           <button
