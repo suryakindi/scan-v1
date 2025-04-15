@@ -17,6 +17,7 @@ class PermissionSeeder extends Seeder
             'Integrasi-Tools',
             'Management-Client',
             'Master-Data',
+            'Layanan'
         ];
 
         $rolesPermissions = [
