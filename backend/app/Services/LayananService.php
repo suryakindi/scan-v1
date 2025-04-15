@@ -25,19 +25,19 @@ class LayananService
                 ->whereNull('registrasi_pasiens.tanggal_pulang')
                 ->whereNull('registrasi_pasiens.deleted_by')
                 ->where('registrasi_detail_layanan_pasiens.is_active', true);
-                
+
             if ($tglAwal && $tglAkhir) {
                 if ($tglAwal) {
                     $tglAwal = DateTime::createFromFormat('d-m-Y', $tglAwal)->format('Y-m-d 00:00:00');
                 }
-    
+
                 if ($tglAkhir) {
                     $tglAkhir = DateTime::createFromFormat('d-m-Y', $tglAkhir)->format('Y-m-d 23:59:59');
                 }
-    
+
                 $registrasi->whereBetween('registrasi_pasiens.tanggal_registrasi', [$tglAwal, $tglAkhir]);
             }
-    
+
             if ($search) {
                 $registrasi->where(function ($query) use ($search) {
                     $query->where('pasiens.nama', 'ilike', '%' . $search . '%')
@@ -63,9 +63,9 @@ class LayananService
                 'master_ruangans.nama_ruangan',
                 'dokter.name as dokter',
                 DB::raw('(registrasi_pasiens.waktu_pemanggilan - registrasi_pasiens.tanggal_registrasi) as selisih_waktu')
-                
+
             )
-            ->paginate(100);
+                ->paginate(100);
             return $registrasi;
 
         } catch (\Exception $e) {
@@ -75,15 +75,15 @@ class LayananService
 
     public function updateWaktuPemanggilan(RegistrasiPasien $id_registrasi)
     {
-        DB::beginTransaction();   
+        DB::beginTransaction();
         try {
-           $id_registrasi->waktu_pemanggilan = Carbon::now();
-           $id_registrasi->status_pasien = 4;
-           $id_registrasi->updated_at = Carbon::now();
-           $id_registrasi->updated_by = auth()->user()->id;
-           $id_registrasi->save();
-           DB::commit();
-           return $id_registrasi;
+            $id_registrasi->waktu_pemanggilan = Carbon::now();
+            $id_registrasi->status_pasien = 4;
+            $id_registrasi->updated_at = Carbon::now();
+            $id_registrasi->updated_by = auth()->user()->id;
+            $id_registrasi->save();
+            DB::commit();
+            return $id_registrasi;
         } catch (\Exception $e) {
             throw new \Exception("Gagal", $e->getMessage());
         }
@@ -92,30 +92,33 @@ class LayananService
     public function getUser($cdfix)
     {
         try {
-            $user = User::where('cdfix', $cdfix)->where('is_active', true)->limit(100);
+            $user = User::where('cdfix', $cdfix)->where('is_active', true)->limit(100)->get();
             return $user;
         } catch (\Exception $e) {
             throw new \Exception("Gagal", $e->getMessage());
-        }   
+        }
     }
 
     public function daftarTeregistrasiById($id_registrasi)
     {
-        
-        try {   
+
+        try {
             $daftarTeregistrasi = RegistrasiPasien::where('registrasi_pasiens.id', $id_registrasi)
-            ->join('registrasi_detail_layanan_pasiens', 'registrasi_pasiens.id', '=', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien')
-            ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
-            ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
-            ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
-            ->select(
-                'pasiens.nama',
-                'pasiens.no_bpjs',
-                'master_ruangans.nama_ruangan',
-                'dokter.name as dokter',
-                'registrasi_detail_layanan_pasiens.noantrian'
+                ->join('registrasi_detail_layanan_pasiens', 'registrasi_pasiens.id', '=', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien')
+                ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
+                ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
+                ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
+                ->select(
+                    'pasiens.id as id_pasien',
+                    'pasiens.nama',
+                    'pasiens.no_bpjs',
+                    'master_ruangans.nama_ruangan',
+                    'dokter.name as dokter',
+                    'registrasi_detail_layanan_pasiens.noantrian',
+                    'registrasi_detail_layanan_pasiens.tanggal_masuk',
+                    'pasiens.tanggal_lahir',
                 )
-            ->where('registrasi_pasiens.is_active', true)->first();
+                ->where('registrasi_pasiens.is_active', true)->first();
 
             return $daftarTeregistrasi;
         } catch (\Exception $e) {
