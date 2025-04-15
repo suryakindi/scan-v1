@@ -159,7 +159,9 @@ const Layout: FC = () => {
                 <HOutline.Bars3Icon className="size-6" />
               </button>
 
-              <span className="text-lg font-bold">{client.nama_client}</span>
+              <span className="text-lg font-bold">
+                {client?.nama_client ?? ""}
+              </span>
 
               <div className="flex ml-4 items-center">
                 <div className="flex flex-col text-nowrap mr-2">

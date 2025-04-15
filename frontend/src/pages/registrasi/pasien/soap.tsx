@@ -648,14 +648,21 @@ const SOAP: FC = () => {
                     </div>
                   )}
 
-                  <div className="flex">
+                  <div className="flex gap-3 justify-end">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                    >
+                      Simpan
+                    </button>
+
                     <button
                       type="button"
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-between outline-0"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm flex items-center justify-between outline-0"
                       onClick={handleTambahSOAP}
                     >
                       <HOutline.PlusIcon className="size-5" />
-                      <span className="ml-2">Tabmah SOAP</span>
+                      <span className="ml-2">Tambah SOAP</span>
                     </button>
                   </div>
                 </div>
@@ -691,15 +698,6 @@ const SOAP: FC = () => {
                       Metode perhitungan umur dalam bulan
                     </span>
                   </div>
-                </div>
-
-                <div className="flex">
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-between outline-0"
-                  >
-                    Simpan
-                  </button>
                 </div>
               </form>
             </TabPanel>

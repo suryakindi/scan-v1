@@ -5,7 +5,6 @@ import { api, ResponseT } from "../../../utils/api";
 import { paginateInit, PaginateT } from "../../../utils/paginate";
 import clsx from "clsx";
 import { LayoutContext } from "../../../layout/types";
-import useWebSocket from "react-use-websocket";
 import { LoaderT } from "../../../user";
 import Select from "react-select";
 import {
@@ -45,14 +44,6 @@ type _Get = {
 };
 
 const ListPasien: FC = () => {
-  const { sendMessage } = useWebSocket("ws://localhost:3000/socket/call", {
-    shouldReconnect: () => true,
-    onOpen: () => console.log("WebSocket connection opened!"),
-    onClose: () => console.log("WebSocket connection closed!"),
-    onError: (event: unknown) => console.error("WebSocket error:", event),
-    onMessage: (event: unknown) => console.log("Received message:", event),
-  });
-
   const { user } = useLoaderData<LoaderT>();
 
   const { setIsProcess } = useOutletContext<LayoutContext>();
@@ -239,7 +230,6 @@ const ListPasien: FC = () => {
         <thead>
           <tr>
             <th>#</th>
-            <th>&nbsp;</th>
             <th>Nomor Antrian</th>
             <th>Nama</th>
             <th>No Registrasi</th>
@@ -253,38 +243,6 @@ const ListPasien: FC = () => {
           {pasiens.data.map((item, key) => (
             <tr key={key}>
               <td>{key + 1}</td>
-              <td>
-                <div className="flex gap-2 w-full items-center justify-center">
-                  <button
-                    onClick={() => {
-                      sendMessage(
-                        JSON.stringify({ cdfix: user.cdfix, data: item })
-                      );
-                    }}
-                    type="button"
-                    className="p-1.5 bg-amber-500 hover:bg-amber-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group cursor-pointer"
-                  >
-                    <HOutline.PhoneIcon className="size-6" />
-                    <span className="absolute text-nowrap mb-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all group-hover:block bg-gray-800 text-white text-sm rounded-md px-2 py-1 shadow-lg top-full z-10">
-                      Panggil Pasien
-                    </span>
-                  </button>
-                  {/* <button
-                    onClick={() => batalRegistrasi(item.id_registrasi)}
-                    type="button"
-                    className="p-1.5 bg-red-500 hover:bg-red-400 text-white aspect-square rounded-md flex items-center justify-center outline-none relative group cursor-pointer"
-                  >
-                    <HOutline.XMarkIcon className="size-6" />
-                    <span className="absolute text-nowrap mb-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all group-hover:block bg-gray-800 text-white text-sm rounded-md px-2 py-1 shadow-lg top-full z-10">
-                      Batal Registrasi
-                    </span>
-                  </button>
-                  
-                  Dibuat Dengan CronJob
-                  
-                  */}
-                </div>
-              </td>
               <td>{item.noantrian}</td>
               <td>{item.nama}</td>
               <td>{item.no_registrasi}</td>
