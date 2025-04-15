@@ -98,4 +98,29 @@ class LayananService
             throw new \Exception("Gagal", $e->getMessage());
         }   
     }
+
+    public function daftarTeregistrasiById($id_registrasi)
+    {
+        
+        try {   
+            $daftarTeregistrasi = RegistrasiPasien::where('registrasi_pasiens.id', $id_registrasi)
+            ->join('registrasi_detail_layanan_pasiens', 'registrasi_pasiens.id', '=', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien')
+            ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
+            ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
+            ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
+            ->select(
+                'pasiens.nama',
+                'pasiens.no_bpjs',
+                'master_ruangans.nama_ruangan',
+                'dokter.name as dokter',
+                'registrasi_detail_layanan_pasiens.noantrian'
+                )
+            ->where('registrasi_pasiens.is_active', true)->first();
+
+            return $daftarTeregistrasi;
+        } catch (\Exception $e) {
+            throw new \Exception("Gagal: " . $e->getMessage(), $e->getCode());
+
+        }
+    }
 }
