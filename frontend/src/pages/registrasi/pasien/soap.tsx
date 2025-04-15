@@ -1,22 +1,77 @@
 import { FC, FormEventHandler, useEffect, useRef, useState } from "react";
 import * as HOutline from "@heroicons/react/24/outline";
 import Select from "react-select";
-import { cast, styles } from "../../../utils/react-select";
+import {
+  cast,
+  findValue,
+  mapOptions,
+  styles,
+} from "../../../utils/react-select";
 import { options } from "../../../mock/react-select";
 import { Toast } from "../../../utils/alert";
 import { Stage, Layer, Line, Image } from "react-konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import clsx from "clsx";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import { api, ResponseT } from "../../../utils/api";
+import { Link, useLoaderData, useParams } from "react-router";
+import { LoaderT, UserT } from "../../../user";
+import moment from "moment";
 
 const SOAP: FC = () => {
+  const { user } = useLoaderData<LoaderT>();
+  const param = useParams();
+
+  type Data = {
+    id_pasien: number;
+    nama: string;
+    no_bpjs: string;
+    nama_ruangan: string;
+    dokter: string | null;
+    noantrian: string;
+    tanggal_masuk: string;
+    tanggal_lahir: string;
+  };
+
+  const [pasien, setPasien] = useState<Data | null>(null);
+
+  const getPasienById = async () => {
+    try {
+      const response = await api.get(
+        `/layanan/daftar-pasien/teregistrasi/id/${param.id_registrasi}`
+      );
+
+      if (response.data.data) {
+        setPasien(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   type soapT = {
     datetime: string;
-    dokter: { label: string; value: string } | null;
+    dokter: { label: string; value: number } | null;
     S: string;
     O: string;
     A: string;
     P: string;
+  };
+
+  const [listUsers, setListUsers] = useState<UserT[]>([]);
+
+  const getListUsers = async () => {
+    try {
+      const response = await api.get<ResponseT<UserT[]>>(
+        `/layanan/get-user/${user.cdfix}`
+      );
+
+      if (response.data.data) {
+        setListUsers(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const [soaps, setSoaps] = useState<soapT[]>([]);
@@ -24,7 +79,18 @@ const SOAP: FC = () => {
   const handleTambahSOAP = () => {
     setSoaps((prev) => [
       ...prev,
-      { S: "", O: "", A: "", P: "", dokter: null, datetime: "" },
+      {
+        S: "",
+        O: "",
+        A: "",
+        P: "",
+        dokter: findValue(
+          listUsers,
+          { id: user.cdfix },
+          { label: "name", value: "id" }
+        ) as { label: string; value: number },
+        datetime: "",
+      },
     ]);
   };
 
@@ -62,6 +128,11 @@ const SOAP: FC = () => {
       });
     }
   };
+
+  useEffect(() => {
+    getListUsers();
+    getPasienById();
+  }, []);
 
   /**
    * drawing
@@ -150,52 +221,72 @@ const SOAP: FC = () => {
 
   return (
     <div className="grid grid-cols-1 gap-6">
-      <div className="bg-white shadow-lg p-6 rounded-md items-center grid grid-cols-1 gap-6">
-        <div className="flex justify-between">
-          <div className="flex">
-            <div className="size-28 aspect-square">
-              <img src="/images/userL.png" alt="user.." />
-            </div>
-            <div className="flex flex-col justify-between">
-              <div className="flex flex-col gap-1">
-                <span className="text-lg font-medium">
-                  BELLA PUSPITA SARI (18th)
-                </span>
-                <span>0000904097823</span>
+      {pasien && (
+        <div className="bg-white shadow-lg p-6 rounded-md items-center grid grid-cols-1 gap-6">
+          <div className="flex justify-between">
+            <div className="flex">
+              <div className="size-28 aspect-square">
+                <img src="/images/userL.png" alt="user.." />
               </div>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm flex items-center justify-between outline-0"
-                >
-                  Details
-                </button>
-                <button
-                  type="button"
-                  className="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm flex items-center justify-between outline-0"
-                >
-                  JKN
-                </button>
-                <button
-                  type="button"
-                  className="px-3 py-1.5 border border-green-600 hover:bg-slate-200 text-green-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
-                >
-                  iCare
-                </button>
-              </div>
-            </div>
-          </div>
+              <div className="flex flex-col justify-between">
+                <div className="flex flex-col gap-1">
+                  <span className="text-lg font-medium">
+                    {pasien.nama} (
+                    {`${moment().diff(
+                      moment(pasien.tanggal_lahir, "YYYY-MM-DD"),
+                      "years"
+                    )}th`}
+                    )
+                  </span>
+                  <span>{pasien.no_bpjs}</span>
+                </div>
+                <div className="flex gap-1">
+                  <Link
+                    to={`/registrasi/details/${pasien.id_pasien}`}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                  >
+                    Details
+                  </Link>
 
-          <div className="flex flex-col items-end justify-between">
-            <div className="flex flex-col items-end">
-              <span className="text-3xl font-medium">88</span>
-              <span className="text-xl font-medium">POLI UMUM</span>
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                  >
+                    JKN
+                  </button>
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 border border-green-600 hover:bg-slate-200 text-green-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                  >
+                    iCare
+                  </button>
+                </div>
+              </div>
             </div>
-            <span className="text-sm">dr. Rio Mandala Putra Ruslan</span>
-            <span className="text-sm">Rabu, 26 Maret 2025</span>
+
+            <div className="flex flex-col items-end justify-between">
+              <div className="flex flex-col items-end">
+                <span className="text-3xl font-medium">{pasien.noantrian}</span>
+                <span className="text-xl font-medium">
+                  {pasien.nama_ruangan}
+                </span>
+              </div>
+              {pasien.dokter ? (
+                <span className="text-sm">{pasien.dokter}</span>
+              ) : (
+                <i className="text-red-600 italic">
+                  Belum ada dokter menulis SOAP
+                </i>
+              )}
+              <span className="text-sm">
+                {moment(pasien.tanggal_masuk)
+                  .locale("id")
+                  .format("D MMMM YYYY")}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 gap-6 auto-rows-min">
         <div className="grid grid-cols-1 gap-6">
@@ -530,10 +621,17 @@ const SOAP: FC = () => {
                                   placeholder="Pilih..."
                                   menuPlacement="bottom"
                                   required={true}
-                                  options={options}
+                                  // options={options.map((item, idx) => ({
+                                  //   label: item.label,
+                                  //   value: idx,
+                                  // }))}
+                                  options={mapOptions(listUsers, {
+                                    l: "name",
+                                    v: "id",
+                                  })}
                                   value={dokter}
                                   onChange={(e) =>
-                                    cast<{ label: string; value: string }>(
+                                    cast<{ label: string; value: number }>(
                                       e,
                                       (value) => {
                                         handleChangeSOAP(k, "dokter", value);
