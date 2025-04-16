@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RegistrasiPasien;
+use App\Models\VitalSign;
 use App\Services\LayananService;
 use Illuminate\Http\Request;
 use Exception;
@@ -28,11 +29,11 @@ class LayananController extends Controller
 
     public function updateWaktuPemanggilan(RegistrasiPasien $id_registrasi)
     {
-        
+
         try {
             $updateWaktuPemanggilan = $this->LayananService->updateWaktuPemanggilan($id_registrasi);
             return $this->baseResponse('Waktu pemanggilan berhasil diupdate', null, $updateWaktuPemanggilan, 200);
-        } catch (Exception $e) {    
+        } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat memperbarui waktu pemanggilan', $e->getMessage(), null, 500);
         }
     }
@@ -54,6 +55,26 @@ class LayananController extends Controller
             return $this->baseResponse('Daftar Layanan Pasien Teregistrasi berhasil didapatkan', null, $daftarTeregistrasi, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat melihat Daftar Layanan Pasien Teregistrasi', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function saveVitalSign(Request $request)
+    {
+        try {
+            $vitalSign = $this->LayananService->saveVitalSign($request->all());
+            return $this->baseResponse('Vital Sign berhasil Disimpan', null, $vitalSign, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Menyimpan Vital Sign', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getVitalSignById(VitalSign $id_vital_sign)
+    {
+        try {
+            $vitalSign = $this->LayananService->getVitalSignById($id_vital_sign);
+            return $this->baseResponse('Vital Sign berhasil didapatkan', null, $vitalSign, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat mendapatkan Vital Sign', $e->getMessage(), null, 500);
         }
     }
 }

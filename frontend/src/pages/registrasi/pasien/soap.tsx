@@ -13,7 +13,7 @@ import { Stage, Layer, Line, Image } from "react-konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import clsx from "clsx";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { api, ResponseT } from "../../../utils/api";
+import { api, ResponseT, useXState } from "../../../utils/api";
 import { Link, useLoaderData, useParams } from "react-router";
 import { LoaderT, UserT } from "../../../user";
 import moment from "moment";
@@ -29,20 +29,111 @@ const SOAP: FC = () => {
     nama_ruangan: string;
     dokter: string | null;
     noantrian: string;
+    id_registrasi_pasiens: number;
+    no_registrasi_pasien: string;
+    id_registrasi_detail_layanan_pasiens: number;
+    id_vital_signs: number | null;
     tanggal_masuk: string;
     tanggal_lahir: string;
+  };
+
+  type VitalSign = {
+    id_vital_signs: number | null;
+    id_registrasi_pasien: number;
+    no_registrasi: string;
+    tekanan_darah_hh: string | null;
+    tekanan_darah_mg: string | null;
+    temperature: string | null;
+    nadi: string | null;
+    pernafasan: string | null;
+    berat_badan: string | null;
+    tinggi_badan: string | null;
+    lingkar_kepala: string | null;
+    lingkar_perut: string | null;
+    lingkar_lengan: string | null;
+    cara_ukur: "Berbaring" | "Berdiri" | null;
+    kesadaran: string | null;
+  };
+
+  type SaveResponseVitalSign = VitalSign;
+
+  const [vitalSign, setVitalSign, vitalSignFn] = useXState<
+    VitalSign,
+    SaveResponseVitalSign
+  >(
+    {
+      id_vital_signs: null,
+      id_registrasi_pasien: 0,
+      no_registrasi: "",
+      tekanan_darah_hh: "",
+      tekanan_darah_mg: "",
+      temperature: "",
+      nadi: "",
+      pernafasan: "",
+      berat_badan: "",
+      tinggi_badan: "",
+      lingkar_kepala: "",
+      lingkar_perut: "",
+      lingkar_lengan: "",
+      cara_ukur: "Berdiri",
+      kesadaran: "",
+    },
+    { method: "POST", url: "/layanan/save-vital-sign" }
+  );
+
+  const handleSaveVitalSign: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    try {
+      await vitalSignFn.submit();
+      await getPasienById();
+
+      Toast.fire({
+        title: "Berhasil",
+        text: "Berhasil menyimpan vital sign",
+        icon: "success",
+      });
+    } catch (error) {
+      Toast.fire({
+        title: "Error",
+        text: "Gagal menyimpan vital sign",
+        icon: "error",
+      });
+      console.error(error);
+    }
+  };
+
+  const getVitalSignById = async (id_vital_signs: number) => {
+    try {
+      const response = await api.get<ResponseT<VitalSign>>(
+        `/layanan/get-vital-sign-by-id/${id_vital_signs}`
+      );
+      if (response.data.data) {
+        setVitalSign(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const [pasien, setPasien] = useState<Data | null>(null);
 
   const getPasienById = async () => {
     try {
-      const response = await api.get(
+      const response = await api.get<ResponseT<Data>>(
         `/layanan/daftar-pasien/teregistrasi/id/${param.id_registrasi}`
       );
 
       if (response.data.data) {
         setPasien(response.data.data);
+        if (response.data.data.id_vital_signs) {
+          await getVitalSignById(response.data.data.id_vital_signs);
+        } else {
+          setVitalSign({
+            id_vital_signs: response.data.data.id_vital_signs,
+            id_registrasi_pasien: response.data.data.id_registrasi_pasiens,
+            no_registrasi: response.data.data.no_registrasi_pasien,
+          });
+        }
       }
     } catch (error) {
       console.error(error);
@@ -339,7 +430,16 @@ const SOAP: FC = () => {
             </div>
           </div>
           <div className="flex justify-center border-b border-b-slate-300 p-6">
-            <span className="text-5xl">132/82 mmHg</span>
+            <span className="text-5xl text-nowrap">
+              {vitalSign.tekanan_darah_hh === ""
+                ? "0"
+                : vitalSign.tekanan_darah_hh}
+              /
+              {vitalSign.tekanan_darah_mg === ""
+                ? "0"
+                : vitalSign.tekanan_darah_mg}{" "}
+              mmHg
+            </span>
           </div>
           <div className="grid grid-cols-3 items-center">
             <div className="flex items-center justify-center gap-2">
@@ -348,7 +448,10 @@ const SOAP: FC = () => {
                 alt="temperature..."
                 className="size-10"
               />
-              <span className="text-xl">36.0 &#176;C</span>
+              <span className="text-xl">
+                {vitalSign.temperature === "" ? "0" : vitalSign.temperature}{" "}
+                &#176;C
+              </span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <img
@@ -356,7 +459,9 @@ const SOAP: FC = () => {
                 alt="temperature..."
                 className="size-10"
               />
-              <span className="text-xl">82 x</span>
+              <span className="text-xl">
+                {vitalSign.nadi === "" ? "0" : vitalSign.nadi} x
+              </span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <img
@@ -364,16 +469,14 @@ const SOAP: FC = () => {
                 alt="temperature..."
                 className="size-10"
               />
-              <span className="text-xl">22 x</span>
+              <span className="text-xl">
+                {vitalSign.pernafasan === "" ? "0" : vitalSign.pernafasan} x
+              </span>
             </div>
           </div>
-          <div className="bg-white shadow-lg rounded-md p-6">
-            <form
-              className="gap-6 flex flex-col"
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
+
+          <form onSubmit={handleSaveVitalSign} className="flex flex-col gap-6">
+            <div className="bg-white shadow-lg rounded-md p-6 gap-6 flex flex-col">
               <span className="text-xl font-medium">Kesadaran</span>
               <Select
                 className="w-full"
@@ -384,22 +487,23 @@ const SOAP: FC = () => {
                 menuPlacement="bottom"
                 required={true}
                 options={options}
+                isDisabled={true}
+                value={findValue(
+                  options,
+                  {
+                    value: vitalSign.kesadaran ?? "",
+                  },
+                  { label: "label", value: "value" }
+                )}
+                onChange={(e) =>
+                  cast<{ label: string; value: string }>(e, ({ value }) => {
+                    setVitalSign({ kesadaran: value });
+                  })
+                }
               />
-              <div className="flex">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-between outline-0"
-                >
-                  Simpan
-                </button>
-              </div>
-            </form>
-          </div>
-          <div className="bg-white shadow-lg rounded-md p-6">
-            <form
-              className="gap-6 flex flex-col"
-              onSubmit={(e) => e.preventDefault()}
-            >
+            </div>
+
+            <div className="bg-white shadow-lg rounded-md p-6 gap-6 flex flex-col">
               <div className="gap-3 flex flex-col">
                 <span className="text-xl font-medium">Vital sign</span>
                 <div className="grid grid-cols-3 items-center">
@@ -409,12 +513,20 @@ const SOAP: FC = () => {
                       <input
                         type="number"
                         className="border border-gray-300 py-1.5 px-2 w-2/5 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                        value={vitalSign.tekanan_darah_hh ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ tekanan_darah_hh: value })
+                        }
                       />
                       <span>/</span>
                       <div className="flex items-center border border-gray-300 w-3/5 rounded-sm focus-within:border-blue-300 active:border-blue-300">
                         <input
                           type="number"
                           className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.tekanan_darah_mg ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ tekanan_darah_mg: value })
+                          }
                         />
                         <span className="mx-2">mmHg</span>
                       </div>
@@ -431,6 +543,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="temperature"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.temperature ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ temperature: value })
+                        }
                       />
                       <span className="mx-2">&#176;C</span>
                     </div>
@@ -446,6 +562,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="nadi"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.nadi ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ nadi: value })
+                        }
                       />
                       <span className="mx-2">x/menit</span>
                     </div>
@@ -461,6 +581,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="pernafasan"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.pernafasan ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ pernafasan: value })
+                        }
                       />
                       <span className="mx-2">x/menit</span>
                     </div>
@@ -476,6 +600,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="berat-badan"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.berat_badan ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ berat_badan: value })
+                        }
                       />
                       <span className="mx-2">Kg</span>
                     </div>
@@ -491,6 +619,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="tinggi-badan"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.tinggi_badan ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ tinggi_badan: value })
+                        }
                       />
                       <span className="mx-2">Cm</span>
                     </div>
@@ -506,6 +638,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="lingkar-kepala"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.lingkar_kepala ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ lingkar_kepala: value })
+                        }
                       />
                       <span className="mx-2">Cm</span>
                     </div>
@@ -521,6 +657,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="lingkar-perut"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.lingkar_perut ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ lingkar_perut: value })
+                        }
                       />
                       <span className="mx-2">Cm</span>
                     </div>
@@ -536,6 +676,10 @@ const SOAP: FC = () => {
                         type="number"
                         id="lingkar-lengan"
                         className="py-1.5 px-2 w-full outline-none"
+                        value={vitalSign.lingkar_lengan ?? ""}
+                        onChange={({ currentTarget: { value } }) =>
+                          setVitalSign({ lingkar_lengan: value })
+                        }
                       />
                       <span className="mx-2">Cm</span>
                     </div>
@@ -548,24 +692,24 @@ const SOAP: FC = () => {
                       <button
                         type="button"
                         className={clsx(
-                          // eslint-disable-next-line no-constant-condition
-                          true
+                          vitalSign.cara_ukur === "Berbaring"
                             ? "text-white bg-blue-600 hover:bg-blue-500"
                             : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
                           "flex w-full justify-center items-center px-3 py-1.5 border border-e-0 rounded-s-sm cursor-pointer border-blue-600"
                         )}
+                        onClick={() => setVitalSign({ cara_ukur: "Berbaring" })}
                       >
                         Berbaring
                       </button>
                       <button
                         type="button"
                         className={clsx(
-                          // eslint-disable-next-line no-constant-condition
-                          false
+                          vitalSign.cara_ukur === "Berdiri"
                             ? "text-white bg-blue-600 hover:bg-blue-500"
                             : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
                           "flex w-full justify-center items-center px-3 py-1.5 border border-s-0 rounded-e-sm cursor-pointer border-blue-600"
                         )}
+                        onClick={() => setVitalSign({ cara_ukur: "Berdiri" })}
                       >
                         Berdiri
                       </button>
@@ -582,8 +726,8 @@ const SOAP: FC = () => {
                   Simpan
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
 
         <TabGroup>

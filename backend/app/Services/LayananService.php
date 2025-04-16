@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
 use App\Models\User;
+use App\Models\VitalSign;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
@@ -108,15 +109,20 @@ class LayananService
                 ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
                 ->join('master_ruangans', 'registrasi_detail_layanan_pasiens.id_ruangan', '=', 'master_ruangans.id')
                 ->leftjoin('users as dokter', 'registrasi_detail_layanan_pasiens.id_dokter', '=', 'dokter.id')
+                ->leftjoin('vital_signs as vital_signs', 'vital_signs.id_registrasi_pasien', '=', 'registrasi_pasiens.id')
                 ->select(
                     'pasiens.id as id_pasien',
                     'pasiens.nama',
                     'pasiens.no_bpjs',
+                    'registrasi_pasiens.id as id_registrasi_pasiens',
+                    'registrasi_pasiens.no_registrasi as no_registrasi_pasien',
                     'master_ruangans.nama_ruangan',
                     'dokter.name as dokter',
                     'registrasi_detail_layanan_pasiens.noantrian',
                     'registrasi_detail_layanan_pasiens.tanggal_masuk',
+                    'registrasi_detail_layanan_pasiens.id as id_registrasi_detail_layanan_pasiens',
                     'pasiens.tanggal_lahir',
+                    'vital_signs.id as id_vital_signs',
                 )
                 ->where('registrasi_pasiens.is_active', true)->first();
 
@@ -125,5 +131,80 @@ class LayananService
             throw new \Exception("Gagal: " . $e->getMessage(), $e->getCode());
 
         }
+    }
+
+    public function saveVitalSign(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $user = Auth()->user();
+
+            if (isset($data["id_vital_signs"]) && $data["id_vital_signs"] !== null) {
+                VitalSign::where("id", $data["id_vital_signs"])->update([
+                    'updated_by' => $user->id,
+
+                    'tekanan_darah' => $data['tekanan_darah_hh'] . '/' . $data['tekanan_darah_mg'],
+                    'temperature' => $data['temperature'],
+                    'nadi' => $data['nadi'],
+                    'pernafasan' => $data['pernafasan'],
+                    'berat_badan' => $data['berat_badan'],
+                    'tinggi_badan' => $data['tinggi_badan'],
+                    'lingkar_kepala' => $data['lingkar_kepala'],
+                    'lingkar_perut' => $data['lingkar_perut'],
+                    'lingkar_lengan' => $data['lingkar_lengan'],
+                    'cara_ukur' => $data['cara_ukur'],
+                    'kesadaran' => $data['kesadaran'],
+                ]);
+            } else {
+                VitalSign::create([
+                    'cdfix' => $user->cdfix,
+                    'created_by' => $user->id,
+                    'id_registrasi_pasien' => $data['id_registrasi_pasien'],
+                    'no_registrasi' => $data['no_registrasi'],
+
+                    'tekanan_darah' => $data['tekanan_darah_hh'] . '/' . $data['tekanan_darah_mg'],
+                    'temperature' => $data['temperature'],
+                    'nadi' => $data['nadi'],
+                    'pernafasan' => $data['pernafasan'],
+                    'berat_badan' => $data['berat_badan'],
+                    'tinggi_badan' => $data['tinggi_badan'],
+                    'lingkar_kepala' => $data['lingkar_kepala'],
+                    'lingkar_perut' => $data['lingkar_perut'],
+                    'lingkar_lengan' => $data['lingkar_lengan'],
+                    'cara_ukur' => $data['cara_ukur'],
+                    'kesadaran' => $data['kesadaran'],
+                ]);
+            }
+
+            DB::commit();
+
+            return $data;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception("Gagal: " . $e->getMessage(), $e->getCode());
+        }
+    }
+
+    public function getVitalSignById(VitalSign $id_vital_sign)
+    {
+        $data = (object) [
+            'id_vital_signs' => $id_vital_sign->id,
+            'id_registrasi_pasien' => $id_vital_sign->id_registrasi_pasien,
+            'no_registrasi' => $id_vital_sign->no_registrasi,
+            'tekanan_darah_hh' => explode('/', $id_vital_sign->tekanan_darah)[0] ?? null,
+            'tekanan_darah_mg' => explode('/', $id_vital_sign->tekanan_darah)[1] ?? null,
+            'temperature' => $id_vital_sign->temperature,
+            'nadi' => $id_vital_sign->nadi,
+            'pernafasan' => $id_vital_sign->pernafasan,
+            'berat_badan' => $id_vital_sign->berat_badan,
+            'tinggi_badan' => $id_vital_sign->tinggi_badan,
+            'lingkar_kepala' => $id_vital_sign->lingkar_kepala,
+            'lingkar_perut' => $id_vital_sign->lingkar_perut,
+            'lingkar_lengan' => $id_vital_sign->lingkar_lengan,
+            'cara_ukur' => $id_vital_sign->cara_ukur,
+            'kesadaran' => $id_vital_sign->kesadaran,
+        ];
+
+        return $data;
     }
 }
