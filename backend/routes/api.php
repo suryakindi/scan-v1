@@ -68,6 +68,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('edit-registrasi-pelayanan/{id_registrasi}', [RegistrasiController::class, 'editRegistrasiLayananPasien'])->middleware('permission:Registrasi,edit');
             Route::get('list-registrasi-pelayanan', [RegistrasiController::class, 'listRegistrasiPasien'])->middleware('permission:Registrasi,view');
 
+            Route::post('save-soap', [RegistrasiController::class, 'saveSOAP'])->middleware('permission:Registrasi,create');
+            Route::get('get-soap-by-id-registrasi/{registrasiId}', [RegistrasiController::class, 'getSoapByIdRegistrasi'])->middleware('permission:Registrasi,view');
+
+
 
 
 
