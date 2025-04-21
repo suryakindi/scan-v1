@@ -26,6 +26,7 @@ class Pasien extends Model
         'pendidikan_terakhir',
         'pekerjaan',
         'notelp',
+        'jenis_kelamin',
         'nama_bapak',
         'nama_ibu',
         'status_perkawinan',

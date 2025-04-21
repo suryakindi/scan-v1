@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('nik')->nullable()->unique();
             $table->string('tempatlahir');
             $table->string('tanggal_lahir');
+            $table->string('jenis_kelamin')->default('Laki-laki');
             $table->string('agama');
             $table->string('pendidikan_terakhir');
             $table->string('pekerjaan');
