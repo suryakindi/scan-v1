@@ -23,6 +23,7 @@ type Data = {
   id_status_pasien: number;
   status_pasien: string;
   noantrian: string;
+  noantrianbpjs: string;
   no_registrasi: string;
   tanggal_registrasi: string;
   nama_ruangan: string;
@@ -248,6 +249,7 @@ const RawatJalan: FC = () => {
         <thead>
           <tr>
             <th>Ticket</th>
+            <th>No Antrian BPJS</th>
             <th>Nama</th>
             <th>Ruangan</th>
             <th>Statu Pulang</th>
@@ -262,6 +264,15 @@ const RawatJalan: FC = () => {
               <td>
                 <div className="size-8 bg-green-200 text-green-600 flex items-center justify-center rounded-full m-auto">
                   {item.noantrian}
+                </div>
+              </td>
+              <td>
+                <div
+                  className={`size-8 flex items-center justify-center rounded-full m-auto ${
+                    item.noantrianbpjs ? 'bg-green-200 text-green-600' : 'bg-red-200 text-red-600'
+                  }`}
+                >
+                  {item.noantrianbpjs ?? '-'}
                 </div>
               </td>
               <td>
