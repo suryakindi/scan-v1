@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_dokter')->nullable();
             $table->string('noantrian');
             $table->string('noantriandokter');
+            $table->string('noantrianbpjs')->nullable();
             $table->datetime('tanggal_masuk');
             $table->datetime('tanggal_keluar')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();

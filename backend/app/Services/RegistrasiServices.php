@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\MasterJaminan;
+use App\Models\MasterJenisKunjungan;
+use App\Models\MasterRuangan;
+use App\Models\MasterTkp;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
 use App\Models\User;
@@ -9,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use DateTime;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
 use GuzzleHttp\Exception\RequestException;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -16,9 +21,16 @@ use Illuminate\Support\Facades\Hash;
 
 class RegistrasiServices
 {
+    protected BPJSToolsService $BPJSToolsService;
+    public function __construct(BPJSToolsService $BPJSToolsService)
+    {
+  
+        $this->BPJSToolsService = $BPJSToolsService;
+    }
 
     public function saveRegistrasiPasien(array $data)
     {
+       
         DB::beginTransaction();
         try {
             // Cek apakah pasien masih memiliki pendaftaran yang belum selesai
@@ -47,6 +59,7 @@ class RegistrasiServices
             $registrasi = RegistrasiPasien::create($data);
 
             DB::commit();
+           
             return $registrasi;
         } catch (Exception $e) {
             DB::rollBack();
@@ -57,6 +70,7 @@ class RegistrasiServices
 
     public function saveRegistrasiDetailPasien($registrasi)
     {
+        $cdfix = Auth()->user()->cdfix;
         DB::beginTransaction();
         try {
             // Ambil tanggal registrasi pasien
@@ -87,12 +101,59 @@ class RegistrasiServices
             $registrasiDetail->tanggal_masuk = $tanggalRegistrasi;
             $registrasiDetail->cdfix = $registrasi->cdfix;
             $registrasiDetail->created_by = auth()->user()->id;
-            $registrasiDetail->save();
+            
 
+            $jaminan = MasterJaminan::where('penjamin', 'ilike', '%JKN%')->first();
+            $status = null;
+            if($jaminan->id == $registrasi->id_jaminan)
+            {
+                $checkBridgingBPJS = $this->BPJSToolsService->getDokterBPJS($cdfix, [], 'pcare-rest');
+                $dataBPJS = $checkBridgingBPJS->getData(); 
+                $status = 'OK';
+            }
+           
+            if($status != null){
+                $tglDaftar = $registrasi->tanggal_registrasi;
+                $id_ruangan = MasterRuangan::find($registrasi->id_ruangan_asal);
+                $kdPoli = $id_ruangan->kodeexternal;
+                $id_jenisKunjungan = MasterJenisKunjungan::find($registrasi->id_jenis_kunjungan);
+                $kunjSakit = $id_jenisKunjungan->kode_bpjs;
+                $id_tkp = MasterTkp::find($registrasi->id_tkp);
+                $kdTkp = $id_tkp->kodeexternal;
+                $data = [
+                    'id_pasien' => $registrasi->id_pasien,
+                    'kdPoli' => $kdPoli,
+                    'kunjSakit' => $kunjSakit,
+                    'kdTkp' => $kdTkp,
+                    'tglDaftar' => $tglDaftar
+                ];
+                
+                $AddPendaftaranPcare = $this->BPJSToolsService->AddRegistrasiPcare($data, 'pcare-rest');
+                if ($AddPendaftaranPcare instanceof \Illuminate\Http\JsonResponse) {
+                    $AddPendaftaranPcare = $AddPendaftaranPcare->getData(true);
+                    
+                }
+                
+                $noUrut = $AddPendaftaranPcare['data']['message'] ?? null;
+                
+                if ($noUrut) {
+                    $registrasiDetail->noantrianbpjs = $noUrut;
+                }
+                $resultBpjs = 'Sukses';
+            }else{
+                $resultBpjs = 'Gagal';
+            }
+
+            $registrasiDetail->save();
             DB::commit();
-            return $registrasiDetail;
+            return $result = [
+                'registrasiDetail' => $registrasiDetail,
+                'resultBpjs' => $resultBpjs
+            ];
+            return $result;
         } catch (Exception $e) {
             DB::rollBack();
+            $registrasiDetail->save();
             throw new Exception("Gagal membuat registrasiDetail: " . $e->getMessage());
         }
     }
@@ -152,6 +213,7 @@ class RegistrasiServices
             'registrasi_pasiens.id as id_registrasi',
             'registrasi_detail_layanan_pasiens.tanggal_masuk',
             'registrasi_detail_layanan_pasiens.noantrian',
+            'registrasi_detail_layanan_pasiens.noantrianbpjs',
             'master_jaminans.penjamin',
             'master_ruangans.nama_ruangan',
             'dokter.name as dokter',
@@ -230,4 +292,6 @@ class RegistrasiServices
             throw new Exception($e->getMessage());
         }
     }
+
+   
 }

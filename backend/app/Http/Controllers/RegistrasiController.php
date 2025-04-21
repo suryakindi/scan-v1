@@ -3,26 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterPasienRequest;
+use App\Services\BPJSToolsService;
 use App\Services\RegistrasiServices;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RegistrasiController extends Controller
 {
     protected RegistrasiServices $RegistrasiServices;
-
-    public function __construct(RegistrasiServices $RegistrasiServices)
+    protected BPJSToolsService $BPJSToolsService;
+ 
+    public function __construct(RegistrasiServices $RegistrasiServices, BPJSToolsService $BPJSToolsService)
     {
         $this->RegistrasiServices = $RegistrasiServices;
+        $this->BPJSToolsService = $BPJSToolsService;
     }
 
+   
     public function saveRegistrasiPasien(RegisterPasienRequest $request)
     {
+        DB::beginTransaction();
         try {
             $registrasi = $this->RegistrasiServices->saveRegistrasiPasien($request->all());
             $registrasiDetail = $this->RegistrasiServices->saveRegistrasiDetailPasien($registrasi);
-            return $this->baseResponse('Registrasi Pasien berhasil dibuat', null, $registrasi, 201);
+            DB::commit();
+            return $this->baseResponse('Registrasi Pasien berhasil dibuat', null, $registrasiDetail, 201);
         } catch (Exception $e) {
+            DB::rollBack();
             return $this->baseResponse($e->getMessage(), $e->getMessage(), null, 500);
         }
     }

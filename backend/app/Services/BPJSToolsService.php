@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\BPJSTools;
 use App\Models\MasterDepartemen;
 use App\Models\MasterRuangan;
+use App\Models\Pasien;
 use App\Models\SettingServiceName;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -550,6 +552,92 @@ class BPJSToolsService
         }
     }
 
+    public function AddRegistrasiPcare($data, $service_name)
+    {
+        $id_client = auth()->user()->cdfix;
+
+        // 🔐 Get Konfigurasi & Endpoint
+        $set = $this->getBPJSToolsById($id_client);
+        $kdProviderPeserta = $set['bpjs_tools']->provider_id ?? null;
+
+        $base_url = null;
+        foreach ($set['service_name'] as $item) {
+            if ($item['service_name'] == $service_name) {
+                $base_url = $item['base_url'] . '/pendaftaran';
+                break;
+            }
+        }
+
+        if (!$base_url) {
+            return response()->json(['error' => 'Base URL untuk PCare tidak ditemukan'], 400);
+        }
+
+        $headers = $this->SetUpHeader($id_client, $service_name);
+
+        // 👤 Data Pasien
+        $pasien = Pasien::find($data['id_pasien']);
+        $noKartu = $pasien->no_bpjs ?? null;
+
+        // 🗓 Format Tanggal
+        $tglDaftarRaw = $data['tglDaftar'] ?? null;
+        $tglDaftar = $tglDaftarRaw ? Carbon::parse($tglDaftarRaw)->format('d-m-Y') : null;
+
+        // 🧾 Data Request
+        $requestPayload = [
+            "kdProviderPeserta" => $kdProviderPeserta,
+            "tglDaftar"        => $tglDaftar,
+            "noKartu"          => $noKartu,
+            "kdPoli"           => $data['kdPoli'] ?? null,
+            "keluhan"          => null,
+            "kunjSakit"        => $data['kunjSakit'] ?? null,
+            "sistole"          => 0,
+            "diastole"         => 0,
+            "beratBadan"       => 0,
+            "tinggiBadan"      => 0,
+            "respRate"         => 0,
+            "lingkarPerut"     => 0,
+            "heartRate"        => 0,
+            "rujukBalik"       => 0,
+            "kdTkp"            => $data['kdTkp'] ?? null,
+        ];
+
+        
+
+        // 🌐 Kirim ke PCare
+        $client = new \GuzzleHttp\Client();
+
+        try {
+            $response = $client->post($base_url, [
+                'headers' => [
+                    'Content-Type'     => 'text/plain',
+                    'X-cons-id'        => $this->cons_id,
+                    'X-signature'      => $headers['X-signature'],
+                    'X-timestamp'      => $headers['X-timestamp'],
+                    'X-authorization'  => $headers['X-authorization'],
+                    'user_key'         => $headers['user_key'],
+                ],
+                'body'    => json_encode($requestPayload),
+                'timeout' => 10,
+            ]);
+
+            $responseData = json_decode($response->getBody(), true);
+            return $this->DecryptResponse($responseData);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            $fullMessage = 'Gagal membuat registrasiDetail. ';
+            if ($e->hasResponse()) {
+                $response = json_decode((string) $e->getResponse()->getBody(), true);
+                $apiMessage = $response['metaData']['message'] ?? (string) $e->getResponse()->getBody();
+                $fullMessage .= $apiMessage;
+            } else {
+                $fullMessage .= $e->getMessage();
+            }
+
+            throw new \Exception($fullMessage);
+        } catch (\Exception $e) {
+            throw new \Exception("Terjadi kesalahan: " . $e->getMessage());
+        }
+    }
 
 
     

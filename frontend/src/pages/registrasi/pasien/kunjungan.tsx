@@ -29,6 +29,7 @@ type _Get = {
   nama_ruangan: string;
   no_registrasi: string;
   noantrian: string;
+  noantrianbpjs: string;
   penjamin: string;
   tanggal_masuk: string;
   status:
@@ -235,6 +236,7 @@ const ListPasien: FC = () => {
           <tr>
             <th>#</th>
             <th>Nomor Antrian</th>
+            <th>Nomor Antrian BPJS</th>
             <th>Nama</th>
             <th>No Registrasi</th>
             <th>Penjamin</th>
@@ -248,6 +250,7 @@ const ListPasien: FC = () => {
             <tr key={key}>
               <td>{key + 1}</td>
               <td>{item.noantrian}</td>
+              <td>{item.noantrianbpjs ?? '-'}</td>
               <td>{item.nama}</td>
               <td>{item.no_registrasi}</td>
               <td>{item.penjamin}</td>
