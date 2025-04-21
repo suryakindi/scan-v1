@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('soap', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->unsignedBigInteger('cdfix');
             $table->unsignedBigInteger('id_registrasi_detail_layanan_pasien');
             $table->text('soap_details');

@@ -8,6 +8,7 @@ use App\Models\MasterRuangan;
 use App\Models\MasterTkp;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
+use App\Models\Soap;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -24,13 +25,13 @@ class RegistrasiServices
     protected BPJSToolsService $BPJSToolsService;
     public function __construct(BPJSToolsService $BPJSToolsService)
     {
-  
+
         $this->BPJSToolsService = $BPJSToolsService;
     }
 
     public function saveRegistrasiPasien(array $data)
     {
-       
+
         DB::beginTransaction();
         try {
             // Cek apakah pasien masih memiliki pendaftaran yang belum selesai
@@ -59,7 +60,7 @@ class RegistrasiServices
             $registrasi = RegistrasiPasien::create($data);
 
             DB::commit();
-           
+
             return $registrasi;
         } catch (Exception $e) {
             DB::rollBack();
@@ -101,18 +102,19 @@ class RegistrasiServices
             $registrasiDetail->tanggal_masuk = $tanggalRegistrasi;
             $registrasiDetail->cdfix = $registrasi->cdfix;
             $registrasiDetail->created_by = auth()->user()->id;
-            
 
-            $jaminan = MasterJaminan::where('penjamin', 'ilike', '%JKN%')->first();
+
             $status = null;
-            if($jaminan->id == $registrasi->id_jaminan)
-            {
-                $checkBridgingBPJS = $this->BPJSToolsService->getDokterBPJS($cdfix, [], 'pcare-rest');
-                $dataBPJS = $checkBridgingBPJS->getData(); 
-                $status = 'OK';
+            $jaminan = MasterJaminan::where('penjamin', '=', 'JKN')->first();
+            if ($jaminan) {
+                if ($jaminan->id == $registrasi->id_jaminan) {
+                    $checkBridgingBPJS = $this->BPJSToolsService->getDokterBPJS($cdfix, [], 'pcare-rest');
+                    $dataBPJS = $checkBridgingBPJS->getData();
+                    $status = 'OK';
+                }
             }
-           
-            if($status != null){
+
+            if ($status != null) {
                 $tglDaftar = $registrasi->tanggal_registrasi;
                 $id_ruangan = MasterRuangan::find($registrasi->id_ruangan_asal);
                 $kdPoli = $id_ruangan->kodeexternal;
@@ -127,20 +129,20 @@ class RegistrasiServices
                     'kdTkp' => $kdTkp,
                     'tglDaftar' => $tglDaftar
                 ];
-                
+
                 $AddPendaftaranPcare = $this->BPJSToolsService->AddRegistrasiPcare($data, 'pcare-rest');
                 if ($AddPendaftaranPcare instanceof \Illuminate\Http\JsonResponse) {
                     $AddPendaftaranPcare = $AddPendaftaranPcare->getData(true);
-                    
+
                 }
-                
+
                 $noUrut = $AddPendaftaranPcare['data']['message'] ?? null;
-                
+
                 if ($noUrut) {
                     $registrasiDetail->noantrianbpjs = $noUrut;
                 }
                 $resultBpjs = 'Sukses';
-            }else{
+            } else {
                 $resultBpjs = 'Gagal';
             }
 
@@ -293,5 +295,57 @@ class RegistrasiServices
         }
     }
 
-   
+    public function saveSOAP(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $user = Auth()->user();
+
+            $dataToSave = [];
+            $dataToSave['id_registrasi_detail_layanan_pasien'] = $data['id_registrasi_pasiens'];
+            $dataToSave['soap_details'] = collect($data['soaps'])->toJson();
+
+            if (isset($data['id']) && $data['id'] !== null) {
+                $dataToSave['updated_by'] = $user->id;
+                $soap = Soap::where('id', $data['id'])->update($dataToSave);
+            } else {
+                $dataToSave['cdfix'] = $user->cdfix;
+                $dataToSave['created_by'] = $user->id;
+                $soap = Soap::create($dataToSave);
+            }
+
+            DB::commit();
+            return $soap;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public function getSoapByIdRegistrasi($registrasiId)
+    {
+        try {
+            $soap = Soap::where('id_registrasi_detail_layanan_pasien', $registrasiId)->first();
+            $soap_detail = collect(json_decode($soap->soap_details))
+                ->map(function ($soap) {
+                    $soap->dokter = User::select([
+                        'id as value',
+                        'name as label'
+                    ])
+                        ->where('id', $soap->created_by)
+                        ->first();
+
+                    return $soap;
+                });
+
+            $soap->soap_details = $soap_detail;
+
+            return $soap;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
 }

@@ -13,14 +13,14 @@ class RegistrasiController extends Controller
 {
     protected RegistrasiServices $RegistrasiServices;
     protected BPJSToolsService $BPJSToolsService;
- 
+
     public function __construct(RegistrasiServices $RegistrasiServices, BPJSToolsService $BPJSToolsService)
     {
         $this->RegistrasiServices = $RegistrasiServices;
         $this->BPJSToolsService = $BPJSToolsService;
     }
 
-   
+
     public function saveRegistrasiPasien(RegisterPasienRequest $request)
     {
         DB::beginTransaction();
@@ -72,6 +72,26 @@ class RegistrasiController extends Controller
             return $this->baseResponse('Registrasi Layanan Pasien berhasil didapatkan', null, $registrasi, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat Registrasi Pasien', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function saveSOAP(Request $request)
+    {
+        try {
+            $soap = $this->RegistrasiServices->saveSOAP($request->all());
+            return $this->baseResponse('Registrasi SOAP berhasil didapatkan', null, $soap, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Menyimpan SOAP', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getSoapByIdRegistrasi($registrasiId)
+    {
+        try {
+            $soaps = $this->RegistrasiServices->getSoapByIdRegistrasi($registrasiId);
+            return $this->baseResponse('SOAP berhasil didapatkan', null, $soaps, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat mendapatkan SOAP', $e->getMessage(), null, 500);
         }
     }
 }

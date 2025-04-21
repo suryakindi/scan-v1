@@ -71,7 +71,7 @@ class LayananService
             return $registrasi;
 
         } catch (\Exception $e) {
-            throw new \Exception("Gagal", $e->getMessage());
+            throw new \Exception("Gagal" . $e->getMessage());
         }
     }
 

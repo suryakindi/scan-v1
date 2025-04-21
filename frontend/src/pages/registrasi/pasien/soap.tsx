@@ -134,6 +134,10 @@ const SOAP: FC = () => {
             no_registrasi: response.data.data.no_registrasi_pasien,
           });
         }
+
+        await getSoapByIdRegistrasi(
+          response.data.data.id_registrasi_detail_layanan_pasiens
+        );
       }
     } catch (error) {
       console.error(error);
@@ -180,7 +184,7 @@ const SOAP: FC = () => {
           { id: user.cdfix },
           { label: "name", value: "id" }
         ) as { label: string; value: number },
-        datetime: "",
+        datetime: moment().format("YYYY-MM-DD HH:mm:ss"),
       },
     ]);
   };
@@ -203,7 +207,19 @@ const SOAP: FC = () => {
     e.preventDefault();
 
     try {
-      console.log(soaps);
+      const response = await api.post("/registrasi-pelayanan/save-soap", {
+        id_registrasi_pasiens: pasien?.id_registrasi_pasiens,
+        soaps: soaps.map(({ S, O, A, P, dokter, datetime }) => ({
+          S,
+          O,
+          A,
+          P,
+          created_by: dokter?.value,
+          datetime,
+        })),
+      });
+
+      console.log(response);
 
       Toast.fire({
         title: "Berhasil",
@@ -217,6 +233,43 @@ const SOAP: FC = () => {
         text: "Lorem ipsum dolor sit amet.",
         icon: "error",
       });
+    }
+  };
+
+  const getSoapByIdRegistrasi = async (registrasiId: number | string) => {
+    try {
+      const response = await api.get<
+        ResponseT<{
+          id: number;
+          cdfix: number;
+          id_registrasi_detail_layanan_pasien: number;
+          soap_details: soapT[];
+          is_active: boolean;
+          created_by: number | null;
+          updated_by: number | null;
+          deleted_by: number | null;
+          deleted_at: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        }>
+      >(`/registrasi-pelayanan/get-soap-by-id-registrasi/${registrasiId}`);
+
+      if (response.data.data) {
+        setSoaps(
+          response.data.data.soap_details.map(
+            ({ S, O, A, P, dokter, datetime }) => ({
+              S,
+              O,
+              A,
+              P,
+              dokter,
+              datetime,
+            })
+          )
+        );
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -742,10 +795,7 @@ const SOAP: FC = () => {
           <TabPanels className="mt-4">
             {/* SOAP TAB */}
             <TabPanel>
-              <form
-                className="flex flex-col gap-6"
-                onSubmit={(e) => e.preventDefault()}
-              >
+              <form className="flex flex-col gap-6" onSubmit={handleSubmitSOAP}>
                 <div className="bg-white shadow-lg p-6 rounded-md items-center grid grid-cols-1 gap-6">
                   {soaps.length > 0 && (
                     <div className="grid grid-cols-1 gap-12">
@@ -765,6 +815,7 @@ const SOAP: FC = () => {
                                   placeholder="Pilih..."
                                   menuPlacement="bottom"
                                   required={true}
+                                  isDisabled={true}
                                   // options={options.map((item, idx) => ({
                                   //   label: item.label,
                                   //   value: idx,
@@ -787,9 +838,14 @@ const SOAP: FC = () => {
                               <div className="flex flex-1">
                                 <input
                                   type="datetime-local"
-                                  className="w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                                  className={clsx(
+                                    "w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
+                                    "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300",
+                                    "read-only:bg-gray-200/80 read-only:active:border-gray-300 read-only:focus:border-gray-300"
+                                  )}
                                   required={true}
                                   value={datetime}
+                                  readOnly={true}
                                   onChange={(e) =>
                                     handleChangeSOAP(
                                       k,
