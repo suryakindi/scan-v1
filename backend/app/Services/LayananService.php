@@ -59,6 +59,7 @@ class LayananService
                 'registrasi_pasiens.status_pasien as id_status_pasien',
                 'status_pasiens.status as status_pasien',
                 'registrasi_detail_layanan_pasiens.noantrian',
+                'registrasi_detail_layanan_pasiens.noantrianbpjs',
                 'registrasi_pasiens.no_registrasi',
                 'registrasi_pasiens.tanggal_registrasi',
                 'master_ruangans.nama_ruangan',

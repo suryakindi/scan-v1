@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->string('lingkar_lengan')->nullable();
             $table->string('cara_ukur')->nullable();
             $table->string('kesadaran')->nullable();
+            $table->boolean('is_active')->default(1);
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();

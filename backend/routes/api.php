@@ -88,7 +88,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('daftar-pasien/teregistrasi', [LayananController::class, 'daftarTeregistrasi'])->middleware('permission:Layanan,view');
         Route::get('daftar-pasien/teregistrasi/id/{id_registrasi}', [LayananController::class, 'daftarTeregistrasiById'])->middleware('permission:Layanan,view');
         Route::get('get-user/{cdfix}', [LayananController::class, 'getUser'])->middleware('permission:Layanan,view');
-        Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Registrasi,update');
+        Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Registrasi,edit');
         Route::post('save-vital-sign', [LayananController::class, 'saveVitalSign'])->middleware('permission:Registrasi,create');
         Route::get('get-vital-sign-by-id/{id_vital_sign}', [LayananController::class, 'getVitalSignById'])->middleware('permission:Registrasi,view');
     });
