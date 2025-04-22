@@ -75,25 +75,7 @@ class RegistrasiController extends Controller
         }
     }
 
-    public function saveSOAP(Request $request)
-    {
-        try {
-            $soap = $this->RegistrasiServices->saveSOAP($request->all());
-            return $this->baseResponse('Registrasi SOAP berhasil didapatkan', null, $soap, 200);
-        } catch (Exception $e) {
-            return $this->baseResponse('Terjadi kesalahan saat Menyimpan SOAP', $e->getMessage(), null, 500);
-        }
-    }
-
-    public function getSoapByIdRegistrasi($registrasiId)
-    {
-        try {
-            $soaps = $this->RegistrasiServices->getSoapByIdRegistrasi($registrasiId);
-            return $this->baseResponse('SOAP berhasil didapatkan', null, $soaps, 200);
-        } catch (Exception $e) {
-            return $this->baseResponse('Terjadi kesalahan saat mendapatkan SOAP', $e->getMessage(), null, 500);
-        }
-    }
+   
 }
 
 

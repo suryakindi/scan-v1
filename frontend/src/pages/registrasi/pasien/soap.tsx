@@ -172,6 +172,7 @@ const SOAP: FC = () => {
   const [soaps, setSoaps] = useState<soapT[]>([]);
 
   const handleTambahSOAP = () => {
+
     setSoaps((prev) => [
       ...prev,
       {
@@ -207,8 +208,8 @@ const SOAP: FC = () => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/registrasi-pelayanan/save-soap", {
-        id_registrasi_pasiens: pasien?.id_registrasi_pasiens,
+      const response = await api.post("/layanan/save-soap", {
+        id_registrasi_detail_layanan_pasiens: pasien?.id_registrasi_detail_layanan_pasiens,
         soaps: soaps.map(({ S, O, A, P, dokter, datetime }) => ({
           S,
           O,
@@ -252,7 +253,7 @@ const SOAP: FC = () => {
           created_at: string | null;
           updated_at: string | null;
         }>
-      >(`/registrasi-pelayanan/get-soap-by-id-registrasi/${registrasiId}`);
+      >(`/layanan/get-soap-by-id-registrasi/${registrasiId}`);
 
       if (response.data.data) {
         setSoaps(
@@ -815,7 +816,7 @@ const SOAP: FC = () => {
                                   placeholder="Pilih..."
                                   menuPlacement="bottom"
                                   required={true}
-                                  isDisabled={true}
+                                  isDisabled={false}
                                   // options={options.map((item, idx) => ({
                                   //   label: item.label,
                                   //   value: idx,

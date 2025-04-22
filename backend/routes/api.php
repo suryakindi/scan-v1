@@ -68,10 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('edit-registrasi-pelayanan/{id_registrasi}', [RegistrasiController::class, 'editRegistrasiLayananPasien'])->middleware('permission:Registrasi,edit');
             Route::get('list-registrasi-pelayanan', [RegistrasiController::class, 'listRegistrasiPasien'])->middleware('permission:Registrasi,view');
 
-            Route::post('save-soap', [RegistrasiController::class, 'saveSOAP'])->middleware('permission:Registrasi,create');
-            Route::get('get-soap-by-id-registrasi/{registrasiId}', [RegistrasiController::class, 'getSoapByIdRegistrasi'])->middleware('permission:Registrasi,view');
-
-
+         
 
 
 
@@ -95,6 +92,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Registrasi,edit');
         Route::post('save-vital-sign', [LayananController::class, 'saveVitalSign'])->middleware('permission:Registrasi,create');
         Route::get('get-vital-sign-by-id/{id_vital_sign}', [LayananController::class, 'getVitalSignById'])->middleware('permission:Registrasi,view');
+        Route::post('save-soap', [LayananController::class, 'saveSOAP'])->middleware('permission:Layanan,create');
+        Route::get('get-soap-by-id-registrasi/{registrasiId}', [LayananController::class, 'getSoapByIdRegistrasi'])->middleware('permission:Layanan,view');
+
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {
