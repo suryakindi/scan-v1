@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,7 +13,7 @@ return new class extends Migration
         Schema::create('soap', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('cdfix');
-            $table->unsignedBigInteger('id_registrasi_detail_layanan_pasien');
+            $table->unsignedBigInteger('id_registrasi_detail_layanan_pasien')->unique();
             $table->text('soap_details');
             $table->boolean('is_active')->default(1);
             $table->unsignedBigInteger('created_by')->nullable();

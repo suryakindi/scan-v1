@@ -81,13 +81,13 @@ class LayananService
 
     public function updateWaktuPemanggilan(RegistrasiPasien $id_registrasi)
     {
-      
+
         DB::beginTransaction();
         try {
             $statusPasien = StatusPasien::where('status', 'Dilayani')->first();
-            if($statusPasien){
+            if ($statusPasien) {
                 $id_registrasi->status_pasien = $statusPasien->id;
-            }else{
+            } else {
                 $id_registrasi->status_pasien = null;
             }
             $id_registrasi->waktu_pemanggilan = Carbon::now();
@@ -224,45 +224,39 @@ class LayananService
     {
         $user = auth()->user();
         $detail = RegistrasiDetailLayananPasien::find($data['id_registrasi_detail_layanan_pasiens']);
-      
+
         if ($detail) {
             $registrasi = RegistrasiPasien::find($detail->id_registrasi_pasien);
             $statusPasien = StatusPasien::where('status', 'Dilayani')->first();
 
-            if($statusPasien){
+            if ($statusPasien) {
                 $registrasi->status_pasien = $statusPasien->id;
                 $registrasi->save();
             }
             if ($registrasi && is_null($detail->id_dokter) && is_null($registrasi->id_dokter)) {
                 $dokterRole = Role::where('name', 'Dokter')->first();
-                if($user->role_id == $dokterRole->id){
+                if ($user->role_id == $dokterRole->id) {
                     $detail->id_dokter = $user->id;
                     $registrasi->id_dokter = $user->id;
 
                     $detail->save();
                     $registrasi->save();
                 }
-               
+
             }
         }
 
         DB::beginTransaction();
 
         try {
-           
-            $dataToSave = [
-                'id_registrasi_detail_layanan_pasien' => $data['id_registrasi_detail_layanan_pasiens'],
-                'soap_details' => collect($data['soaps'])->toJson(),
-            ];
+            $dataToSave = [];
+            $dataToSave['id_registrasi_detail_layanan_pasien'] = $data['id_registrasi_detail_layanan_pasiens'];
+            $dataToSave['soap_details'] = json_encode($data['soap_details']);
+            $dataToSave['updated_by'] = $user->id;
+            $dataToSave['created_by'] = $user->id;
+            $dataToSave['cdfix'] = $user->cdfix;
 
-            if (!empty($data['id'])) {
-                $dataToSave['updated_by'] = $user->id;
-                Soap::where('id', $data['id'])->update($dataToSave);
-            } else {
-                $dataToSave['created_by'] = $user->id;
-                $dataToSave['cdfix'] = $user->cdfix;
-                Soap::create($dataToSave);
-            }
+            Soap::upsert([$dataToSave], ['id_registrasi_detail_layanan_pasien'], ['soap_details', 'updated_by']);
 
             DB::commit();
             return true;
@@ -276,9 +270,10 @@ class LayananService
     public function getSoapByIdRegistrasi($registrasiId)
     {
         try {
-            $soapList = Soap::where('id_registrasi_detail_layanan_pasien', $registrasiId)->get();
+            $soap = Soap::where('id_registrasi_detail_layanan_pasien', $registrasiId)->first();
+            $soap->soap_details = json_decode($soap->soap_details);
 
-            return $soapList;
+            return $soap;
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }

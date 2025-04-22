@@ -146,7 +146,7 @@ const SOAP: FC = () => {
 
   type soapT = {
     datetime: string;
-    dokter: { label: string; value: number } | null;
+    user_id: number | null;
     S: string;
     O: string;
     A: string;
@@ -169,22 +169,19 @@ const SOAP: FC = () => {
     }
   };
 
-  const [soaps, setSoaps] = useState<soapT[]>([]);
+  const [soapDetails, setSoapDetails] = useState<soapT[]>([]);
 
   const handleTambahSOAP = () => {
+    const userFinded = findValue(listUsers, { id: user.id });
 
-    setSoaps((prev) => [
+    setSoapDetails((prev) => [
       ...prev,
       {
         S: "",
         O: "",
         A: "",
         P: "",
-        dokter: findValue(
-          listUsers,
-          { id: user.cdfix },
-          { label: "name", value: "id" }
-        ) as { label: string; value: number },
+        user_id: userFinded ? Number(userFinded.id) : null,
         datetime: moment().format("YYYY-MM-DD HH:mm:ss"),
       },
     ]);
@@ -195,32 +192,35 @@ const SOAP: FC = () => {
     key: keyof soapT,
     value: soapT[typeof key]
   ) => {
-    setSoaps((prev) =>
+    setSoapDetails((prev) =>
       prev.map((soap, i) => (i === index ? { ...soap, [key]: value } : soap))
     );
   };
 
   const handleDeleteSOAP = (index: number) => {
-    setSoaps((prev) => prev.filter((_, i) => i !== index));
+    setSoapDetails((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmitSOAP: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/layanan/save-soap", {
-        id_registrasi_detail_layanan_pasiens: pasien?.id_registrasi_detail_layanan_pasiens,
-        soaps: soaps.map(({ S, O, A, P, dokter, datetime }) => ({
-          S,
-          O,
-          A,
-          P,
-          created_by: dokter?.value,
-          datetime,
-        })),
+      if (!pasien)
+        Toast.fire({
+          title: "Gagal",
+          text: "Data registrasi tidak ditemukan",
+          icon: "error",
+        });
+
+      await api.post("/layanan/save-soap", {
+        id_registrasi_detail_layanan_pasiens:
+          pasien?.id_registrasi_detail_layanan_pasiens,
+        soap_details: soapDetails,
       });
 
-      console.log(response);
+      await getSoapByIdRegistrasi(
+        pasien?.id_registrasi_detail_layanan_pasiens ?? 0
+      );
 
       Toast.fire({
         title: "Berhasil",
@@ -255,20 +255,8 @@ const SOAP: FC = () => {
         }>
       >(`/layanan/get-soap-by-id-registrasi/${registrasiId}`);
 
-      if (response.data.data) {
-        setSoaps(
-          response.data.data.soap_details.map(
-            ({ S, O, A, P, dokter, datetime }) => ({
-              S,
-              O,
-              A,
-              P,
-              dokter,
-              datetime,
-            })
-          )
-        );
-      }
+      if (response.data.data.soap_details)
+        setSoapDetails(response.data.data.soap_details);
     } catch (error) {
       console.error(error);
     }
@@ -434,354 +422,361 @@ const SOAP: FC = () => {
       )}
 
       <div className="grid grid-cols-2 gap-6 auto-rows-min">
-        <div className="grid grid-cols-1 gap-6">
-          <div className="px-6">
-            <div
-              ref={drawContainerRef}
-              className="flex flex-col items-center gap-6"
-            >
-              <span className="text-xs">
-                Drag cursor untuk menggambar marker pada area bermasalah
-              </span>
-              <Stage
-                width={drawDimensions.width}
-                height={drawDimensions.height}
-                onMouseDown={handleMouseDown}
-                onMousemove={handleMouseMove}
-                onMouseup={handleMouseUp}
+        <div className="flex flex-col">
+          <div className="grid grid-cols-1 gap-6">
+            <div className="px-6">
+              <div
+                ref={drawContainerRef}
+                className="flex flex-col items-center gap-6"
               >
-                <Layer>
-                  {drawImage && (
-                    <Image
-                      image={drawImage}
-                      width={drawDimensions.width}
-                      height={drawDimensions.height}
-                    />
-                  )}
-                </Layer>
-                <Layer>
-                  {drawLines.map((line, i) => (
-                    <Line
-                      key={i}
-                      points={line.points}
-                      stroke="#000000"
-                      strokeWidth={3}
-                      tension={0.5}
-                      lineCap="round"
-                      lineJoin="round"
-                      globalCompositeOperation="source-over"
-                    />
-                  ))}
-                </Layer>
-              </Stage>
-              <button
-                type="button"
-                className="px-4 py-2 border border-blue-600 hover:bg-slate-200 text-blue-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
-                onClick={handleResetDrawing}
-              >
-                Undo
-              </button>
-            </div>
-          </div>
-          <div className="flex justify-center border-b border-b-slate-300 p-6">
-            <span className="text-5xl text-nowrap">
-              {vitalSign.tekanan_darah_hh === ""
-                ? "0"
-                : vitalSign.tekanan_darah_hh}
-              /
-              {vitalSign.tekanan_darah_mg === ""
-                ? "0"
-                : vitalSign.tekanan_darah_mg}{" "}
-              mmHg
-            </span>
-          </div>
-          <div className="grid grid-cols-3 items-center">
-            <div className="flex items-center justify-center gap-2">
-              <img
-                src="/images/temperature.png"
-                alt="temperature..."
-                className="size-10"
-              />
-              <span className="text-xl">
-                {vitalSign.temperature === "" ? "0" : vitalSign.temperature}{" "}
-                &#176;C
-              </span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <img
-                src="/images/heart.png"
-                alt="temperature..."
-                className="size-10"
-              />
-              <span className="text-xl">
-                {vitalSign.nadi === "" ? "0" : vitalSign.nadi} x
-              </span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <img
-                src="/images/lungs.png"
-                alt="temperature..."
-                className="size-10"
-              />
-              <span className="text-xl">
-                {vitalSign.pernafasan === "" ? "0" : vitalSign.pernafasan} x
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={handleSaveVitalSign} className="flex flex-col gap-6">
-            <div className="bg-white shadow-lg rounded-md p-6 gap-6 flex flex-col">
-              <span className="text-xl font-medium">Kesadaran</span>
-              <Select
-                className="w-full"
-                isClearable={true}
-                isSearchable={true}
-                styles={styles}
-                placeholder="Pilih..."
-                menuPlacement="bottom"
-                required={true}
-                options={options}
-                isDisabled={true}
-                value={findValue(
-                  options,
-                  {
-                    value: vitalSign.kesadaran ?? "",
-                  },
-                  { label: "label", value: "value" }
-                )}
-                onChange={(e) =>
-                  cast<{ label: string; value: string }>(e, ({ value }) => {
-                    setVitalSign({ kesadaran: value });
-                  })
-                }
-              />
-            </div>
-
-            <div className="bg-white shadow-lg rounded-md p-6 gap-6 flex flex-col">
-              <div className="gap-3 flex flex-col">
-                <span className="text-xl font-medium">Vital sign</span>
-                <div className="grid grid-cols-3 items-center">
-                  <span className="col-span-1">Tekanan darah</span>
-                  <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        className="border border-gray-300 py-1.5 px-2 w-2/5 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
-                        value={vitalSign.tekanan_darah_hh ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ tekanan_darah_hh: value })
-                        }
+                <span className="text-xs">
+                  Drag cursor untuk menggambar marker pada area bermasalah
+                </span>
+                <Stage
+                  width={drawDimensions.width}
+                  height={drawDimensions.height}
+                  onMouseDown={handleMouseDown}
+                  onMousemove={handleMouseMove}
+                  onMouseup={handleMouseUp}
+                >
+                  <Layer>
+                    {drawImage && (
+                      <Image
+                        image={drawImage}
+                        width={drawDimensions.width}
+                        height={drawDimensions.height}
                       />
-                      <span>/</span>
-                      <div className="flex items-center border border-gray-300 w-3/5 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                    )}
+                  </Layer>
+                  <Layer>
+                    {drawLines.map((line, i) => (
+                      <Line
+                        key={i}
+                        points={line.points}
+                        stroke="#000000"
+                        strokeWidth={3}
+                        tension={0.5}
+                        lineCap="round"
+                        lineJoin="round"
+                        globalCompositeOperation="source-over"
+                      />
+                    ))}
+                  </Layer>
+                </Stage>
+                <button
+                  type="button"
+                  className="px-4 py-2 border border-blue-600 hover:bg-slate-200 text-blue-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                  onClick={handleResetDrawing}
+                >
+                  Undo
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-center border-b border-b-slate-300 p-6">
+              <span className="text-5xl text-nowrap">
+                {vitalSign.tekanan_darah_hh === ""
+                  ? "0"
+                  : vitalSign.tekanan_darah_hh}
+                /
+                {vitalSign.tekanan_darah_mg === ""
+                  ? "0"
+                  : vitalSign.tekanan_darah_mg}{" "}
+                mmHg
+              </span>
+            </div>
+            <div className="grid grid-cols-3 items-center">
+              <div className="flex items-center justify-center gap-2">
+                <img
+                  src="/images/temperature.png"
+                  alt="temperature..."
+                  className="size-10"
+                />
+                <span className="text-xl">
+                  {vitalSign.temperature === "" ? "0" : vitalSign.temperature}{" "}
+                  &#176;C
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <img
+                  src="/images/heart.png"
+                  alt="temperature..."
+                  className="size-10"
+                />
+                <span className="text-xl">
+                  {vitalSign.nadi === "" ? "0" : vitalSign.nadi} x
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <img
+                  src="/images/lungs.png"
+                  alt="temperature..."
+                  className="size-10"
+                />
+                <span className="text-xl">
+                  {vitalSign.pernafasan === "" ? "0" : vitalSign.pernafasan} x
+                </span>
+              </div>
+            </div>
+
+            <form
+              onSubmit={handleSaveVitalSign}
+              className="flex flex-col gap-6"
+            >
+              <div className="bg-white shadow-lg rounded-md p-6 gap-6 flex flex-col">
+                <span className="text-xl font-medium">Kesadaran</span>
+                <Select
+                  className="w-full"
+                  isClearable={true}
+                  isSearchable={true}
+                  styles={styles}
+                  placeholder="Pilih..."
+                  menuPlacement="bottom"
+                  required={true}
+                  options={options}
+                  isDisabled={true}
+                  value={findValue(
+                    options,
+                    {
+                      value: vitalSign.kesadaran ?? "",
+                    },
+                    { label: "label", value: "value" }
+                  )}
+                  onChange={(e) =>
+                    cast<{ label: string; value: string }>(e, ({ value }) => {
+                      setVitalSign({ kesadaran: value });
+                    })
+                  }
+                />
+              </div>
+
+              <div className="bg-white shadow-lg rounded-md p-6 gap-6 flex flex-col">
+                <div className="gap-3 flex flex-col">
+                  <span className="text-xl font-medium">Vital sign</span>
+                  <div className="grid grid-cols-3 items-center">
+                    <span className="col-span-1">Tekanan darah</span>
+                    <div className="col-span-2">
+                      <div className="flex items-center gap-2">
                         <input
                           type="number"
-                          className="py-1.5 px-2 w-full outline-none"
-                          value={vitalSign.tekanan_darah_mg ?? ""}
+                          className="border border-gray-300 py-1.5 px-2 w-2/5 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                          value={vitalSign.tekanan_darah_hh ?? ""}
                           onChange={({ currentTarget: { value } }) =>
-                            setVitalSign({ tekanan_darah_mg: value })
+                            setVitalSign({ tekanan_darah_hh: value })
                           }
                         />
-                        <span className="mx-2">mmHg</span>
+                        <span>/</span>
+                        <div className="flex items-center border border-gray-300 w-3/5 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                          <input
+                            type="number"
+                            className="py-1.5 px-2 w-full outline-none"
+                            value={vitalSign.tekanan_darah_mg ?? ""}
+                            onChange={({ currentTarget: { value } }) =>
+                              setVitalSign({ tekanan_darah_mg: value })
+                            }
+                          />
+                          <span className="mx-2">mmHg</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="temperature" className="col-span-1">
+                      Temperature
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="temperature"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.temperature ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ temperature: value })
+                          }
+                        />
+                        <span className="mx-2">&#176;C</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="nadi" className="col-span-1">
+                      Nadi
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="nadi"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.nadi ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ nadi: value })
+                          }
+                        />
+                        <span className="mx-2">x/menit</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="pernafasan" className="col-span-1">
+                      Pernafasan
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="pernafasan"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.pernafasan ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ pernafasan: value })
+                          }
+                        />
+                        <span className="mx-2">x/menit</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="berat-badan" className="col-span-1">
+                      Berat Badan
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="berat-badan"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.berat_badan ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ berat_badan: value })
+                          }
+                        />
+                        <span className="mx-2">Kg</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="tinggi-badan" className="col-span-1">
+                      Tinggi Badan
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="tinggi-badan"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.tinggi_badan ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ tinggi_badan: value })
+                          }
+                        />
+                        <span className="mx-2">Cm</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="lingkar-kepala" className="col-span-1">
+                      Lingkar Kepala
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="lingkar-kepala"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.lingkar_kepala ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ lingkar_kepala: value })
+                          }
+                        />
+                        <span className="mx-2">Cm</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="lingkar-perut" className="col-span-1">
+                      Lingkar Perut
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="lingkar-perut"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.lingkar_perut ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ lingkar_perut: value })
+                          }
+                        />
+                        <span className="mx-2">Cm</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <label htmlFor="lingkar-lengan" className="col-span-1">
+                      Lingkar Lengan
+                    </label>
+                    <div className="col-span-2">
+                      <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
+                        <input
+                          type="number"
+                          id="lingkar-lengan"
+                          className="py-1.5 px-2 w-full outline-none"
+                          value={vitalSign.lingkar_lengan ?? ""}
+                          onChange={({ currentTarget: { value } }) =>
+                            setVitalSign({ lingkar_lengan: value })
+                          }
+                        />
+                        <span className="mx-2">Cm</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 items-center">
+                    <span className="col-span-1">Cara ukur</span>
+                    <div className="col-span-2">
+                      <div className="flex items-center text-nowrap">
+                        <button
+                          type="button"
+                          className={clsx(
+                            vitalSign.cara_ukur === "Berbaring"
+                              ? "text-white bg-blue-600 hover:bg-blue-500"
+                              : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
+                            "flex w-full justify-center items-center px-3 py-1.5 border border-e-0 rounded-s-sm cursor-pointer border-blue-600"
+                          )}
+                          onClick={() =>
+                            setVitalSign({ cara_ukur: "Berbaring" })
+                          }
+                        >
+                          Berbaring
+                        </button>
+                        <button
+                          type="button"
+                          className={clsx(
+                            vitalSign.cara_ukur === "Berdiri"
+                              ? "text-white bg-blue-600 hover:bg-blue-500"
+                              : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
+                            "flex w-full justify-center items-center px-3 py-1.5 border border-s-0 rounded-e-sm cursor-pointer border-blue-600"
+                          )}
+                          onClick={() => setVitalSign({ cara_ukur: "Berdiri" })}
+                        >
+                          Berdiri
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="temperature" className="col-span-1">
-                    Temperature
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="temperature"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.temperature ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ temperature: value })
-                        }
-                      />
-                      <span className="mx-2">&#176;C</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="nadi" className="col-span-1">
-                    Nadi
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="nadi"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.nadi ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ nadi: value })
-                        }
-                      />
-                      <span className="mx-2">x/menit</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="pernafasan" className="col-span-1">
-                    Pernafasan
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="pernafasan"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.pernafasan ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ pernafasan: value })
-                        }
-                      />
-                      <span className="mx-2">x/menit</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="berat-badan" className="col-span-1">
-                    Berat Badan
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="berat-badan"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.berat_badan ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ berat_badan: value })
-                        }
-                      />
-                      <span className="mx-2">Kg</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="tinggi-badan" className="col-span-1">
-                    Tinggi Badan
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="tinggi-badan"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.tinggi_badan ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ tinggi_badan: value })
-                        }
-                      />
-                      <span className="mx-2">Cm</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="lingkar-kepala" className="col-span-1">
-                    Lingkar Kepala
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="lingkar-kepala"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.lingkar_kepala ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ lingkar_kepala: value })
-                        }
-                      />
-                      <span className="mx-2">Cm</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="lingkar-perut" className="col-span-1">
-                    Lingkar Perut
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="lingkar-perut"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.lingkar_perut ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ lingkar_perut: value })
-                        }
-                      />
-                      <span className="mx-2">Cm</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <label htmlFor="lingkar-lengan" className="col-span-1">
-                    Lingkar Lengan
-                  </label>
-                  <div className="col-span-2">
-                    <div className="flex items-center border border-gray-300 rounded-sm focus-within:border-blue-300 active:border-blue-300">
-                      <input
-                        type="number"
-                        id="lingkar-lengan"
-                        className="py-1.5 px-2 w-full outline-none"
-                        value={vitalSign.lingkar_lengan ?? ""}
-                        onChange={({ currentTarget: { value } }) =>
-                          setVitalSign({ lingkar_lengan: value })
-                        }
-                      />
-                      <span className="mx-2">Cm</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center">
-                  <span className="col-span-1">Cara ukur</span>
-                  <div className="col-span-2">
-                    <div className="flex items-center text-nowrap">
-                      <button
-                        type="button"
-                        className={clsx(
-                          vitalSign.cara_ukur === "Berbaring"
-                            ? "text-white bg-blue-600 hover:bg-blue-500"
-                            : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
-                          "flex w-full justify-center items-center px-3 py-1.5 border border-e-0 rounded-s-sm cursor-pointer border-blue-600"
-                        )}
-                        onClick={() => setVitalSign({ cara_ukur: "Berbaring" })}
-                      >
-                        Berbaring
-                      </button>
-                      <button
-                        type="button"
-                        className={clsx(
-                          vitalSign.cara_ukur === "Berdiri"
-                            ? "text-white bg-blue-600 hover:bg-blue-500"
-                            : "text-blue-600 hover:text-blue-500 hover:bg-blue-100/30",
-                          "flex w-full justify-center items-center px-3 py-1.5 border border-s-0 rounded-e-sm cursor-pointer border-blue-600"
-                        )}
-                        onClick={() => setVitalSign({ cara_ukur: "Berdiri" })}
-                      >
-                        Berdiri
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-between outline-0"
-                >
-                  Simpan
-                </button>
+                <div className="flex">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-between outline-0"
+                  >
+                    Simpan
+                  </button>
+                </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
 
         <TabGroup>
@@ -798,9 +793,9 @@ const SOAP: FC = () => {
             <TabPanel>
               <form className="flex flex-col gap-6" onSubmit={handleSubmitSOAP}>
                 <div className="bg-white shadow-lg p-6 rounded-md items-center grid grid-cols-1 gap-6">
-                  {soaps.length > 0 && (
+                  {soapDetails.length > 0 && (
                     <div className="grid grid-cols-1 gap-12">
-                      {soaps.map(({ dokter, datetime, S, O, A, P }, k) => (
+                      {soapDetails.map((soap, k) => (
                         <div
                           key={k}
                           className="border border-gray-300 grid grid-cols-1 p-3 rounded-sm gap-3"
@@ -816,23 +811,27 @@ const SOAP: FC = () => {
                                   placeholder="Pilih..."
                                   menuPlacement="bottom"
                                   required={true}
-                                  isDisabled={false}
-                                  // options={options.map((item, idx) => ({
-                                  //   label: item.label,
-                                  //   value: idx,
-                                  // }))}
+                                  isDisabled={true}
                                   options={mapOptions(listUsers, {
                                     l: "name",
                                     v: "id",
                                   })}
-                                  value={dokter}
+                                  value={findValue(
+                                    listUsers,
+                                    { id: soap.user_id ?? undefined },
+                                    { label: "name", value: "id" }
+                                  )}
                                   onChange={(e) =>
-                                    cast<{ label: string; value: number }>(
-                                      e,
-                                      (value) => {
-                                        handleChangeSOAP(k, "dokter", value);
-                                      }
-                                    )
+                                    cast<{
+                                      label: string;
+                                      value: number;
+                                    } | null>(e, (selected) => {
+                                      handleChangeSOAP(
+                                        k,
+                                        "user_id",
+                                        selected?.value ?? null
+                                      );
+                                    })
                                   }
                                 />
                               </div>
@@ -845,26 +844,24 @@ const SOAP: FC = () => {
                                     "read-only:bg-gray-200/80 read-only:active:border-gray-300 read-only:focus:border-gray-300"
                                   )}
                                   required={true}
-                                  value={datetime}
+                                  value={soap.datetime}
                                   readOnly={true}
-                                  onChange={(e) =>
-                                    handleChangeSOAP(
-                                      k,
-                                      "datetime",
-                                      e.currentTarget.value
-                                    )
+                                  onChange={({ currentTarget: { value } }) =>
+                                    handleChangeSOAP(k, "datetime", value)
                                   }
                                 />
                               </div>
                             </div>
 
-                            <button
-                              type="button"
-                              className="bg-red-600 hover:bg-red-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-center h-[38px] aspect-square outline-0"
-                              onClick={() => handleDeleteSOAP(k)}
-                            >
-                              <HOutline.TrashIcon className="size-5" />
-                            </button>
+                            {user.id === soap.user_id && (
+                              <button
+                                type="button"
+                                className="bg-red-600 hover:bg-red-500 text-white cursor-pointer rounded-sm ml-auto flex items-center justify-center h-[38px] aspect-square outline-0"
+                                onClick={() => handleDeleteSOAP(k)}
+                              >
+                                <HOutline.TrashIcon className="size-5" />
+                              </button>
+                            )}
                           </div>
                           <div className="flex gap-3">
                             <div className="flex items-center w-4">
@@ -872,16 +869,17 @@ const SOAP: FC = () => {
                             </div>
                             <div className="flex flex-1">
                               <textarea
-                                className="w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                                className={clsx(
+                                  "w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
+                                  "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300",
+                                  "read-only:bg-gray-200/80 read-only:active:border-gray-300 read-only:focus:border-gray-300"
+                                )}
                                 required={true}
-                                value={S}
-                                onChange={(e) =>
-                                  handleChangeSOAP(
-                                    k,
-                                    "S",
-                                    e.currentTarget.value
-                                  )
+                                value={soap.S}
+                                onChange={({ currentTarget: { value } }) =>
+                                  handleChangeSOAP(k, "S", value)
                                 }
+                                disabled={user.id !== soap.user_id}
                               ></textarea>
                             </div>
                           </div>
@@ -891,16 +889,17 @@ const SOAP: FC = () => {
                             </div>
                             <div className="flex flex-1">
                               <textarea
-                                className="w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                                className={clsx(
+                                  "w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
+                                  "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300",
+                                  "read-only:bg-gray-200/80 read-only:active:border-gray-300 read-only:focus:border-gray-300"
+                                )}
                                 required={true}
-                                value={O}
-                                onChange={(e) =>
-                                  handleChangeSOAP(
-                                    k,
-                                    "O",
-                                    e.currentTarget.value
-                                  )
+                                value={soap.O}
+                                onChange={({ currentTarget: { value } }) =>
+                                  handleChangeSOAP(k, "O", value)
                                 }
+                                disabled={user.id !== soap.user_id}
                               ></textarea>
                             </div>
                           </div>
@@ -910,16 +909,17 @@ const SOAP: FC = () => {
                             </div>
                             <div className="flex flex-1">
                               <textarea
-                                className="w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                                className={clsx(
+                                  "w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
+                                  "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300",
+                                  "read-only:bg-gray-200/80 read-only:active:border-gray-300 read-only:focus:border-gray-300"
+                                )}
                                 required={true}
-                                value={A}
-                                onChange={(e) =>
-                                  handleChangeSOAP(
-                                    k,
-                                    "A",
-                                    e.currentTarget.value
-                                  )
+                                value={soap.A}
+                                onChange={({ currentTarget: { value } }) =>
+                                  handleChangeSOAP(k, "A", value)
                                 }
+                                disabled={user.id !== soap.user_id}
                               ></textarea>
                             </div>
                           </div>
@@ -929,16 +929,17 @@ const SOAP: FC = () => {
                             </div>
                             <div className="flex flex-1">
                               <textarea
-                                className="w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300"
+                                className={clsx(
+                                  "w-full border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300",
+                                  "disabled:bg-gray-200/80 disabled:active:border-gray-300 disabled:focus:border-gray-300",
+                                  "read-only:bg-gray-200/80 read-only:active:border-gray-300 read-only:focus:border-gray-300"
+                                )}
                                 required={true}
-                                value={P}
-                                onChange={(e) =>
-                                  handleChangeSOAP(
-                                    k,
-                                    "P",
-                                    e.currentTarget.value
-                                  )
+                                value={soap.P}
+                                onChange={({ currentTarget: { value } }) =>
+                                  handleChangeSOAP(k, "P", value)
                                 }
+                                disabled={user.id !== soap.user_id}
                               ></textarea>
                             </div>
                           </div>
