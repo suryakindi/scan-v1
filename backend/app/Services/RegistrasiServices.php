@@ -8,6 +8,7 @@ use App\Models\MasterRuangan;
 use App\Models\MasterTkp;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
+use App\Models\Role;
 use App\Models\Soap;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -295,57 +296,6 @@ class RegistrasiServices
         }
     }
 
-    public function saveSOAP(array $data)
-    {
-        DB::beginTransaction();
-        try {
-            $user = Auth()->user();
-
-            $dataToSave = [];
-            $dataToSave['id_registrasi_detail_layanan_pasien'] = $data['id_registrasi_pasiens'];
-            $dataToSave['soap_details'] = collect($data['soaps'])->toJson();
-
-            if (isset($data['id']) && $data['id'] !== null) {
-                $dataToSave['updated_by'] = $user->id;
-                $soap = Soap::where('id', $data['id'])->update($dataToSave);
-            } else {
-                $dataToSave['cdfix'] = $user->cdfix;
-                $dataToSave['created_by'] = $user->id;
-                $soap = Soap::create($dataToSave);
-            }
-
-            DB::commit();
-            return $soap;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw new Exception($e->getMessage());
-        }
-    }
-
-    public function getSoapByIdRegistrasi($registrasiId)
-    {
-        try {
-            $soap = Soap::where('id_registrasi_detail_layanan_pasien', $registrasiId)->first();
-            $soap_detail = collect(json_decode($soap->soap_details))
-                ->map(function ($soap) {
-                    $soap->dokter = User::select([
-                        'id as value',
-                        'name as label'
-                    ])
-                        ->where('id', $soap->created_by)
-                        ->first();
-
-                    return $soap;
-                });
-
-            $soap->soap_details = $soap_detail;
-
-            return $soap;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw new Exception($e->getMessage());
-        }
-    }
-
+    
 
 }

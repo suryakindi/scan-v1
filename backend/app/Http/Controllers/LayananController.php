@@ -77,4 +77,24 @@ class LayananController extends Controller
             return $this->baseResponse('Terjadi kesalahan saat mendapatkan Vital Sign', $e->getMessage(), null, 500);
         }
     }
+
+    public function saveSOAP(Request $request)
+    {
+        try {
+            $soap = $this->LayananService->saveSOAP($request->all());
+            return $this->baseResponse('Registrasi SOAP berhasil disimpan', null, $soap, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Menyimpan SOAP', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getSoapByIdRegistrasi($registrasiId)
+    {
+        try {
+            $soaps = $this->LayananService->getSoapByIdRegistrasi($registrasiId);
+            return $this->baseResponse('SOAP berhasil didapatkan', null, $soaps, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat mendapatkan SOAP', $e->getMessage(), null, 500);
+        }
+    }
 }

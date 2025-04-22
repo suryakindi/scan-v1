@@ -123,6 +123,7 @@ class BPJSToolsService
                 'servicename' =>$servicename
             ];
         } catch (\Exception $e) {
+            DB::rollBack();
             throw new Exception("Gagal create BPJSTools: " . $e->getMessage());
         }
        

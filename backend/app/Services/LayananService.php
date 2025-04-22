@@ -3,10 +3,14 @@
 namespace App\Services;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
+use App\Models\Role;
+use App\Models\Soap;
+use App\Models\StatusPasien;
 use App\Models\User;
 use App\Models\VitalSign;
 use Carbon\Carbon;
 use DateTime;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class LayananService
@@ -77,16 +81,23 @@ class LayananService
 
     public function updateWaktuPemanggilan(RegistrasiPasien $id_registrasi)
     {
+      
         DB::beginTransaction();
         try {
+            $statusPasien = StatusPasien::where('status', 'Dilayani')->first();
+            if($statusPasien){
+                $id_registrasi->status_pasien = $statusPasien->id;
+            }else{
+                $id_registrasi->status_pasien = null;
+            }
             $id_registrasi->waktu_pemanggilan = Carbon::now();
-            $id_registrasi->status_pasien = 4;
             $id_registrasi->updated_at = Carbon::now();
             $id_registrasi->updated_by = auth()->user()->id;
             $id_registrasi->save();
             DB::commit();
             return $id_registrasi;
         } catch (\Exception $e) {
+            DB::rollBack();
             throw new \Exception("Gagal", $e->getMessage());
         }
     }
@@ -208,4 +219,70 @@ class LayananService
 
         return $data;
     }
+
+    public function saveSOAP(array $data)
+    {
+        $user = auth()->user();
+        $detail = RegistrasiDetailLayananPasien::find($data['id_registrasi_detail_layanan_pasiens']);
+      
+        if ($detail) {
+            $registrasi = RegistrasiPasien::find($detail->id_registrasi_pasien);
+            $statusPasien = StatusPasien::where('status', 'Dilayani')->first();
+
+            if($statusPasien){
+                $registrasi->status_pasien = $statusPasien->id;
+                $registrasi->save();
+            }
+            if ($registrasi && is_null($detail->id_dokter) && is_null($registrasi->id_dokter)) {
+                $dokterRole = Role::where('name', 'Dokter')->first();
+                if($user->role_id == $dokterRole->id){
+                    $detail->id_dokter = $user->id;
+                    $registrasi->id_dokter = $user->id;
+
+                    $detail->save();
+                    $registrasi->save();
+                }
+               
+            }
+        }
+
+        DB::beginTransaction();
+
+        try {
+           
+            $dataToSave = [
+                'id_registrasi_detail_layanan_pasien' => $data['id_registrasi_detail_layanan_pasiens'],
+                'soap_details' => collect($data['soaps'])->toJson(),
+            ];
+
+            if (!empty($data['id'])) {
+                $dataToSave['updated_by'] = $user->id;
+                Soap::where('id', $data['id'])->update($dataToSave);
+            } else {
+                $dataToSave['created_by'] = $user->id;
+                $dataToSave['cdfix'] = $user->cdfix;
+                Soap::create($dataToSave);
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
+
+
+    public function getSoapByIdRegistrasi($registrasiId)
+    {
+        try {
+            $soapList = Soap::where('id_registrasi_detail_layanan_pasien', $registrasiId)->get();
+
+            return $soapList;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+
 }
