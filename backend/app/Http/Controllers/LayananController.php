@@ -19,8 +19,9 @@ class LayananController extends Controller
 
     public function daftarTeregistrasi(Request $request)
     {
+        
         try {
-            $daftarTeregistrasi = $this->LayananService->daftarTeregistrasi($request->tglAwal, $request->tglAkhir, $request->search, $request->ruangan);
+            $daftarTeregistrasi = $this->LayananService->daftarTeregistrasi($request->tglAwal, $request->tglAkhir, $request->search, $request->ruangan, $request->all());
             return $this->baseResponse('Daftar Layanan Pasien Teregistrasi berhasil didapatkan', null, $daftarTeregistrasi, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat melihat Daftar Layanan Pasien Teregistrasi', $e->getMessage(), null, 500);
@@ -95,6 +96,16 @@ class LayananController extends Controller
             return $this->baseResponse('SOAP berhasil didapatkan', null, $soaps, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat mendapatkan SOAP', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getKesadaran()
+    {
+        try {
+            $kesadaran = $this->LayananService->getKesadaran();
+            return $this->baseResponse('Kesadaran berhasil didapatkan', null, $kesadaran, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat mendapatkan Kesadaran', $e->getMessage(), null, 500);
         }
     }
 }
