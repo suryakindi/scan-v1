@@ -57,9 +57,9 @@ class LayananService
             if ($ruangan) {
                 $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%' . $ruangan . '%');
             }
-            if(isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] == true){
-                $registrasi->where('registrasi_detail_layanan_pasiens.id_dokter', $user->id);
-            }
+            // if(isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] == true){
+            //     $registrasi->where('registrasi_detail_layanan_pasiens.id_dokter', $user->id);
+            // }
             $registrasi = $registrasi->select(
                 'registrasi_pasiens.id as id_registrasi',
                 'pasiens.nama',
@@ -133,6 +133,7 @@ class LayananService
                 ->select(
                     'pasiens.id as id_pasien',
                     'pasiens.nama',
+                    'pasiens.nik as nik_pasien',
                     'pasiens.no_bpjs',
                     'registrasi_pasiens.id as id_registrasi_pasiens',
                     'registrasi_pasiens.no_registrasi as no_registrasi_pasien',

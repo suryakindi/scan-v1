@@ -86,6 +86,7 @@ const raw: WrapRoute[] = [
     path: "/layanan",
     name: "Layanan",
     nav: true,
+    Icon: HOutline.ShieldCheckIcon,
     children: [
       {
         path: "/layanan/rawat-jalan",
