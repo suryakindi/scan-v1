@@ -14,7 +14,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import clsx from "clsx";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { api, ResponseT, useXState } from "../../../utils/api";
-import { Link, useLoaderData, useParams } from "react-router";
+import { data, Link, useLoaderData, useParams } from "react-router";
 import { LoaderT, UserT } from "../../../user";
 import moment from "moment";
 
@@ -24,6 +24,7 @@ const SOAP: FC = () => {
 
   type Data = {
     id_pasien: number;
+    nik_pasien: string | null;
     nama: string;
     no_bpjs: string;
     nama_ruangan: string;
@@ -52,7 +53,7 @@ const SOAP: FC = () => {
     lingkar_perut: string | null;
     lingkar_lengan: string | null;
     cara_ukur: "Berbaring" | "Berdiri" | null;
-    kesadaran: string | null;
+    kesadaran: number | null;
   };
 
   type SaveResponseVitalSign = VitalSign;
@@ -76,7 +77,7 @@ const SOAP: FC = () => {
       lingkar_perut: "",
       lingkar_lengan: "",
       cara_ukur: "Berdiri",
-      kesadaran: "",
+      kesadaran: null,
     },
     { method: "POST", url: "/layanan/save-vital-sign" }
   );
@@ -108,7 +109,10 @@ const SOAP: FC = () => {
         `/layanan/get-vital-sign-by-id/${id_vital_signs}`
       );
       if (response.data.data) {
-        setVitalSign(response.data.data);
+        setVitalSign({
+          ...response.data.data,
+          kesadaran: Number(response.data.data.kesadaran),
+        });
       }
     } catch (error) {
       console.error(error);
@@ -164,6 +168,34 @@ const SOAP: FC = () => {
       if (response.data.data) {
         setListUsers(response.data.data);
       }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  type Kesadaran = {
+    id: number;
+    kesadaran: string;
+    kodeexternal: string;
+    is_active: boolean;
+    cdfix: number;
+    created_by: number;
+    updated_by: string | null;
+    deleted_by: string | null;
+    deleted_at: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+
+  const [kesadarans, setKesadarans] = useState<Kesadaran[]>([]);
+
+  const getKesadaran = async () => {
+    try {
+      const response = await api.get<ResponseT<Kesadaran[]>>(
+        "/layanan/get-kesadaran"
+      );
+
+      if (response.data.data) setKesadarans(response.data.data);
     } catch (error) {
       console.error(error);
     }
@@ -265,6 +297,7 @@ const SOAP: FC = () => {
   useEffect(() => {
     getListUsers();
     getPasienById();
+    getKesadaran();
   }, []);
 
   /**
@@ -371,7 +404,10 @@ const SOAP: FC = () => {
                     )}th`}
                     )
                   </span>
-                  <span>{pasien.no_bpjs}</span>
+                  <span>
+                    NIK: {pasien.nik_pasien} /{" "}
+                    {pasien.no_bpjs && <>BPJS: {pasien.no_bpjs}</>}
+                  </span>
                 </div>
                 <div className="flex gap-1">
                   <Link
@@ -532,17 +568,16 @@ const SOAP: FC = () => {
                   placeholder="Pilih..."
                   menuPlacement="bottom"
                   required={true}
-                  options={options}
-                  isDisabled={true}
+                  options={mapOptions(kesadarans, { l: "kesadaran", v: "id" })}
                   value={findValue(
-                    options,
+                    kesadarans,
                     {
-                      value: vitalSign.kesadaran ?? "",
+                      id: vitalSign.kesadaran ?? undefined,
                     },
-                    { label: "label", value: "value" }
+                    { label: "kesadaran", value: "id" }
                   )}
                   onChange={(e) =>
-                    cast<{ label: string; value: string }>(e, ({ value }) => {
+                    cast<{ label: string; value: number }>(e, ({ value }) => {
                       setVitalSign({ kesadaran: value });
                     })
                   }

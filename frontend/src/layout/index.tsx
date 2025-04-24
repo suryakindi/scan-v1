@@ -5,6 +5,7 @@ import {
   Outlet,
   useLoaderData,
   useLocation,
+  useNavigate,
   useNavigation,
 } from "react-router";
 import clsx from "clsx";
@@ -16,16 +17,19 @@ import { routes, WrapRoute } from "../routes";
 import LoadingOverlay from "./loading-ovarelay";
 import { LayoutContext } from "./types";
 import { LoaderT } from "../user";
+import { api } from "../utils/api";
 
 const Layout: FC = () => {
   const [show, setShow] = useState<boolean>(true);
   const [open, setOpen] = useState<string | undefined>(undefined);
   const [isProcess, setIsProcess] = useState<boolean>(false);
 
+  const navigate = useNavigate();
+
   const { state } = useNavigation();
   const { pathname } = useLocation();
 
-  const { client } = useLoaderData<LoaderT>();
+  const { client, user, role } = useLoaderData<LoaderT>();
 
   const navRoutes = routes
     .map((route) => {
@@ -50,8 +54,16 @@ const Layout: FC = () => {
           show ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="bg-white sticky top-0 z-10 h-16 text-2xl font-bold text-blue-700 flex items-center justify-center">
-          Logo
+        <div className="bg-white sticky top-0 z-10 h-[72px] flex items-center border-b border-b-slate-300 gap-6">
+          <img
+            src="/images/logo_bg_transparent.png"
+            alt="logo"
+            className="h-full px-3 py-4 border-r border-r-slate-300"
+          />
+
+          <span className="text-xl font-bold overflow-hidden">
+            {client?.nama_client ?? ""}
+          </span>
         </div>
         <ul className="before:h-4 before:flex">
           {navRoutes.map((parent, _parent) => (
@@ -127,7 +139,7 @@ const Layout: FC = () => {
               className="flex h-12 px-4 items-center justify-between w-full rounded-md hover:bg-slate-200"
             >
               <div className="flex items-center">
-                <HOutline.PuzzlePieceIcon className="size-6" />
+                <HOutline.QueueListIcon className="size-6" />
                 <span className="ml-2">Viewer</span>
               </div>
             </Link>
@@ -159,14 +171,10 @@ const Layout: FC = () => {
                 <HOutline.Bars3Icon className="size-6" />
               </button>
 
-              <span className="text-lg font-bold">
-                {client?.nama_client ?? ""}
-              </span>
-
               <div className="flex ml-4 items-center">
                 <div className="flex flex-col text-nowrap mr-2">
-                  <span className="font-medium">John Doe</span>
-                  <span className="text-xs">Super Admin</span>
+                  <span className="font-medium">{user?.name ?? ""}</span>
+                  <span className="text-xs">{role?.name ?? ""}</span>
                 </div>
                 <Menu>
                   <MenuButton
@@ -182,7 +190,7 @@ const Layout: FC = () => {
                   <MenuItems
                     transition
                     anchor="bottom end"
-                    className="transition duration-200 ease-in-out bg-white left-0 border border-slate-200 rounded-sm mt-1"
+                    className="transition duration-200 ease-in-out bg-white left-0 border border-slate-200 rounded-sm mt-4 z-50"
                   >
                     <MenuItem
                       as="button"
@@ -201,6 +209,15 @@ const Layout: FC = () => {
                     <MenuItem
                       as="button"
                       className="py-2 px-4 cursor-pointer hover:bg-slate-200 flex items-center w-full"
+                      onClick={async () => {
+                        try {
+                          await api.post("/logout-user");
+                          localStorage.removeItem("token");
+                          navigate("/login");
+                        } catch (error) {
+                          console.error(error);
+                        }
+                      }}
                     >
                       <HOutline.PowerIcon className="size-4 mr-2" />
                       <span>Logout</span>

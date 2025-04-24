@@ -31,14 +31,20 @@
 }
 
 :root {
-  font-family: Roboto, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Public Sans", sans-serif, -apple-system, "system-ui", "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.me-table {
+/* .me-table {
   @apply w-full mb-4 align-text-top text-center;
 }
 .me-table > thead,
@@ -59,4 +65,52 @@
 }
 .me-table > tbody > tr:hover > * {
   @apply bg-slate-100;
+} */
+
+/* .me-table {
+  * {
+  }
+
+  thead {
+    color: #e5e7eb;
+    background-color: #155dfc;
+
+    * {
+    }
+
+    th {
+      padding: 0.5rem;
+    }
+  }
+
+  tbody {
+    * {
+    }
+
+    td {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+
+  border: 1px solid #777;
+} */
+
+.me-table {
+  @apply w-full mb-4 align-text-top text-center;
+}
+.me-table > thead,
+.me-table > tbody {
+  @apply align-middle;
+}
+.me-table > thead > * {
+  @apply bg-blue-600 text-white;
+}
+.me-table > :not(caption) > * {
+  @apply border-y border-blue-300;
+}
+.me-table > :not(caption) > * > * {
+  @apply px-1 py-1 border-x border-blue-300;
+}
+.me-table > tbody > tr:hover > * {
+  @apply bg-blue-200;
 }

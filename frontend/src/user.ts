@@ -63,6 +63,7 @@ interface LoaderT {
   client: ClientT;
   user: UserT;
   token: string;
+  role: UserRoleT;
 }
 
 export const userLoader = async (_: LoaderFunctionArgs, module?: ModuleT) => {
@@ -74,10 +75,12 @@ export const userLoader = async (_: LoaderFunctionArgs, module?: ModuleT) => {
         role_permissions: PermissionT;
         user_permissions: PermissionT;
         client: ClientT;
+        role: UserRoleT;
       }>
     >("/check-token", {
       headers: { Authorization: `Bearer ${token}` },
     });
+    console.log(user);
 
     const permission = [
       user.data.data.role_permissions,
@@ -111,6 +114,7 @@ export const userLoader = async (_: LoaderFunctionArgs, module?: ModuleT) => {
       token,
       user: user.data.data.user,
       client: user.data.data.client,
+      role: user.data.data.role,
     } as LoaderT;
   } catch (error) {
     console.error(error);

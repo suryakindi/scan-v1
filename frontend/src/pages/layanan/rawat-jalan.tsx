@@ -67,11 +67,13 @@ const RawatJalan: FC = () => {
     tglAkhir: string;
     ruangan: string;
     search: string;
+    is_dokter: boolean;
   }>({
     ruangan: "",
     search: "",
     tglAkhir: moment().format("YYYY-MM-DD"),
     tglAwal: moment().format("YYYY-MM-DD"),
+    is_dokter: false,
   });
 
   const getData = async (
@@ -135,30 +137,46 @@ const RawatJalan: FC = () => {
           <span className="font-medium">Rawat Jalan</span>
         </div>
 
-        <div className="flex items-center gap-1">
-          <input
-            type="date"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
-            value={filters.tglAwal}
-            onChange={({ currentTarget: { value } }) =>
-              setFilters((prev) => ({
-                ...prev,
-                tglAwal: value,
-              }))
-            }
-          />
-          <span>s/d</span>
-          <input
-            type="date"
-            className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
-            value={filters.tglAkhir}
-            onChange={({ currentTarget: { value } }) =>
-              setFilters((prev) => ({
-                ...prev,
-                tglAkhir: value,
-              }))
-            }
-          />
+        <div className="flex items-center gap-3">
+          <div className="flex">
+            <input
+              type="checkbox"
+              className="border size-6"
+              checked={filters.is_dokter}
+              onChange={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  is_dokter: !prev.is_dokter,
+                }))
+              }
+            />
+          </div>
+
+          <div className="flex items-center gap-1 flex-1">
+            <input
+              type="date"
+              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+              value={filters.tglAwal}
+              onChange={({ currentTarget: { value } }) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  tglAwal: value,
+                }))
+              }
+            />
+            <span>s/d</span>
+            <input
+              type="date"
+              className="border border-gray-300 py-1.5 px-2 rounded-sm outline-none active:border-blue-300 focus:border-blue-300 w-full"
+              value={filters.tglAkhir}
+              onChange={({ currentTarget: { value } }) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  tglAkhir: value,
+                }))
+              }
+            />
+          </div>
         </div>
 
         <Select
@@ -269,10 +287,12 @@ const RawatJalan: FC = () => {
               <td>
                 <div
                   className={`size-8 flex items-center justify-center rounded-full m-auto ${
-                    item.noantrianbpjs ? 'bg-green-200 text-green-600' : 'bg-red-200 text-red-600'
+                    item.noantrianbpjs
+                      ? "bg-green-200 text-green-600"
+                      : "bg-red-200 text-red-600"
                   }`}
                 >
-                  {item.noantrianbpjs ?? '-'}
+                  {item.noantrianbpjs ?? "-"}
                 </div>
               </td>
               <td>
