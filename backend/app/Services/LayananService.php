@@ -57,9 +57,9 @@ class LayananService
             if ($ruangan) {
                 $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%' . $ruangan . '%');
             }
-            // if(isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] == true){
-            //     $registrasi->where('registrasi_detail_layanan_pasiens.id_dokter', $user->id);
-            // }
+            if(isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] === true || isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] === 'true'){
+                $registrasi->where('registrasi_detail_layanan_pasiens.id_dokter', $user->id);
+            }
             $registrasi = $registrasi->select(
                 'registrasi_pasiens.id as id_registrasi',
                 'pasiens.nama',
@@ -236,6 +236,9 @@ class LayananService
 
         if ($detail) {
             $registrasi = RegistrasiPasien::find($detail->id_registrasi_pasien);
+            $registrasi->waktu_pemanggilan = Carbon::now();
+            $registrasi->updated_at = Carbon::now();
+            $registrasi->updated_by = auth()->user()->id;
             $statusPasien = StatusPasien::where('status', 'Dilayani')->first();
 
             if ($statusPasien) {

@@ -46,7 +46,7 @@ Route::prefix('auth')->group(function () {
 });
 
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:1000,1'])->group(function () {
     Route::post('logout-user', [AuthController::class, 'logoutUser']);
     Route::get('check-token', [AuthController::class, 'CheckToken']);
 
@@ -89,9 +89,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('daftar-pasien/teregistrasi', [LayananController::class, 'daftarTeregistrasi'])->middleware('permission:Layanan,view');
         Route::get('daftar-pasien/teregistrasi/id/{id_registrasi}', [LayananController::class, 'daftarTeregistrasiById'])->middleware('permission:Layanan,view');
         Route::get('get-user/{cdfix}', [LayananController::class, 'getUser'])->middleware('permission:Layanan,view');
-        Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Registrasi,edit');
-        Route::post('save-vital-sign', [LayananController::class, 'saveVitalSign'])->middleware('permission:Registrasi,create');
-        Route::get('get-vital-sign-by-id/{id_vital_sign}', [LayananController::class, 'getVitalSignById'])->middleware('permission:Registrasi,view');
+        Route::put('update-waktu-pemanggilan/{id_registrasi}', [LayananController::class, 'updateWaktuPemanggilan'])->middleware('permission:Layanan,edit');
+        Route::post('save-vital-sign', [LayananController::class, 'saveVitalSign'])->middleware('permission:Layanan,create');
+        Route::get('get-vital-sign-by-id/{id_vital_sign}', [LayananController::class, 'getVitalSignById'])->middleware('permission:Layanan,view');
         Route::post('save-soap', [LayananController::class, 'saveSOAP'])->middleware('permission:Layanan,create');
         Route::get('get-soap-by-id-registrasi/{registrasiId}', [LayananController::class, 'getSoapByIdRegistrasi'])->middleware('permission:Layanan,view');
         Route::get('get-kesadaran', [LayananController::class, 'getKesadaran'])->middleware('permission:Layanan,view');
