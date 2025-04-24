@@ -14,7 +14,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import clsx from "clsx";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { api, ResponseT, useXState } from "../../../utils/api";
-import { data, Link, useLoaderData, useParams } from "react-router";
+import { Link, useLoaderData, useParams } from "react-router";
 import { LoaderT, UserT } from "../../../user";
 import moment from "moment";
 
