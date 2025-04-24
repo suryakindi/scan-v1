@@ -94,7 +94,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('get-vital-sign-by-id/{id_vital_sign}', [LayananController::class, 'getVitalSignById'])->middleware('permission:Registrasi,view');
         Route::post('save-soap', [LayananController::class, 'saveSOAP'])->middleware('permission:Layanan,create');
         Route::get('get-soap-by-id-registrasi/{registrasiId}', [LayananController::class, 'getSoapByIdRegistrasi'])->middleware('permission:Layanan,view');
-
+        Route::get('get-kesadaran', [LayananController::class, 'getKesadaran'])->middleware('permission:Layanan,view');
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {

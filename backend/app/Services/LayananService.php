@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Services;
+
+use App\Models\MasterKesadaran;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
 use App\Models\Role;
@@ -11,14 +13,17 @@ use App\Models\VitalSign;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class LayananService
 {
-    public function daftarTeregistrasi($tglAwal = null, $tglAkhir = null, $search = null, $ruangan = null)
+    public function daftarTeregistrasi($tglAwal = null, $tglAkhir = null, $search = null, $ruangan = null, array $dataRequest)
     {
+       
         try {
             $cdFix = Auth()->user()->cdfix;
+            $user = Auth()->user();
 
             $registrasi = RegistrasiDetailLayananPasien::join('registrasi_pasiens', 'registrasi_detail_layanan_pasiens.id_registrasi_pasien', '=', 'registrasi_pasiens.id')
                 ->join('pasiens', 'registrasi_pasiens.id_pasien', '=', 'pasiens.id')
@@ -51,6 +56,9 @@ class LayananService
             }
             if ($ruangan) {
                 $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%' . $ruangan . '%');
+            }
+            if(isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] == true){
+                $registrasi->where('registrasi_detail_layanan_pasiens.id_dokter', $user->id);
             }
             $registrasi = $registrasi->select(
                 'registrasi_pasiens.id as id_registrasi',
@@ -278,6 +286,14 @@ class LayananService
             throw new \Exception($e->getMessage());
         }
     }
-
+    public function getKesadaran()
+    {
+        try {
+            $kesadaran = MasterKesadaran::where('is_active', TRUE)->get();
+            return $kesadaran;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
 
 }

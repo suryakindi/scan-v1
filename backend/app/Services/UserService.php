@@ -56,6 +56,9 @@ class UserService
                 ->select('modules.name as module', 'permissions.can_view', 'permissions.can_edit', 'permissions.can_create', 'permissions.can_delete')
                 ->get();
 
+            $roleUser = DB::table('roles')
+                ->where('id', $user->role_id)
+                ->first();
             // Ambil user override permissions
             $userPermissions = DB::table('user_permissions')
                 ->join('modules', 'user_permissions.module_id', '=', 'modules.id')
@@ -73,7 +76,8 @@ class UserService
                     'user' => $user,
                     'client' => $client,
                     'role_permissions' => $rolePermissions,
-                    'user_permissions' => $userPermissions
+                    'user_permissions' => $userPermissions,
+                    'role'=>$roleUser
                 ],
                 'code' => 200
             ];
