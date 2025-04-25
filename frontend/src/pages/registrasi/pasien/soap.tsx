@@ -8,7 +8,7 @@ import {
   styles,
 } from "../../../utils/react-select";
 import { options } from "../../../mock/react-select";
-import { Toast } from "../../../utils/alert";
+import { Alert, Toast } from "../../../utils/alert";
 import { Stage, Layer, Line, Image } from "react-konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import clsx from "clsx";
@@ -142,6 +142,10 @@ const SOAP: FC = () => {
         await getSoapByIdRegistrasi(
           response.data.data.id_registrasi_detail_layanan_pasiens
         );
+
+        await getGambarMRecordByIdRegistrasi(
+          response.data.data.id_registrasi_detail_layanan_pasiens
+        );
       }
     } catch (error) {
       console.error(error);
@@ -244,15 +248,25 @@ const SOAP: FC = () => {
           icon: "error",
         });
 
-      await api.post("/layanan/save-soap", {
-        id_registrasi_detail_layanan_pasiens:
-          pasien?.id_registrasi_detail_layanan_pasiens,
-        soap_details: soapDetails,
-      });
+      try {
+        await api.post("/layanan/save-soap", {
+          id_registrasi_detail_layanan_pasiens:
+            pasien?.id_registrasi_detail_layanan_pasiens,
+          soap_details: soapDetails,
+        });
+      } catch {}
 
-      await getSoapByIdRegistrasi(
-        pasien?.id_registrasi_detail_layanan_pasiens ?? 0
-      );
+      try {
+        await getSoapByIdRegistrasi(
+          pasien?.id_registrasi_detail_layanan_pasiens ?? 0
+        );
+      } catch {}
+
+      try {
+        await getGambarMRecordByIdRegistrasi(
+          pasien?.id_registrasi_detail_layanan_pasiens ?? 0
+        );
+      } catch {}
 
       Toast.fire({
         title: "Berhasil",
@@ -290,6 +304,59 @@ const SOAP: FC = () => {
       if (response.data.data.soap_details)
         setSoapDetails(response.data.data.soap_details);
     } catch (error) {
+      console.error(error);
+    }
+  };
+
+  type GambarMRecordResponse = {
+    id: number;
+    id_registrasi_detail_layanan_pasien: number;
+    gambar: string;
+    cdfix: number;
+    is_active: boolean;
+    created_by: number | null;
+    updated_by: number | null;
+    deleted_by: number | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+
+  const getGambarMRecordByIdRegistrasi = async (
+    registrasiId: number | string
+  ) => {
+    try {
+      const response = await api.get<ResponseT<GambarMRecordResponse>>(
+        `/layanan/get-gambar-m-record/${registrasiId}`
+      );
+
+      if (response.data.data.gambar)
+        setDrawLines(JSON.parse(response.data.data.gambar));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const saveGambarMRecordByIdRegistrasi = async () => {
+    try {
+      await api.post<ResponseT<GambarMRecordResponse>>(
+        "/layanan/save-gambar-m-record/",
+        {
+          id_registrasi_detail_layanan_pasien: param.id_registrasi,
+          gambar: JSON.stringify(drawLines),
+        }
+      );
+
+      Alert.fire({
+        title: "Berhasil",
+        text: "Berhasil menyimpan gambar",
+        icon: "success",
+      });
+    } catch (error) {
+      Alert.fire({
+        title: "Error",
+        text: "Gagal menyimpan gambar",
+        icon: "error",
+      });
       console.error(error);
     }
   };
@@ -499,13 +566,22 @@ const SOAP: FC = () => {
                     ))}
                   </Layer>
                 </Stage>
-                <button
-                  type="button"
-                  className="px-4 py-2 border border-blue-600 hover:bg-slate-200 text-blue-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
-                  onClick={handleResetDrawing}
-                >
-                  Undo
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="px-4 py-2 border border-blue-600 hover:bg-slate-200 text-blue-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                    onClick={handleResetDrawing}
+                  >
+                    Undo
+                  </button>
+                  <button
+                    type="button"
+                    className="px-4 py-2 border border-blue-600 hover:bg-blue-500 text-white bg-blue-600 cursor-pointer rounded-sm flex items-center justify-between outline-0"
+                    onClick={saveGambarMRecordByIdRegistrasi}
+                  >
+                    Simpan
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex justify-center border-b border-b-slate-300 p-6">

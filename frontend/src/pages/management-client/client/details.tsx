@@ -4,7 +4,7 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import * as HeroSolid from "@heroicons/react/24/solid";
 import * as HeroOutline from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { LoaderT } from "../../../user";
+import { LoaderT, RolesT, UserT } from "../../../user";
 import { useLokasi } from "../../../utils/lokasi";
 import { api, ResponseT, useXState } from "../../../utils/api";
 import Select from "react-select";
@@ -290,6 +290,22 @@ const Details: FC = () => {
     {}
   );
 
+  const [userClients, setUserClients] = useState<(UserT & { role: RolesT })[]>(
+    []
+  );
+
+  const getUserClient = async () => {
+    try {
+      const response = await api.get<ResponseT<(UserT & { role: RolesT })[]>>(
+        "/management/get-user-client"
+      );
+
+      if (response.data.data) setUserClients(response.data.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       setIsProcess(true);
@@ -298,6 +314,7 @@ const Details: FC = () => {
       await getDataUrls();
       await ConnectionBPJSGetDokter();
       await connectionSatuSehat();
+      await getUserClient();
       setIsProcess(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -674,12 +691,14 @@ const Details: FC = () => {
                           <th>NO</th>
                           <th>NAMA</th>
                           <th>LEVEL</th>
-                          <th>SATUSEHAT</th>
+                          <th>STATUS USER</th>
+                          <th>SATU SEHAT</th>
+                          <th>KODE BPJS</th>
                           <th>ACTIONS</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.from({ length: 20 }, (_, k) => (
+                        {userClients.map((userClient, k) => (
                           <tr key={k}>
                             <td>{k + 1}</td>
                             <td>
@@ -687,15 +706,24 @@ const Details: FC = () => {
                                 <div className="flex w-10 h-10 bg-blue-400 text-white rounded-full items-center justify-center mr-2">
                                   <HeroSolid.UserIcon className="size-6" />
                                 </div>
-                                <span>{`nama ${k}`}</span>
+                                <span>{userClient.name}</span>
                               </div>
                             </td>
                             <td>{`level ${k}`}</td>
                             <td>
-                              <span className="text-sm bg-green-500 text-white px-4 py-1 rounded-sm">
-                                Aktif
+                              <span
+                                className={clsx(
+                                  "text-sm text-white px-4 py-1 rounded-sm",
+                                  userClient.is_active
+                                    ? "bg-green-500"
+                                    : "bg-red-500"
+                                )}
+                              >
+                                {userClient.is_active ? "Aktif" : "Tidak Aktif"}
                               </span>
                             </td>
+                            <td>{userClient.ihs_id ?? "-"}</td>
+                            <td>{userClient.kode_bpjs ?? "-"}</td>
                             <td>
                               <Link
                                 to="#"
