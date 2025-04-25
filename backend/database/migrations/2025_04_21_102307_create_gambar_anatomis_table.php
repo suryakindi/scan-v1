@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('gambar_anatomis', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_registrasi_detail_layanan_pasien');
+            $table->unsignedBigInteger('id_registrasi_detail_layanan_pasien')->unique();
             $table->text('gambar')->nullable();
             $table->unsignedBigInteger('cdfix');
             $table->boolean('is_active')->default(1);

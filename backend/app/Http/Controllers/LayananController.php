@@ -19,7 +19,7 @@ class LayananController extends Controller
 
     public function daftarTeregistrasi(Request $request)
     {
-        
+
         try {
             $daftarTeregistrasi = $this->LayananService->daftarTeregistrasi($request->tglAwal, $request->tglAkhir, $request->search, $request->ruangan, $request->all());
             return $this->baseResponse('Daftar Layanan Pasien Teregistrasi berhasil didapatkan', null, $daftarTeregistrasi, 200);
@@ -106,6 +106,28 @@ class LayananController extends Controller
             return $this->baseResponse('Kesadaran berhasil didapatkan', null, $kesadaran, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat mendapatkan Kesadaran', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function saveGambarMRecord(Request $request)
+    {
+        try {
+            $gambar = $this->LayananService->saveGambarMRecord($request->all());
+
+            return $this->baseResponse('Gambar berhasil disimpan', null, $gambar, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi error saat menyimpan gambar', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getGambarMRecord($registrasiId)
+    {
+        try {
+            $gambar = $this->LayananService->getGambarMRecord($registrasiId);
+
+            return $this->baseResponse('Gambar berhasil didapatkan', null, $gambar, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi error saat mendapatkan gambar', $e->getMessage(), null, 500);
         }
     }
 }

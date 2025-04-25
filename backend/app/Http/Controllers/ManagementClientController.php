@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\{ClientRequest,ClientUpdateRequest };
+use App\Http\Requests\{ClientRequest, ClientUpdateRequest};
 
 use App\Models\ManagementClient;
 use App\Services\ManagementClientService;
@@ -22,7 +22,8 @@ class ManagementClientController extends Controller
      * Store a newly created client.
      */
 
-    public function getAll(){
+    public function getAll()
+    {
         try {
             $getClient = $this->managementClientService->getAll();
             return $this->baseResponse('Client berhasil Didapatkan', null, $getClient, 200);
@@ -30,9 +31,10 @@ class ManagementClientController extends Controller
             return $this->baseResponse('Terjadi kesalahan', $e->getMessage(), null, 500);
         }
     }
-    
-    public function GetById(ManagementClient $client){
-        
+
+    public function GetById(ManagementClient $client)
+    {
+
         try {
             $getClient = $this->managementClientService->getById($client);
             return $this->baseResponse('Client berhasil Didapatkan', null, $getClient, 200);
@@ -68,12 +70,23 @@ class ManagementClientController extends Controller
      */
     public function delete(ManagementClient $client): JsonResponse
     {
-        
+
         try {
             $updatedClient = $this->managementClientService->deleteClient($client);
             return $this->baseResponse('Client berhasil dinonaktifkan', null, $updatedClient, 200);
         } catch (Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat menghapus client', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getUserClient()
+    {
+        try {
+            $userClient = $this->managementClientService->getUserClient();
+
+            return $this->baseResponse('user client berhasil didapatkan', null, $userClient, 200);
+        } catch (Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat mendapatkan data client', $e->getMessage(), null, 500);
         }
     }
 }

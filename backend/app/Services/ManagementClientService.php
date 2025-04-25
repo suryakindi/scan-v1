@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ManagementClient;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -16,7 +17,8 @@ class ManagementClientService
      * @throws Exception
      */
 
-    public function getAll(){
+    public function getAll()
+    {
         try {
             $client = ManagementClient::where('is_active', TRUE)->paginate(100);
             return $client;
@@ -24,7 +26,8 @@ class ManagementClientService
             throw new Exception("Gagal Mendapatkan Client: " . $e->getMessage());
         }
     }
-    public function getById(ManagementClient $client){
+    public function getById(ManagementClient $client)
+    {
         try {
             return $client;
         } catch (\Exception $e) {
@@ -83,6 +86,25 @@ class ManagementClientService
         } catch (Exception $e) {
             DB::rollBack();
             throw new Exception("Gagal menghapus client: " . $e->getMessage());
+        }
+    }
+
+    public function getUserClient()
+    {
+        try {
+            $user = auth()->user();
+
+            $userClient = User::where('cdfix', $user->cdfix)
+                ->leftJoin('roles', 'users.role_id', 'roles.id')
+                ->select(
+                    'users.*',
+                    'roles.name as role',
+                )
+                ->get();
+
+            return $userClient;
+        } catch (\Throwable $th) {
+            throw new Exception("Gagal mendapatkan user client: " . $th->getMessage());
         }
     }
 }

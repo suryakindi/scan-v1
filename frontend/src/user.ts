@@ -80,7 +80,6 @@ export const userLoader = async (_: LoaderFunctionArgs, module?: ModuleT) => {
     >("/check-token", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log(user);
 
     const permission = [
       user.data.data.role_permissions,

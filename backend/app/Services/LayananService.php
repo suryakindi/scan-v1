@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\GambarAnatomi;
 use App\Models\MasterKesadaran;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
@@ -20,7 +21,7 @@ class LayananService
 {
     public function daftarTeregistrasi($tglAwal = null, $tglAkhir = null, $search = null, $ruangan = null, array $dataRequest)
     {
-       
+
         try {
             $cdFix = Auth()->user()->cdfix;
             $user = Auth()->user();
@@ -57,7 +58,7 @@ class LayananService
             if ($ruangan) {
                 $registrasi->where('master_ruangans.nama_ruangan', 'ilike', '%' . $ruangan . '%');
             }
-            if(isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] === true || isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] === 'true'){
+            if (isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] === true || isset($dataRequest['is_dokter']) && $dataRequest['is_dokter'] === 'true') {
                 $registrasi->where('registrasi_detail_layanan_pasiens.id_dokter', $user->id);
             }
             $registrasi = $registrasi->select(
@@ -300,4 +301,38 @@ class LayananService
         }
     }
 
+    public function saveGambarMRecord(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $user = Auth()->user();
+            $dataToSave = [
+                'id_registrasi_detail_layanan_pasien' => $data['id_registrasi_detail_layanan_pasien'],
+                'gambar' => $data['gambar'],
+                'cdfix' => $user->cdfix,
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+            ];
+
+            GambarAnatomi::upsert($dataToSave, ['id_registrasi_detail_layanan_pasien'], ['gambar', 'updated_by']);
+            DB::commit();
+
+            $gambar = GambarAnatomi::where('id_registrasi_detail_layanan_pasien', $data['id_registrasi_detail_layanan_pasien'])->first();
+
+            return $gambar;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function getGambarMRecord(int $id_registrasi_detail_layanan_pasien)
+    {
+        try {
+            $gambar = GambarAnatomi::where('id_registrasi_detail_layanan_pasien', $id_registrasi_detail_layanan_pasien)->first();
+            return $gambar;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
 }

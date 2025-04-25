@@ -250,7 +250,7 @@ const ListPasien: FC = () => {
             <tr key={key}>
               <td>{key + 1}</td>
               <td>{item.noantrian}</td>
-              <td>{item.noantrianbpjs ?? '-'}</td>
+              <td>{item.noantrianbpjs ?? "-"}</td>
               <td>{item.nama}</td>
               <td>{item.no_registrasi}</td>
               <td>{item.penjamin}</td>
@@ -290,7 +290,7 @@ const ListPasien: FC = () => {
                     </MenuItem>
                     <MenuItem>
                       <Link
-                        to={`/registrasi/form/${item.id_registrasi_detail_layanan}/edit`}
+                        to={`/registrasi/form/${item.id_registrasi}/edit`}
                         className="py-2 px-3 flex items-center hover:bg-blue-600 hover:text-white gap-2"
                       >
                         <HOutline.PencilIcon className="size-4" />

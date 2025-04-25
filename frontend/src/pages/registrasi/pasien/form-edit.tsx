@@ -183,7 +183,7 @@ const FormPasien: FC = () => {
           if (_jaminans) {
             const finded = findValue(
               _jaminans.data,
-              { penjamin: "JKN" },
+              { id: _pasien.id_jaminan },
               { id_jaminan: "id" }
             );
 

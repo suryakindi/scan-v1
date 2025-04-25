@@ -95,6 +95,8 @@ Route::middleware(['auth:sanctum', 'throttle:1000,1'])->group(function () {
         Route::post('save-soap', [LayananController::class, 'saveSOAP'])->middleware('permission:Layanan,create');
         Route::get('get-soap-by-id-registrasi/{registrasiId}', [LayananController::class, 'getSoapByIdRegistrasi'])->middleware('permission:Layanan,view');
         Route::get('get-kesadaran', [LayananController::class, 'getKesadaran'])->middleware('permission:Layanan,view');
+        Route::get('get-gambar-m-record/{registrasiId}', [LayananController::class, 'getGambarMRecord'])->middleware('permission:Layanan,view');
+        Route::post('save-gambar-m-record', [LayananController::class, 'saveGambarMRecord'])->middleware('permission:Layanan,create');
     });
 
     Route::prefix('management')->middleware('permission:Management-Client,view')->group(function () {
@@ -104,6 +106,7 @@ Route::middleware(['auth:sanctum', 'throttle:1000,1'])->group(function () {
         Route::get('get-clients', [ManagementClientController::class, 'getAll'])->middleware('permission:Management-Client,view');
         Route::get('get-client/id/{client}', [ManagementClientController::class, 'GetById'])->middleware('permission:Management-Client,view');
         Route::put('edit-master-alergi/{id_alergi}', [MasterDataController::class, 'editMasterAlergi'])->middleware('permission:Master-Data,edit');
+        Route::get('get-user-client', [ManagementClientController::class, 'getUserClient'])->middleware('permission:Management-Client,view');
     });
 
     Route::prefix('master-data')->middleware('permission:Master-Data,view')->group(function () {
