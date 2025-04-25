@@ -10,6 +10,7 @@ use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\RegistrasiPasien;
 use App\Models\Role;
 use App\Models\Soap;
+use App\Models\StatusPasien;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -261,9 +262,13 @@ class RegistrasiServices
         DB::beginTransaction();
         try {
             $layananRegistrasi = RegistrasiPasien::find($id_registrasi);
-            if ($layananRegistrasi->status_pasien != 3) {
-                throw new Exception("Pasien Sudah Di Layani");
+            $statusPasien = StatusPasien::where('status', 'Dilayani')->first();
+            if($statusPasien){
+                if ($layananRegistrasi->status_pasien === $statusPasien->id) {
+                    throw new Exception("Pasien Sudah Di Layani");
+                }
             }
+            
             $layananRegistrasi->id_ruangan_asal = $data['id_ruangan_asal'];
             $layananRegistrasi->id_ruangan_terakhir = $data['id_ruangan_asal'];
             $layananRegistrasi->id_jenis_kunjungan = $data['id_jenis_kunjungan'];
