@@ -10,6 +10,8 @@ import {
   IconChartArcs,
   IconChartInfographic,
   IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
   IconCircle,
   IconClipboardList,
   IconDashboard,
@@ -28,6 +30,130 @@ import {
 import logo from "./assets/berry.svg";
 import userIcon from "./assets/user-round-QwaXuEgi.svg";
 import clsx from "clsx";
+import Select, { components, StylesConfig } from "react-select";
+
+const m = [
+  { p: "Registrasi", c: [{ p: "List Pasien" }, { p: "Kunjungan" }] },
+  { p: "Layanan", c: [{ p: "Rawat Jalan" }, { p: "Rawat Inap" }] },
+  { p: "Management Client", c: [{ p: "CLient" }, { p: "Base URL" }] },
+  { p: "Viewer" },
+];
+console.log(m);
+
+const options: { label: string; value: string }[] = [
+  { label: "Chocolate Cake", value: "chocolate_cake" },
+  { label: "Vanilla Ice Cream", value: "vanilla_ice_cream" },
+  { label: "Strawberry Cheesecake", value: "strawberry_cheesecake" },
+  { label: "Apple Pie", value: "apple_pie" },
+  { label: "Tiramisu", value: "tiramisu" },
+  { label: "Panna Cotta", value: "panna_cotta" },
+  { label: "Crème Brûlée", value: "creme_brulee" },
+  { label: "Brownies", value: "brownies" },
+  { label: "Macarons", value: "macarons" },
+  { label: "Lemon Tart", value: "lemon_tart" },
+  { label: "Banana Split", value: "banana_split" },
+  { label: "Chocolate Mousse", value: "chocolate_mousse" },
+  { label: "Churros", value: "churros" },
+  { label: "Pavlova", value: "pavlova" },
+  { label: "Baklava", value: "baklava" },
+  { label: "Donuts", value: "donuts" },
+  { label: "Cupcakes", value: "cupcakes" },
+  { label: "Eclairs", value: "eclairs" },
+  { label: "Fruit Parfait", value: "fruit_parfait" },
+  { label: "Mango Sticky Rice", value: "mango_sticky_rice" },
+];
+
+const styles: StylesConfig = {
+  // input: (base) => ({ ...base, margin: 0 }),
+  // singleValue: (base) => ({
+  //   ...base,
+  //   color: "#000000",
+  // }),
+  // multiValue: (base) => ({
+  //   ...base,
+  //   color: "#ffffff",
+  //   backgroundColor: "#432dd7",
+  // }),
+  // multiValueRemove: (base) => ({
+  //   ...base,
+  //   borderRadius: 0,
+  //   ":hover": { backgroundColor: "#4f39f6" },
+  // }),
+  // multiValueLabel: (base) => ({
+  //   ...base,
+  //   color: "#ffffff",
+  //   display: "flex",
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   paddingBlock: 2,
+  // }),
+  // valueContainer: (base) => ({
+  //   ...base,
+  //   margin: 0,
+  //   paddingInline: 10,
+  //   paddingBottom: 10,
+  //   paddingTop: 11,
+  // }),
+  // control: (base, { menuIsOpen, isFocused }) => {
+  //   return {
+  //     ...base,
+  //     boxShadow: isFocused ? "inset 0 0 0 1px #432dd7" : "none",
+  //     minHeight: 0,
+  //     borderColor: menuIsOpen ? "#432dd7" : "#99a1af",
+  //     borderRadius: 8,
+  //     ":hover": {
+  //       borderColor: menuIsOpen ? "#432dd7" : "#000",
+  //     },
+  //   };
+  // },
+  // dropdownIndicator: (base) => ({
+  //   ...base,
+  //   padding: 0,
+  //   color: "#d1d5dc",
+  //   ":hover": { color: "#d1d5dc" },
+  // }),
+  // clearIndicator: (base) => ({
+  //   ...base,
+  //   padding: 0,
+  //   color: "#d1d5dc",
+  //   ":hover": { color: "#d1d5dc" },
+  // }),
+  // loadingIndicator: (base) => ({
+  //   ...base,
+  //   padding: 0,
+  //   color: "#d1d5dc",
+  //   ":hover": { color: "#d1d5dc" },
+  // }),
+  // indicatorSeparator: (base) => ({
+  //   ...base,
+  //   backgroundColor: "#d1d5dc",
+  //   ":hover": { color: "#d1d5dc" },
+  // }),
+  // menu: (base, { placement }) => {
+  //   return {
+  //     ...base,
+  //     boxShadow: "none",
+  //     borderColor: "#d1d5dc",
+  //     borderWidth: 1,
+  //     overflow: "hidden",
+  //     margin: 0,
+  //     top: placement === "top" ? "auto" : "100%",
+  //     bottom: placement === "top" ? "100%" : "auto",
+  //   };
+  // },
+  // menuList: (base) => ({
+  //   ...base,
+  //   padding: 0,
+  // }),
+  // option: (base) => ({
+  //   ...base,
+  //   paddingBlock: 4,
+  // }),
+  placeholder: (base) => ({
+    ...base,
+    display: "none",
+  }),
+};
 
 const Layout: FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -149,7 +275,7 @@ const Layout: FC = () => {
       <nav
         className={clsx(
           expand ? "w-64" : "w-20",
-          "fixed inset-0 left-0 p-2 overflow-y-scroll before:flex before:flex-col before:h-[84px] z-40 bg-white transition-all duration-300"
+          "fixed bottom-0 left-0 top-[84px] p-2 overflow-y-scroll z-40 bg-white transition-all duration-300"
         )}
       >
         <ul
@@ -301,10 +427,79 @@ const Layout: FC = () => {
                     </table>
                   </div>
                   <div className="p-5 flex items-center justify-end">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-5">
                       <span>Rows per page</span>
+                      <select>
+                        {[10, 25, 100].map((i) => (
+                          <option value={i} key={i}>
+                            {i}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="cursor-pointer hover:bg-slate-200 p-2 flex items-center justify-center rounded-full"
+                        >
+                          <IconChevronLeft className="size-5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="cursor-pointer hover:bg-slate-200 p-2 flex items-center justify-center rounded-full"
+                        >
+                          <IconChevronRight className="size-5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="bg-white rounded-md grid grid-cols-4 p-5 auto-rows-min gap-5">
+                  <div className="relative h-fit">
+                    <input
+                      type="text"
+                      id="floating_outlined"
+                      className="block px-2.5 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-lg border-1 placeholder-shown:border-gray-400 appearance-none focus:outline-none peer hover:border-black focus:hover:border-indigo-700 focus:border-indigo-700 focus:ring focus:ring-inset focus:ring-indigo-700"
+                      placeholder=""
+                    />
+                    <label
+                      htmlFor="floating_outlined"
+                      className="absolute text-sm peer-placeholder-shown:text-gray-400 duration-100 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-hover:text-black peer-focus:text-indigo-700 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1"
+                    >
+                      Floating outlined
+                    </label>
+                  </div>
+
+                  <Select
+                    className="w-full"
+                    options={options}
+                    isClearable
+                    components={{
+                      Input: ({ ...props }) => {
+                        return <components.Input {...props} className="peer" />;
+                      },
+                      ValueContainer: ({ children, ...props }) => {
+                        return (
+                          <components.ValueContainer {...props}>
+                            <label
+                              className={clsx(
+                                props.hasValue
+                                  ? "scale-75 -translate-y-4 top-2 bg-white"
+                                  : "text-gray-400 scale-100 -translate-y-1/2 top-1/2",
+                                "absolute text-sm duration-100 transform z-10 origin-[0] px-2 peer-focus:px-2 peer-hover:text-black peer-focus:text-indigo-700 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1"
+                              )}
+                            >
+                              {props.selectProps.placeholder}
+                            </label>
+                            {children}
+                          </components.ValueContainer>
+                        );
+                      },
+                    }}
+                    placeholder="My Cool Label"
+                    styles={styles}
+                    menuPlacement="top"
+                  />
                 </div>
               </div>
 
