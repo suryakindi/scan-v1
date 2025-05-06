@@ -25,7 +25,64 @@ createRoot(document.getElementById("root")!).render(
               {
                 path: "/",
                 Component: Layout,
-                children: [],
+                children: [
+                  {
+                    path: "/list-pasien",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>list-pasien</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    path: "/kunjungan",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>kunjungan</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    path: "/rawat-jalan",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>rawat-jalan</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    path: "/rawat-inap",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>rawat-inap</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    path: "/client",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>client</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    path: "/base-url",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>base-url</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    path: "/viewer",
+                    element: (
+                      <div className="flex flex-1 flex-col">
+                        <p>viewer</p>
+                      </div>
+                    ),
+                  },
+                ],
                 async loader() {
                   try {
                     console.log("ok");
