@@ -1,7 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./main.css";
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router";
+import {
+  createBrowserRouter,
+  Outlet,
+  redirect,
+  RouterProvider,
+} from "react-router";
 import login from "./pages/auth/login/route";
 import Fallback from "./pages/base/fallback";
 import E500 from "./pages/base/500";
@@ -9,6 +14,8 @@ import E404 from "./pages/base/404";
 import { Provider } from "react-redux";
 import { store } from "./utils/state";
 import Layout from "./layout";
+import { api, ResponseT } from "./utils/api";
+import { AuthObject } from "./utils/global-types";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -85,9 +92,14 @@ createRoot(document.getElementById("root")!).render(
                 ],
                 async loader() {
                   try {
-                    console.log("ok");
+                    const response = await api.get<ResponseT<AuthObject>>(
+                      "/check-token"
+                    );
+
+                    if (!response.data.data.user) throw response;
                   } catch (error) {
                     console.error(error);
+                    return redirect("/login");
                   }
                 },
               },
