@@ -39,7 +39,6 @@ type Menu = {
 type MenuWithChild = {
   name: string;
   c: Child[];
-  expand: boolean;
   Icon: ComponentType<IconProps>;
 };
 
@@ -48,14 +47,13 @@ type Group = {
   menu: (Menu | MenuWithChild)[];
 };
 
-const staticNavs: Group[] = [
+const navs: Group[] = [
   {
     name: "Dashboard",
     menu: [
       {
         name: "Registrasi",
         Icon: IconDashboard,
-        expand: false,
         c: [
           { name: "List Pasien", to: "/list-pasien" },
           { name: "Kunjungan", to: "/kunjungan" },
@@ -64,7 +62,6 @@ const staticNavs: Group[] = [
       {
         name: "Layanan",
         Icon: IconDashboard,
-        expand: false,
         c: [
           { name: "Rawat Jalan", to: "/rawat-jalan" },
           { name: "Rawat Inap", to: "/rawat-inap" },
@@ -73,7 +70,6 @@ const staticNavs: Group[] = [
       {
         name: "Management Client Client Client Client Client",
         Icon: IconDashboard,
-        expand: false,
         c: [
           { name: "Client", to: "/client" },
           { name: "Base URL", to: "/base-url" },
@@ -96,24 +92,17 @@ const Layout: FC = () => {
   };
 
   const [expand, setExpand] = useState<boolean>(true);
-  const [navs, setNavs] = useState<Group[]>(staticNavs);
+  const [openedNav, setOpenedNav] = useState<{ x: number; y: number }>({
+    x: -1,
+    y: -1,
+  });
 
-  const setExpandNav = (_group: number, _menu: number) => {
-    setNavs((prev) =>
-      prev.map((group, groupIndex) => ({
-        ...group,
-        menu: group.menu.map((menu, menuIndex) =>
-          "expand" in menu
-            ? {
-                ...menu,
-                expand:
-                  groupIndex === _group && menuIndex === _menu && !menu.expand,
-              }
-            : menu
-        ),
-      }))
+  const toggleOpenedNav = (groupIndex: number, menuIndex: number) =>
+    setOpenedNav(({ x, y }) =>
+      x === groupIndex && y === menuIndex
+        ? { x: -1, y: -1 }
+        : { x: groupIndex, y: menuIndex }
     );
-  };
 
   const location = useLocation();
 
@@ -124,7 +113,7 @@ const Layout: FC = () => {
     let _1: number = -1;
     let _2: number = -1;
 
-    for (const [groupIndex, group] of staticNavs.entries()) {
+    for (const [groupIndex, group] of navs.entries()) {
       for (const [menuIndex, menu] of group.menu.entries()) {
         if ("to" in menu && menu.to === location.pathname) {
           _1 = groupIndex;
@@ -141,11 +130,7 @@ const Layout: FC = () => {
       }
     }
 
-    setTimeout(() => {
-      if (_1 !== -1 && _2 !== -1) {
-        setExpandNav(_1, _2);
-      }
-    }, 2000);
+    console.log(_1, _2);
   }, []);
 
   return (
@@ -264,7 +249,7 @@ const Layout: FC = () => {
                             if (!("to" in menu)) {
                               e.preventDefault();
                             }
-                            setExpandNav(groupIndex, menuIndex);
+                            toggleOpenedNav(groupIndex, menuIndex);
                           }}
                           className={({ isActive }) =>
                             clsx(
@@ -292,11 +277,15 @@ const Layout: FC = () => {
                             <IconChevronDown className="size-4 shrink-0" />
                           )}
                         </NavLink>
-                        {"c" in menu && "expand" in menu && (
+                        {"c" in menu && (
                           <ul
                             className={clsx(
                               "gap-1 flex flex-col border-s border-s-slate-300 ms-6 mt-1 overflow-y-hidden",
-                              expand && menu.expand ? "h-full" : "h-0"
+                              expand &&
+                                groupIndex === openedNav.x &&
+                                menuIndex === openedNav.y
+                                ? "h-full"
+                                : "h-0"
                             )}
                           >
                             {menu.c.map((child, childIndex) => (
