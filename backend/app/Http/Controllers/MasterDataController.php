@@ -11,6 +11,7 @@ use App\Services\MasterDataService;
 use App\Models\MasterTkp;
 use App\Models\MasterJenisKunjungan;
 use App\Models\MasterRuangan;
+use App\Models\MasterTindakan;
 use Exception;
 class MasterDataController extends Controller
 {
@@ -367,6 +368,46 @@ class MasterDataController extends Controller
             return $this->baseResponse('List berhasil didapatkan', null, $getAntrianViewer, 200);
         } catch (\Exception $e) {
             return $this->baseResponse('Terjadi kesalahan saat Mendapatka list', $e->getMessage(), null, 500);
+        }
+    }
+    
+    public function createMasterTindakan(Request $request)
+    {
+        try {
+            $masterTindakan = $this->MasterDataService->createMasterTindakan($request->all());
+            return $this->baseResponse('Master Tindakan berhasil dibuat', null, $masterTindakan, 201);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Tindakan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function getMasterTindakan(Request $request)
+    {
+        try {
+            $masterTindakan = $this->MasterDataService->getMasterTindakan($request->all());
+            return $this->baseResponse('Master Tindakan berhasil didapatkan', null, $masterTindakan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Tindakan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function editMasterTindakan(MasterTindakan $id_tindakan, Request $request)
+    {
+        try {
+            $masterTindakan = $this->MasterDataService->editMasterTindakan($id_tindakan, $request->all());
+            return $this->baseResponse('Master Tindakan berhasil update', null, $masterTindakan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Tindakan', $e->getMessage(), null, 500);
+        }
+    }
+
+    public function deleteMasterTindakan(MasterTindakan $id_tindakan)
+    {
+        try {
+            $masterTindakan = $this->MasterDataService->deleteMasterTindakan($id_tindakan);
+            return $this->baseResponse('Master Tindakan berhasil dihapus', null, $masterTindakan, 200);
+        } catch (\Exception $e) {
+            return $this->baseResponse('Terjadi kesalahan saat Master Tindakan', $e->getMessage(), null, 500);
         }
     }
 
