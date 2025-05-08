@@ -9,12 +9,14 @@ use App\Models\MasterDiagnosa;
 use App\Models\MasterJaminan;
 use App\Models\MasterJenisKunjungan;
 use App\Models\MasterRuangan;
+use App\Models\MasterTindakan;
 use App\Models\MasterTkp;
 use App\Models\Module;
 use App\Models\Permission;
 use App\Models\RegistrasiDetailLayananPasien;
 use App\Models\Role;
 use App\Models\UserPermission;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -448,6 +450,70 @@ class MasterDataService
             return $antrianViewer;
         } catch (\Exception $e) {
             throw $e;
+        }
+    }
+
+    public function createMasterTindakan(array $data)
+    {
+        $cdfix = Auth()->user()->cdfix;
+        $data['cdfix'] = $cdfix;
+        DB::beginTransaction();
+        try {
+            $client = MasterTindakan::create($data);
+            DB::commit();
+            return $client;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal membuat tindakan: " . $e->getMessage());
+        }
+    }
+
+    public function getMasterTindakan(array $data)
+    {
+        $cdfix = Auth()->user()->cdfix;
+       
+        try {
+            $tindakan = MasterTindakan::where('cdfix', $cdfix)->where('is_active', true);
+            if(isset($data['search'])) {
+            $tindakan = $tindakan->where('tindakan', 'ilike', '%' . $data['search'] . '%');
+            }
+            $tindakan = $tindakan->paginate(100);
+            return $tindakan;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function editMasterTindakan(MasterTindakan $id_tindakan, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $client = $id_tindakan->update($data);
+            DB::commit();
+            return $client;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal edit tindakan: " . $e->getMessage());
+        }
+    }
+
+    public function deleteMasterTindakan(MasterTindakan $id_tindakan)
+    {
+        DB::beginTransaction();
+        try {
+            $client = $id_tindakan->update(
+                [
+                    'is_active' => false,
+                    'updated_at' => Carbon::now(),
+                    'deleted_at' => Carbon::now(),
+                    'deleted_by' => Auth()->user()->id
+                ]
+            );
+            DB::commit();
+            return $client;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception("Gagal delete tindakan: " . $e->getMessage());
         }
     }
 }

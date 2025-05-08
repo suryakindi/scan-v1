@@ -146,6 +146,11 @@ Route::middleware(['auth:sanctum', 'throttle:1000,1'])->group(function () {
         Route::put('edit-mapping-dokter-ruangan/{id_mapping}', [MasterDataController::class, 'editMappingDokterRuangan'])->middleware('permission:Master-Data,edit');
         Route::delete('delete-mapping-dokter-ruangan/{id_mapping}', [MasterDataController::class, 'deleteMappingDokterRuangan'])->middleware('permission:Master-Data,delete');
 
+        Route::post('create-master-tindakan/', [MasterDataController::class, 'createMasterTindakan'])->middleware('permission:Master-Data,create');
+        Route::get('get-master-tindakan', [MasterDataController::class, 'getMasterTindakan'])->middleware('permission:Master-Data,view');
+        Route::put('edit-master-tindakan/{id_tindakan}', [MasterDataController::class, 'editMasterTindakan'])->middleware('permission:Master-Data,edit');
+        Route::delete('delete-master-tindakan/{id_tindakan}', [MasterDataController::class, 'deleteMasterTindakan'])->middleware('permission:Master-Data,delete');
+
     });
 
     Route::prefix('integerasi-sistem')->middleware('permission:Management-Client,view')->group(function () {
