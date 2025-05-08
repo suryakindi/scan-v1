@@ -1,16 +1,15 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-type User = "User" | null;
+import { UserObject } from "./global-types";
 
 const { reducer, actions } = createSlice({
   name: "app",
   initialState: {
     user: null,
   } as {
-    user: User;
+    user: UserObject | null;
   },
   reducers: {
-    setUser(state, action: PayloadAction<User>) {
+    setUser(state, action: PayloadAction<UserObject>) {
       state.user = action.payload;
     },
   },
@@ -19,3 +18,5 @@ const { reducer, actions } = createSlice({
 const store = configureStore({ reducer });
 
 export { store, actions };
+
+export type AppState = ReturnType<typeof store.getState>;
