@@ -1,16 +1,21 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserObject } from "./global-types";
+import { AuthObject, Token } from "./global-types";
 
 const { reducer, actions } = createSlice({
   name: "app",
   initialState: {
-    user: null,
+    auth: null,
+    token: null,
   } as {
-    user: UserObject | null;
+    auth: AuthObject | null;
+    token: Token;
   },
   reducers: {
-    setUser(state, action: PayloadAction<UserObject>) {
-      state.user = action.payload;
+    setAuth(state, action: PayloadAction<AuthObject | null>) {
+      state.auth = action.payload;
+    },
+    setToken(state, action: PayloadAction<Token>) {
+      state.token = action.payload;
     },
   },
 });

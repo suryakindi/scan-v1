@@ -1,34 +1,23 @@
-import React, {
-  ComponentType,
-  FC,
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ComponentType, FC, Fragment, useEffect, useState } from "react";
 import {
-  IconAccessPoint,
-  IconAdjustmentsHorizontal,
-  IconArrowsMaximize,
-  IconBell,
-  IconChevronDown,
+  IconChevronRight,
   IconCircle,
   IconDashboard,
   IconLogout,
   IconMenu2,
-  IconSearch,
   IconSettings,
-  IconTransfer,
 } from "@tabler/icons-react";
 import type { IconProps } from "@tabler/icons-react";
-import logo from "./assets/berry.svg";
+import logo from "./assets/images/logo_bg_transparent.png";
 import userIcon from "./assets/user-round-QwaXuEgi.svg";
 import clsx from "clsx";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import Fallback from "./pages/base/fallback";
-import { api } from "./utils/api";
+import { api, ResponseT } from "./utils/api";
 import { AuthObject } from "./utils/global-types";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { useDispatch } from "react-redux";
+import { actions } from "./utils/state";
 
 type Child = {
   name: string;
@@ -90,11 +79,13 @@ const navs: Group[] = [
 ];
 
 const Layout: FC = () => {
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchBoxClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!(e.target as HTMLElement).closest("button"))
-      searchInputRef.current?.focus();
-  };
+  // const searchInputRef = useRef<HTMLInputElement>(null);
+  // const searchBoxClickHandler = (e: React.MouseEvent<HTMLDivElement>) => {
+  //   if (!(e.target as HTMLElement).closest("button"))
+  //     searchInputRef.current?.focus();
+  // };
+
+  const token = localStorage.getItem("token");
 
   const [expand, setExpand] = useState<boolean>(true);
   const [openedNav, setOpenedNav] = useState<{ x: number; y: number }>({
@@ -114,41 +105,47 @@ const Layout: FC = () => {
   /**
    * first squish
    */
-  useEffect(() => {
-    let _1: number = -1;
-    let _2: number = -1;
+  // useEffect(() => {
+  //   let _1: number = -1;
+  //   let _2: number = -1;
 
-    for (const [groupIndex, group] of navs.entries()) {
-      for (const [menuIndex, menu] of group.menu.entries()) {
-        if ("to" in menu && menu.to === location.pathname) {
-          _1 = groupIndex;
-          _2 = menuIndex;
-        }
+  //   for (const [groupIndex, group] of navs.entries()) {
+  //     for (const [menuIndex, menu] of group.menu.entries()) {
+  //       if ("to" in menu && menu.to === location.pathname) {
+  //         _1 = groupIndex;
+  //         _2 = menuIndex;
+  //       }
 
-        if (
-          "c" in menu &&
-          menu.c.map((_m) => _m.to).includes(location.pathname)
-        ) {
-          _1 = groupIndex;
-          _2 = menuIndex;
-        }
-      }
-    }
-  }, []);
+  //       if (
+  //         "c" in menu &&
+  //         menu.c.map((_m) => _m.to).includes(location.pathname)
+  //       ) {
+  //         _1 = groupIndex;
+  //         _2 = menuIndex;
+  //       }
+  //     }
+  //   }
+  // }, []);
 
   const navigate = useNavigate();
   const [isProcess, setIsProcess] = useState<boolean>(true);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data } = await api.get<AuthObject>("/check-token", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        const {
+          data: { data },
+        } = await api.get<ResponseT<AuthObject>>("/check-token", {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!data) throw new Error("Unauthorized");
+
+        dispatch(actions.setAuth(data));
+        dispatch(actions.setToken(token));
       } catch (error) {
-        console.error("Unauthorized. Redirecting to login.");
+        console.error("Unauthorized. Redirecting to login.", error);
         navigate("/login");
       } finally {
         setIsProcess(false);
@@ -156,6 +153,7 @@ const Layout: FC = () => {
     };
 
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const logout = async () => {
@@ -163,11 +161,13 @@ const Layout: FC = () => {
 
     try {
       await api.post("logout-user", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
       console.error(error);
     } finally {
+      dispatch(actions.setAuth(null));
+      dispatch(actions.setToken(null));
       localStorage.removeItem("token");
       navigate("/login");
     }
@@ -180,8 +180,11 @@ const Layout: FC = () => {
       <Fragment>
         <header className="h-[84px] bg-white fixed inset-x-0 top-0 flex items-center z-50">
           <div className="w-64 flex items-center justify-between px-2">
-            <div className="flex items-center ml-4">
-              <img src={logo} alt="Logo" />
+            <div className="flex items-center ml-4 flex-1 gap-2">
+              <img src={logo} alt="Logo" className="h-8" />
+              <span className="text-lg text-indigo-700 font-semibold">
+                SCAN
+              </span>
             </div>
             <button
               type="button"
@@ -191,8 +194,8 @@ const Layout: FC = () => {
               <IconMenu2 className="size-5" />
             </button>
           </div>
-          <div className="flex flex-1 items-center justify-between px-2">
-            <div
+          <div className="flex flex-1 items-center justify-end px-2">
+            {/* <div
               className="flex items-center border p-2 w-96 rounded-lg border-gray-400 cursor-text hover:border-black focus-within:hover:border-indigo-700 focus-within:border-indigo-700 focus-within:ring focus-within:ring-inset focus-within:ring-indigo-700"
               onClick={searchBoxClickHandler}
             >
@@ -211,10 +214,10 @@ const Layout: FC = () => {
               >
                 <IconAdjustmentsHorizontal className="size-5" />
               </button>
-            </div>
+            </div> */}
 
             <div className="flex items-center gap-3 mr-4">
-              <button
+              {/* <button
                 type="button"
                 className="rounded-md aspect-square p-2 cursor-pointer bg-slate-200 text-indigo-700 hover:bg-indigo-800 hover:text-white transition-colors duration-300"
               >
@@ -237,7 +240,7 @@ const Layout: FC = () => {
                 className="rounded-md aspect-square p-2 cursor-pointer bg-slate-200 text-indigo-700 hover:bg-indigo-800 hover:text-white transition-colors duration-300"
               >
                 <IconArrowsMaximize className="size-5" />
-              </button>
+              </button> */}
 
               <Menu>
                 <MenuButton className="flex items-center p-1.5 rounded-full gap-2.5 cursor-pointer bg-slate-200 text-indigo-700 hover:bg-indigo-800 hover:text-white transition-colors duration-300">
@@ -334,7 +337,15 @@ const Layout: FC = () => {
                               <span className="truncate">{menu.name}</span>
                             </div>
                             {!("to" in menu) && (
-                              <IconChevronDown className="size-4 shrink-0" />
+                              <IconChevronRight
+                                className={clsx(
+                                  "size-4 shrink-0 transition-all duration-300",
+                                  expand &&
+                                    groupIndex === openedNav.x &&
+                                    menuIndex === openedNav.y &&
+                                    "rotate-90"
+                                )}
+                              />
                             )}
                           </NavLink>
                           {"c" in menu && (

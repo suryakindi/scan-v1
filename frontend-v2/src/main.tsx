@@ -1,4 +1,4 @@
-import { FC, StrictMode } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./main.css";
 import { createBrowserRouter, RouterProvider } from "react-router";
@@ -9,89 +9,61 @@ import { Provider } from "react-redux";
 import { store } from "./utils/state";
 import Layout from "./layout";
 import Login from "./pages/login";
-
-const AppWrapper: FC = () => {
-  return (
-    <RouterProvider
-      router={createBrowserRouter([
-        {
-          path: "/login",
-          element: <Login />,
-        },
-        {
-          path: "/",
-          Component: Layout,
-          ErrorBoundary: E500,
-          HydrateFallback: Fallback,
-          children: [
-            {
-              path: "/list-pasien",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>list-pasien</p>
-                </div>
-              ),
-            },
-            {
-              path: "/kunjungan",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>kunjungan</p>
-                </div>
-              ),
-            },
-            {
-              path: "/rawat-jalan",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>rawat-jalan</p>
-                </div>
-              ),
-            },
-            {
-              path: "/rawat-inap",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>rawat-inap</p>
-                </div>
-              ),
-            },
-            {
-              path: "/client",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>client</p>
-                </div>
-              ),
-            },
-            {
-              path: "/base-url",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>base-url</p>
-                </div>
-              ),
-            },
-            {
-              path: "/viewer",
-              element: (
-                <div className="flex flex-1 flex-col">
-                  <p>viewer</p>
-                </div>
-              ),
-            },
-          ],
-        },
-        { path: "*", Component: E404 },
-      ])}
-    />
-  );
-};
+import { Kunjungan, ListPasien } from "./pages/registrasi";
+import { RawatInap, RawatJalan } from "./pages/layanan";
+import { BaseURL, Client } from "./pages/management-client";
+import Viewer from "./pages/viewer";
+import Dashboard from "./pages/dashboard";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
-      <AppWrapper />
+      <RouterProvider
+        router={createBrowserRouter([
+          {
+            path: "/login",
+            element: <Login />,
+          },
+          {
+            path: "/",
+            Component: Layout,
+            ErrorBoundary: E500,
+            HydrateFallback: Fallback,
+            children: [
+              { path: "/", Component: Dashboard },
+              {
+                path: "/list-pasien",
+                Component: ListPasien,
+              },
+              {
+                path: "/kunjungan",
+                Component: Kunjungan,
+              },
+              {
+                path: "/rawat-jalan",
+                Component: RawatJalan,
+              },
+              {
+                path: "/rawat-inap",
+                Component: RawatInap,
+              },
+              {
+                path: "/client",
+                Component: Client,
+              },
+              {
+                path: "/base-url",
+                Component: BaseURL,
+              },
+              {
+                path: "/viewer",
+                Component: Viewer,
+              },
+            ],
+          },
+          { path: "*", Component: E404 },
+        ])}
+      />
     </Provider>
   </StrictMode>
 );

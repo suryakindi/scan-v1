@@ -1,5 +1,4 @@
 import { FC, FormEventHandler, useEffect, useState } from "react";
-import { MoonLoader } from "react-spinners";
 import loginImage from "../../assets/images/login.png";
 import { useNavigate } from "react-router";
 import { api, ResponseT } from "../../utils/api";
@@ -56,13 +55,14 @@ const Login: FC = () => {
           navigate("/");
         }
       } catch (error) {
-        console.log("Token invalid, stay on login page.");
+        console.log("Token invalid, stay on login page.", error);
       } finally {
         setIsProcess(false);
       }
     };
 
     checkToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isProcess) {
@@ -134,7 +134,6 @@ const Login: FC = () => {
                 className="cursor-pointer bg-indigo-700 text-white px-10 py-2.5 rounded-lg flex items-center gap-2"
               >
                 <span>Login</span>
-                <MoonLoader loading={false} color="#fff" size={12} />
               </button>
             </div>
           </div>
