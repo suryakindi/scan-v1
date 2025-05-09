@@ -80,3 +80,15 @@ export type AuthObject = {
   user_permissions: PermissionObject[];
   role: RoleObject;
 };
+
+export type Token = string | null;
+
+export type BaseURLObject = {
+  base_url: string;
+  kdAplikasi: string;
+  updated_at: string;
+  created_at: string;
+  id: number;
+};
+
+export type XHRStatus = "success" | "error" | "loading";

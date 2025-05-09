@@ -40,7 +40,7 @@ const Example: FC = () => {
             className={clsx(
               "relative p-5 bg-indigo-700 rounded-md overflow-hidden",
               "before:content-[''] before:absolute before:w-[210px] before:h-[210px] before:bg-indigo-800/40 before:rounded-full before:top-[-125px] before:right-[-15px] before:z-0",
-              "after:content-[''] after:absolute after:w-[210px] after:h-[210px] after:bg-indigo-800 after:rounded-full after:top-[-85px] after:right-[-95px] after:z-0"
+              "after:content-[''] after:absolute after:w-[210px] after:h-[210px] after:bg-indigo-800 after:rounded-full after:top-[-85px] after:right-[-95px] after:z-0",
             )}
           >
             <div className="flex justify-between relative z-10">
@@ -163,7 +163,7 @@ const Example: FC = () => {
                       props.hasValue
                         ? "scale-75 -translate-y-4 top-2 bg-white"
                         : "text-gray-400 scale-100 -translate-y-1/2 top-1/2",
-                      "absolute text-sm duration-100 transform z-10 origin-[0] px-2 peer-focus:px-2 peer-hover:text-black peer-focus:text-indigo-700 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1"
+                      "absolute text-sm duration-100 transform z-10 origin-[0] px-2 peer-focus:px-2 peer-hover:text-black peer-focus:text-indigo-700 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1",
                     )}
                   >
                     {props.selectProps.placeholder}
