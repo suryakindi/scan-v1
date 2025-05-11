@@ -1,19 +1,19 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./main.css";
+import "@/main.css";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import Fallback from "./pages/base/fallback";
-import E500 from "./pages/base/500";
-import E404 from "./pages/base/404";
+import Fallback from "@/pages/base/fallback";
+import E500 from "@/pages/base/500";
+import E404 from "@/pages/base/404";
 import { Provider } from "react-redux";
-import { store } from "./utils/state";
-import Layout from "./layout";
-import Login from "./pages/login";
-import { Kunjungan, ListPasien } from "./pages/registrasi";
-import { RawatInap, RawatJalan } from "./pages/layanan";
-import { BaseURL, Client } from "./pages/management-client";
-import Viewer from "./pages/viewer";
-import Dashboard from "./pages/dashboard";
+import { store } from "@/utils/state";
+import Layout from "@/layout";
+import Login from "@/pages/login";
+import { Kunjungan, ListPasien, RegistrasiPasien } from "@/pages/registrasi";
+import { RawatInap, RawatJalan } from "@/pages/layanan";
+import { BaseURL, Client } from "@/pages/management-client";
+import Viewer from "@/pages/viewer";
+import Dashboard from "@/pages/dashboard";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -34,6 +34,10 @@ createRoot(document.getElementById("root")!).render(
               {
                 path: "/list-pasien",
                 Component: ListPasien,
+              },
+              {
+                path: "/registrasi-pasien",
+                Component: RegistrasiPasien,
               },
               {
                 path: "/kunjungan",
