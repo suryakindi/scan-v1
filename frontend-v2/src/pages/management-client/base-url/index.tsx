@@ -58,7 +58,7 @@ const BaseURL: FC = () => {
       console.log(response);
       await preload();
     } catch (error) {
-      console.error();
+      console.error(error);
     } finally {
       setShowModalAdd(false);
     }
@@ -75,7 +75,7 @@ const BaseURL: FC = () => {
       console.log(response);
       await preload();
     } catch (error) {
-      console.error();
+      console.error(error);
     } finally {
       setShowModalEdit(false);
     }
@@ -83,6 +83,7 @@ const BaseURL: FC = () => {
 
   useEffect(() => {
     preload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
