@@ -38,6 +38,7 @@ const Kunjungan: FC = () => {
   useEffect(() => {
     preload();
   }, []);
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="bg-white rounded-md overflow-hidden flex flex-col">
